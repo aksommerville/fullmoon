@@ -138,7 +138,7 @@ thumby_LDOPT+=-Wl,--script=$(thumby_PICO_SDK)/src/rp2_common/pico_standard_link/
 thumby_LD:=$(thumby_GCCPFX)gcc $(thumby_LDOPT) $(thumby_LINKWRAP)
 thumby_LDPOST:=
 
-thumby_SRCFILES:=$(call OPTFILTER,$(thumby_OPT_ENABLE),$(SRCFILES),$(thumby_MIDDIR))
+thumby_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(thumby_OPT_ENABLE),$(SRCFILES),$(thumby_MIDDIR)))
 
 thumby_DATA_SRC:=$(filter src/data/%,$(thumby_SRCFILES))
 thumby_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(thumby_DATA_SRC))

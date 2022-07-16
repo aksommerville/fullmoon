@@ -60,4 +60,20 @@ void fmn_blit(
   int16_t w,int16_t h
 );
 
+#define FMN_UIMODE_TITLE    1
+#define FMN_UIMODE_PLAY     2
+#define FMN_UIMODE_PAUSE    3
+#define FMN_UIMODE_PASSWORD 4
+void fmn_set_uimode(uint8_t mode);
+
+void fmn_game_reset();
+
+/* (pw) is the decoded "internal use" password (the only kind that units outside the password manager see).
+ */
+void fmn_game_reset_with_password(uint32_t pw);
+
+#define FMN_PASSWORD_LENGTH 5
+uint32_t fmn_password_encode(uint32_t pw);
+uint32_t fmn_password_decode(uint32_t display);
+
 #endif
