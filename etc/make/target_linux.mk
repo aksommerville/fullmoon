@@ -3,14 +3,14 @@
 linux_MIDDIR:=mid/linux
 linux_OUTDIR:=out/linux
 
-linux_OPT_ENABLE:=genioc intf x11 drmfb evdev alsa pulse
+linux_OPT_ENABLE:=genioc intf x11 drmfb evdev alsa
 
 linux_CCWARN:=-Werror -Wimplicit
 linux_CCINC:=-I/usr/include/libdrm
 linux_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(linux_OPT_ENABLE))
 linux_CC:=gcc -c -MMD -O3 -Isrc -I$(linux_MIDDIR) $(linux_CCWARN) $(linux_CCINC) $(linux_CCDEF)
 linux_LD:=gcc
-linux_LDPOST:=-ldrm -lX11 -lasound -lpulse -lpulse-simple -lm -lpthread
+linux_LDPOST:=-ldrm -lX11 -lXinerama -lasound -lm -lpthread
 
 linux_SRCFILES:=$(call OPTFILTER,$(linux_OPT_ENABLE),$(SRCFILES),$(linux_MIDDIR))
 

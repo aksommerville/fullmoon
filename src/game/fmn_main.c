@@ -1,19 +1,20 @@
 #include "fullmoon.h"
 #include <string.h>
 
-#if FMN_USE_thumby
-  #include "opt/thumby/thumc.h"
-#endif
-
-static uint8_t fb[(72*40)>>3]={0};
+static uint8_t fb[(FMN_FBW*FMN_FBH)>>3]={0};
+static uint16_t pvinput=0;
 
 void setup() {
-  #if FMN_USE_thumby
-    thumby_begin();
-  #endif
+  fmn_platform_init();
 }
 
 void loop() {
+  fmn_platform_update();
+  
+  uint16_t input=fmn_platform_read_input();
+  if (input!=pvinput) {
+    pvinput=input;
+  }
 
   // gray out buffer.
   uint8_t gray=0x55;
@@ -21,7 +22,5 @@ void loop() {
   uint16_t i=sizeof(fb);
   for (;i-->0;v++,gray^=0xff) *v=gray;
   
-  #if FMN_USE_thumby
-    thumby_send_framebuffer(fb,sizeof(fb));
-  #endif
+  fmn_platform_send_framebuffer(fb);
 }
