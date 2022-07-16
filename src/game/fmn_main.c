@@ -4,6 +4,8 @@
 static uint8_t fb[(FMN_FBW*FMN_FBH)>>3]={0};
 static uint16_t pvinput=0;
 
+extern const struct fmn_image titlesplash;
+
 void setup() {
   fmn_platform_init();
 }
@@ -21,6 +23,8 @@ void loop() {
   uint8_t *v=fb;
   uint16_t i=sizeof(fb);
   for (;i-->0;v++,gray^=0xff) *v=gray;
+  
+  memcpy(fb,titlesplash.v,sizeof(fb));
   
   fmn_platform_send_framebuffer(fb);
 }

@@ -17,10 +17,10 @@ linux_SRCFILES:=$(call OPTFILTER,$(linux_OPT_ENABLE),$(SRCFILES),$(linux_MIDDIR)
 linux_DATA_SRC:=$(filter src/data/%,$(linux_SRCFILES))
 linux_DATA_C:=$(patsubst src/%,$(linux_MIDDIR)/%.c,$(linux_DATA_SRC))
 $(linux_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
-$(linux_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ $<
+$(linux_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
 
-linux_CFILES:=$(filter %.c,$(linux_SRCFILES))
-linux_OFILES:=$(patsubst src/%.c,$(linux_MIDDIR)/%.o,$(linux_CFILES))
+linux_CFILES:=$(filter %.c,$(linux_SRCFILES) $(linux_DATA_C))
+linux_OFILES:=$(patsubst src/%,$(linux_MIDDIR)/%,$(addsuffix .o,$(basename $(linux_CFILES))))
 -include $(linux_OFILES:.o=.d)
 
 $(linux_MIDDIR)/%.o:src/%.c            ;$(PRECMD) $(linux_CC) -o $@ $<

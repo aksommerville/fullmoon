@@ -143,9 +143,9 @@ thumby_SRCFILES:=$(call OPTFILTER,$(thumby_OPT_ENABLE),$(SRCFILES),$(thumby_MIDD
 thumby_DATA_SRC:=$(filter src/data/%,$(thumby_SRCFILES))
 thumby_DATA_C:=$(patsubst src/%,$(thumby_MIDDIR)/%.c,$(thumby_DATA_SRC))
 $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
-$(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ $<
+$(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
 
-thumby_CFILES:=$(filter %.c,$(thumby_SRCFILES))
+thumby_CFILES:=$(filter %.c,$(thumby_SRCFILES)) $(thumby_DATA_C)
 thumby_OFILES:= \
   $(patsubst src/%,$(thumby_MIDDIR)/%,$(addsuffix .o,$(basename $(thumby_CFILES)))) \
   $(patsubst $(thumby_PICO_SDK)/%,$(thumby_MIDDIR)/pico/%,$(addsuffix .o,$(basename $(thumby_EXTCFILES))))
@@ -166,10 +166,7 @@ $(thumby_EXE):$(thumby_BIN);$(PRECMD) $(thumby_ELF2UF2) $< $@
 
 thumby-run:$(thumby_EXE); \
   while true ; do \
-    cp $(thumby_EXE) $(thumby_MOUNTPOINT) || ( \
-      echo "Failed to copy to $(thumby_MOUNTPOINT). Will retry after 1 second..." ; \
-      sleep 1 ; \
-      continue ; \
-    ) ; \
-    break ; \
+    if cp $(thumby_EXE) $(thumby_MOUNTPOINT) ; then break ; fi ; \
+    echo "Failed to copy to $(thumby_MOUNTPOINT). Will retry after 1 second..." ; \
+    sleep 1 ; \
   done

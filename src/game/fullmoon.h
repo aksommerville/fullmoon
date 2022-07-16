@@ -46,4 +46,12 @@ uint16_t fmn_platform_read_input();
 #define FMN_FBH 40
 #define FMN_FBFMT FMN_IMGFMT_thumby
 
+struct fmn_image {
+  uint8_t *v;
+  // NB size of (v) is not necessarily (h*stride); thumby format is different.
+  int16_t w,h,stride;
+  uint8_t fmt;
+  uint8_t writeable;
+};
+
 #endif
