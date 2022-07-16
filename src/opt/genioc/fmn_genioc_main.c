@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+extern const struct fmn_image appicon;
+
 struct fmn_genioc fmn_genioc={0};
 
 /* Signal handler.
@@ -16,7 +18,18 @@ static void fmn_genioc_rcvsig(int sigid) {
   }
 }
 
-extern const struct fmn_image appicon;
+/* Final performance report.
+ */
+ 
+static void fmn_genioc_report_performance() {
+  if (fmn_genioc.framec<1) return;
+  double elapsed=fmn_genioc_now_s()-fmn_genioc.starttime;
+  double elapsedcpu=fmn_genioc_now_cpu_s()-fmn_genioc.starttimecpu;
+  fprintf(stderr,
+    "%d frames in %.03f s, average %.03f Hz. CPU=%.06f\n",
+    fmn_genioc.framec,elapsed,fmn_genioc.framec/elapsed,elapsedcpu/elapsed
+  );
+}
 
 /* Main.
  */
@@ -59,10 +72,31 @@ int main(int argc,char **argv) {
   
   setup();
   
+  fmn_genioc.frametime=1000000/FMN_GENIOC_FRAME_RATE;
+  fmn_genioc.starttime=fmn_genioc_now_s();
+  fmn_genioc.starttimecpu=fmn_genioc_now_cpu_s();
+  fmn_genioc.nexttime=fmn_genioc_now_us();
+  
   while (!fmn_genioc.terminate&&!fmn_genioc.sigc) {
   
-  //TODO proper timing
-    usleep(50000);
+    int64_t now=fmn_genioc_now_us();
+    while (1) {
+      int64_t sleeptime=fmn_genioc.nexttime-now;
+      if (sleeptime<=0) {
+        fmn_genioc.nexttime+=fmn_genioc.frametime;
+        if (fmn_genioc.nexttime<=now) { // panic
+          fmn_genioc.nexttime=now+fmn_genioc.frametime;
+        }
+        break;
+      }
+      if (sleeptime>FMN_GENIOC_SLEEP_LIMIT) { // panic
+        fmn_genioc.nexttime=now+fmn_genioc.frametime;
+        break;
+      }
+      fmn_genioc_sleep_us(sleeptime);
+      now=fmn_genioc_now_us();
+    }
+      
     
     if (intf_update(fmn_genioc.intf)<0) {
       fprintf(stderr,"Error updating drivers.\n");
@@ -71,9 +105,11 @@ int main(int argc,char **argv) {
     }
     
     loop();
+    
+    fmn_genioc.framec++;
   }
   
+  fmn_genioc_report_performance();
   intf_del(fmn_genioc.intf);
-  fprintf(stderr,"Normal exit.\n");
   return 0;
 }

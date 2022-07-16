@@ -8,8 +8,8 @@ But not a high priority.
 
 ## TODO
 
-- [ ] thumby timing
-- [ ] genioc timing
+- [x] thumby timing
+- [x] genioc timing
 - [ ] Map editor.
 - [ ] Game logic.
 - [ ] evdev

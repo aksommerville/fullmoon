@@ -76,6 +76,7 @@ NEW_DEL_REF(audio,{
 })
 
 int audio_driver_play(struct audio_driver *driver,int play) {
+  if (!driver) return 0;
   if (play&&driver->playing) return 0;
   if (!play&&!driver->playing) return 0;
   if (!driver->type->play) return -1;
@@ -83,16 +84,19 @@ int audio_driver_play(struct audio_driver *driver,int play) {
 }
 
 int audio_driver_update(struct audio_driver *driver) {
+  if (!driver) return 0;
   if (!driver->type->update) return 0;
   return driver->type->update(driver);
 }
 
 int audio_driver_lock(struct audio_driver *driver) {
+  if (!driver) return 0;
   if (!driver->type->lock) return 0;
   return driver->type->lock(driver);
 }
 
 int audio_driver_unlock(struct audio_driver *driver) {
+  if (!driver) return 0;
   if (!driver->type->unlock) return 0;
   return driver->type->unlock(driver);
 }

@@ -67,6 +67,7 @@ static int intf_init_video(struct intf *intf,const char *name) {
  */
  
 static int intf_init_audio(struct intf *intf,const char *name) {
+  return 0;//XXX Disabling audio, I expect we're going to remove it.
   if (name) {
     const struct audio_driver_type *type=audio_driver_type_by_name(name,-1);
     if (!type) {
