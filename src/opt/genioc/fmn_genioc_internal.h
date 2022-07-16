@@ -17,6 +17,7 @@ extern struct fmn_genioc {
   struct intf *intf;
   int terminate;
   volatile int sigc;
+  uint16_t input;
 } fmn_genioc;
 
 int fmn_genioc_cb_close(struct video_driver *driver);

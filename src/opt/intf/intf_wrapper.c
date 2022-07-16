@@ -1,6 +1,7 @@
 #include "intf.h"
 #include <stdlib.h>
 #include <limits.h>
+#include <stdio.h>
 
 #define NEW_DEL_REF(t,preinit) \
   void t##_driver_del(struct t##_driver *driver) { \

@@ -297,7 +297,7 @@ static void fmn_x11_set_fullscreen(struct video_driver *driver,int state) {
   };
   XSendEvent(DRIVER->dpy,RootWindow(DRIVER->dpy,DRIVER->screen),0,SubstructureNotifyMask|SubstructureRedirectMask,&evt);
   XFlush(DRIVER->dpy);
-  driver->fullscreen=0;
+  driver->fullscreen=state;
 }
  
 static int _x11_fullscreen(struct video_driver *driver,int state) {

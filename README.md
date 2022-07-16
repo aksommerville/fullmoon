@@ -8,17 +8,16 @@ But not a high priority.
 
 ## TODO
 
-- [ ] genioc input from window manager.
-- [ ] evdev
-- [x] Build-time image converter.
+- [ ] thumby timing
+- [ ] genioc timing
 - [ ] Map editor.
-- [ ] Software renderer.
 - [ ] Game logic.
-- [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
-- [ ] PulseAudio driver. If we're still doing audio.
+- [ ] evdev
 - [ ] Build for WebAssembly.
 - [ ] Web app to wrap the wasm build.
 - [ ] MacOS drivers (new IoC unit)
 - [ ] Windows drivers (genioc)
+- [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
+- [ ] PulseAudio driver. If we're still doing audio.
 - [ ] Can I make a TTY driver for video and input?
 - [ ] Can we make this run on a 68k Mac?

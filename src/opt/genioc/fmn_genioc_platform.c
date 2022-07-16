@@ -28,5 +28,5 @@ void fmn_platform_send_framebuffer(const void *fb) {
  */
 
 uint16_t fmn_platform_read_input() {
-  return 0;//TODO input via genioc
+  return fmn_genioc.input;
 }
