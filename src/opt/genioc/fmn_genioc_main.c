@@ -16,31 +16,7 @@ static void fmn_genioc_rcvsig(int sigid) {
   }
 }
 
-//XXX TEMP
-#define XXX_app_icon_w 8
-#define XXX_app_icon_h 8
-static const uint8_t XXX_app_icon[XXX_app_icon_w*XXX_app_icon_h*4]={
-#define _ 0,0,0,0,
-#define K 0,0,0,255,
-#define W 255,255,255,255,
-#define R 255,0,0,255,
-#define G 0,255,0,255,
-#define B 0,0,255,255,
-  _ _ _ _ _ _ _ W
-  _ _ _ _ _ _ W W
-  _ _ _ _ _ W K W
-  _ _ _ _ W R R W
-  _ _ _ W G G G W
-  _ _ W B B B B W
-  _ W K K K K K W
-  W W W W W W W W
-#undef _
-#undef K
-#undef W
-#undef R
-#undef G
-#undef B
-};
+extern const struct fmn_image appicon;
 
 /* Main.
  */
@@ -57,9 +33,9 @@ int main(int argc,char **argv) {
     .fbh=FMN_FBH,
     .fbfmt=FMN_FBFMT,
     .fullscreen=0,//TODO configurable
-    .icon_rgba=XXX_app_icon,//TODO
-    .iconw=XXX_app_icon_w,
-    .iconh=XXX_app_icon_h,
+    .icon_rgba=appicon.v,
+    .iconw=appicon.w,
+    .iconh=appicon.h,
     .title="Full Moon",
     .audio_rate=44100,//TODO configurable
     .chanc=2,//TODO configurable

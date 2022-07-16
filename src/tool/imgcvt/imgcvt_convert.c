@@ -88,41 +88,55 @@ static int imgcvt_cb_alpha(uint8_t y,uint8_t a,void *userdata) {
  
 int imgcvt_fmn_from_png(struct imgcvt *imgcvt) {
   
-  int alpha;
-  if (imgcvt->png.depth==1) alpha=0;
-  else alpha=png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_alpha,0);
+  imgcvt->image.fmt=0;
+  if (imgcvt->png.depth==1) imgcvt->image.fmt=FMN_IMGFMT_thumby;
+  else if ((imgcvt->png.depth==8)&&(imgcvt->png.colortype==6)) imgcvt->image.fmt=FMN_IMGFMT_rgba8888;
+  else imgcvt->image.fmt=png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_alpha,0)?FMN_IMGFMT_ya11:FMN_IMGFMT_thumby;
   
   imgcvt->image.writeable=0;
   imgcvt->image.w=imgcvt->png.w;
   imgcvt->image.h=imgcvt->png.h;
   
-  if (alpha) {
-    imgcvt->image.fmt=FMN_IMGFMT_ya11;
-    imgcvt->image.stride=(imgcvt->image.w*2+7)>>3;
-    if (!(imgcvt->image.v=calloc(imgcvt->image.stride,imgcvt->image.h))) return -1;
-    struct imgcvt_fmn_iterator_ya11 iter={
-      .p=imgcvt->image.v,
-      .p0=imgcvt->image.v,
-      .shift=6,
-      .xc=imgcvt->image.w,
-      .xc0=imgcvt->image.w,
-      .stride=imgcvt->image.stride,
-    };
-    if (png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_ya11,&iter)<0) return -1;
-    
-  } else {
-    imgcvt->image.fmt=FMN_IMGFMT_thumby;
-    imgcvt->image.stride=imgcvt->image.w;
-    if (!(imgcvt->image.v=calloc(imgcvt->image.stride,((imgcvt->image.h+7)>>3)))) return -1;
-    struct imgcvt_fmn_iterator_thumby iter={
-      .p=imgcvt->image.v,
-      .p0=imgcvt->image.v,
-      .yc=imgcvt->image.h,
-      .xc=imgcvt->image.w,
-      .xc0=imgcvt->image.w,
-      .mask=(imgcvt->image.h>=8)?0x01:(0x80>>(imgcvt->image.h-1)),
-    };
-    if (png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_thumby,&iter)<0) return -1;
+  switch (imgcvt->image.fmt) {
+  
+    case FMN_IMGFMT_ya11: {
+        imgcvt->image.stride=(imgcvt->image.w*2+7)>>3;
+        if (!(imgcvt->image.v=calloc(imgcvt->image.stride,imgcvt->image.h))) return -1;
+        struct imgcvt_fmn_iterator_ya11 iter={
+          .p=imgcvt->image.v,
+          .p0=imgcvt->image.v,
+          .shift=6,
+          .xc=imgcvt->image.w,
+          .xc0=imgcvt->image.w,
+          .stride=imgcvt->image.stride,
+        };
+        if (png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_ya11,&iter)<0) return -1;
+      } break;
+      
+    case FMN_IMGFMT_thumby: {
+        imgcvt->image.stride=imgcvt->image.w;
+        if (!(imgcvt->image.v=calloc(imgcvt->image.stride,((imgcvt->image.h+7)>>3)))) return -1;
+        struct imgcvt_fmn_iterator_thumby iter={
+          .p=imgcvt->image.v,
+          .p0=imgcvt->image.v,
+          .yc=imgcvt->image.h,
+          .xc=imgcvt->image.w,
+          .xc0=imgcvt->image.w,
+          .mask=(imgcvt->image.h>=8)?0x01:(0x80>>(imgcvt->image.h-1)),
+        };
+        if (png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_thumby,&iter)<0) return -1;
+      } break;
+      
+    case FMN_IMGFMT_rgba8888: {
+        imgcvt->image.stride=imgcvt->png.stride;
+        imgcvt->image.v=imgcvt->png.pixels;
+        imgcvt->png.pixels=0;
+      } break;
+      
+    default: {
+        fprintf(stderr,"%s: Image format %d not supported.\n",imgcvt->srcpath,imgcvt->image.fmt);
+        return -2;
+      }
   }
   
   return 0;

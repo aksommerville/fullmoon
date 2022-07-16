@@ -141,6 +141,7 @@ thumby_LDPOST:=
 thumby_SRCFILES:=$(call OPTFILTER,$(thumby_OPT_ENABLE),$(SRCFILES),$(thumby_MIDDIR))
 
 thumby_DATA_SRC:=$(filter src/data/%,$(thumby_SRCFILES))
+thumby_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(thumby_DATA_SRC))
 thumby_DATA_C:=$(patsubst src/%,$(thumby_MIDDIR)/%.c,$(thumby_DATA_SRC))
 $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
