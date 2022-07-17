@@ -33,4 +33,13 @@ void fmn_map_get_scroll(uint8_t *x,uint8_t *y);
 void fmn_map_get_size(uint8_t *w,uint8_t *h);
 void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
 
+/* Check if a given box collides with any static geometry.
+ * If so: Return nonzero, and fill (adjx,adjy) with displacement to the nearest legal position, or (0,0) if we can't find one.
+ * Or no collision: Return zero.
+ * We're not exhaustive about this. If the box collides with two solid cells, we only correct against one of them.
+ * I'm thinking that's OK because you'll find the second one next frame.
+ * All coordinates in global mm.
+ */
+uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h);
+
 #endif

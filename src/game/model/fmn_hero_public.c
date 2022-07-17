@@ -8,6 +8,12 @@
 #define FMN_HERO_WALKSPEED_MAX 6
 #define FMN_HERO_FLYSPEED_MAX  9
 
+// Hitbox in mm relative to canonical position (near left shoulder).
+#define FMN_HERO_HITBOX_X FMN_MM_PER_PIXEL
+#define FMN_HERO_HITBOX_Y FMN_MM_PER_PIXEL
+#define FMN_HERO_HITBOX_W (FMN_MM_PER_TILE-(FMN_MM_PER_PIXEL*2))
+#define FMN_HERO_HITBOX_H (FMN_MM_PER_TILE-(FMN_MM_PER_PIXEL*2))
+
 /* Globals.
  */
  
@@ -27,6 +33,11 @@ void fmn_hero_reset() {
   fmn_hero.walkspeed=0;
   fmn_hero.action=fmn_pause_get_action();
   fmn_hero.facedir=FMN_DIR_S;
+  fmn_hero.actionframe=0;
+  fmn_hero.actionanimtime=0;
+  fmn_hero.actionparam=0;
+  fmn_hero.spellc=0;
+  fmn_hero.spellrepudiation=0;
 }
 
 /* Motion.
@@ -42,6 +53,7 @@ static void fmn_hero_end_motion() {
 static void fmn_hero_update_motion() {
 
   // Apply motion optimistically.
+  int16_t pvx=fmn_hero.x,pvy=fmn_hero.y;
   fmn_hero.x+=fmn_hero.dx*fmn_hero.walkspeed;
   fmn_hero.y+=fmn_hero.dy*fmn_hero.walkspeed;
   if (fmn_hero.button&&(fmn_hero.action==FMN_ACTION_BROOM)) {
@@ -51,7 +63,21 @@ static void fmn_hero_update_motion() {
     else if (fmn_hero.walkspeed>FMN_HERO_WALKSPEED_MAX) fmn_hero.walkspeed--;
   }
   
-  //TODO collisions
+  int16_t adjx=0,adjy=0;
+  if (fmn_map_check_collision(&adjx,&adjy,
+    fmn_hero.x+FMN_HERO_HITBOX_X,
+    fmn_hero.y+FMN_HERO_HITBOX_Y,
+    FMN_HERO_HITBOX_W,
+    FMN_HERO_HITBOX_H
+  )) {
+    if (adjx||adjy) {
+      fmn_hero.x+=adjx;
+      fmn_hero.y+=adjy;
+    } else {
+      fmn_hero.x=pvx;
+      fmn_hero.y=pvy;
+    }
+  }
   
   // Clamp hard to map boundaries. (TODO debatable. Will there ever be map neighbors that you can reach like screen neighbors?)
   int16_t mapwmm,maphmm;
