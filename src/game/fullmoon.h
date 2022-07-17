@@ -77,4 +77,16 @@ uint32_t fmn_game_generate_password();
 uint32_t fmn_password_encode(uint32_t pw);
 uint32_t fmn_password_decode(uint32_t display);
 
+// (FMN_SCREENW_TILES*FMN_TILESIZE==FMN_FBW) and (FMN_SCREENH_TILES*FMN_TILESIZE==FMN_FBH)
+#define FMN_TILESIZE 8
+#define FMN_SCREENW_TILES 9
+#define FMN_SCREENH_TILES 5
+#define FMN_MM_PER_TILE 256
+
+struct fmn_map {
+  uint8_t *v;
+  uint8_t w,h; // Multiples of (FMN_SCREENW_TILES,FMN_SCREENH_TILES)
+  uint8_t initx,inity; // Hero's default start position.
+};
+
 #endif

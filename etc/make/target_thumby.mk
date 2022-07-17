@@ -145,6 +145,7 @@ thumby_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(thumby_DATA_SRC))
 thumby_DATA_C:=$(patsubst src/%,$(thumby_MIDDIR)/%.c,$(thumby_DATA_SRC))
 $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
+$(thumby_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 
 thumby_CFILES:=$(filter %.c,$(thumby_SRCFILES)) $(thumby_DATA_C)
 thumby_OFILES:= \

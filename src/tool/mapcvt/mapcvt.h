@@ -1,0 +1,28 @@
+#ifndef MAPCVT_H
+#define MAPCVT_H
+
+#include "tool/common/cli.h"
+#include "tool/common/serial.h"
+#include "tool/common/fs.h"
+#include "game/fullmoon.h" /* for constants only */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+
+struct mapcvt {
+  struct cli cli;
+  char *srcpath;
+  char *dstpath;
+  char *src,*dst;
+  int srcc,dstc;
+  struct fmn_map map;
+  int maprowa;
+};
+
+#define MAPCVT ((struct mapcvt*)cli)
+
+int mapcvt_fmn_from_text(struct mapcvt *mapcvt);
+int mapcvt_encode_c(struct mapcvt *mapcvt);
+
+#endif

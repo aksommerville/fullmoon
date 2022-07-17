@@ -11,4 +11,9 @@ void fmn_play_input(uint16_t input,uint16_t prev);
 void fmn_play_update();
 void fmn_play_render(struct fmn_image *fb);
 
+void fmn_bgbits_dirty();
+
+// Top-level navigation to screen neighbors. Nonzero if the view changed.
+uint8_t fmn_game_navigate(int8_t dx,int8_t dy);
+
 #endif
