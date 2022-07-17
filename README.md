@@ -21,7 +21,7 @@ But not a high priority.
 - - [ ] monsters
 - - [ ] environmental puzzles
 - - [ ] password/state
-- [ ] evdev
+- [x] evdev
 - [ ] Build for WebAssembly.
 - [ ] Web app to wrap the wasm build.
 - [ ] MacOS drivers (new IoC unit)

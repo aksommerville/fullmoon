@@ -43,6 +43,7 @@ int fmn_genioc_cb_pcm(struct audio_driver *driver,int16_t *v,int c);
 int fmn_genioc_cb_connect(struct input_driver *driver,int devid);
 int fmn_genioc_cb_disconnect(struct input_driver *driver,int devid);
 int fmn_genioc_cb_event(struct input_driver *driver,int devid,int btnid,int value);
+int fmn_genioc_cb_premapped_event(struct input_driver *driver,uint16_t btnid,int value);
 
 double fmn_genioc_now_s();
 double fmn_genioc_now_cpu_s();

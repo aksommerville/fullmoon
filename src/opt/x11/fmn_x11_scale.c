@@ -105,6 +105,9 @@ static void fmn_x11_scale_thumby(struct video_driver *driver,const void *src) {
   // We are going to assume that the dimensions land on byte boundaries, because they do.
   if ((driver->delegate.fbw&7)||(driver->delegate.fbh&7)) return;
   
+  uint32_t white=0xffffffff;
+  uint32_t black=0x00000000;
+  
   uint32_t *dstrow=(void*)DRIVER->image->data;
   int dststride=DRIVER->image->width;
   int cpc=dststride<<2;
@@ -117,7 +120,7 @@ static void fmn_x11_scale_thumby(struct video_driver *driver,const void *src) {
     const uint8_t *srcp=srcrow;
     int xi=driver->delegate.fbw;
     for (;xi-->0;srcp++) {
-      uint32_t pixel=((*srcp)&srcmask)?0xffffffff:0x00000000;
+      uint32_t pixel=((*srcp)&srcmask)?white:black;
       int ri=DRIVER->scale;
       for (;ri-->0;dstp++) *dstp=pixel;
     }

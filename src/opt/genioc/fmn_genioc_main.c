@@ -67,6 +67,7 @@ int main(int argc,char **argv) {
     .connect=fmn_genioc_cb_connect,
     .disconnect=fmn_genioc_cb_disconnect,
     .event=fmn_genioc_cb_event,
+    .premapped_event=fmn_genioc_cb_premapped_event,
   };
   if (!(fmn_genioc.intf=intf_new(&delegate))) return 1;
   

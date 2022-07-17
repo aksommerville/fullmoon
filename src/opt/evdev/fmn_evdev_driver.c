@@ -4,12 +4,23 @@
  */
  
 static void _evdev_del(struct input_driver *driver) {
+  po_evdev_del(DRIVER->evdev);
+}
+
+/* Callback from the inner driver.
+ */
+ 
+static int _evdev_po_cb(struct po_evdev *evdev,uint8_t btnid,int value) {
+  struct input_driver *driver=po_evdev_get_userdata(evdev);
+  if (driver->delegate.premapped_event) return driver->delegate.premapped_event(driver,btnid,value);
+  return 0;
 }
 
 /* Init.
  */
  
 static int _evdev_init(struct input_driver *driver) {
+  if (!(DRIVER->evdev=po_evdev_new(_evdev_po_cb,driver))) return -1;
   return 0;
 }
 
@@ -17,33 +28,7 @@ static int _evdev_init(struct input_driver *driver) {
  */
  
 static int _evdev_update(struct input_driver *driver) {
-  return 0;
-}
-
-/* Get device IDs.
- */
- 
-static const char *_evdev_device_get_ids(int *vid,int *pid,struct input_driver *driver,int devid) {
-  return 0;
-}
-
-/* Iterate device buttons.
- */
- 
-static int _evdev_device_iterate(
-  struct input_driver *driver,
-  int devid,
-  int (*cb)(struct input_driver *driver,int devid,int btnid,int hidusage,int value,int lo,int hi,void *userdata),
-  void *userdata
-) {
-  return 0;
-}
-
-/* Drop device.
- */
- 
-static int _evdev_device_drop(struct input_driver *driver,int devid) {
-  return 0;
+  return po_evdev_update(DRIVER->evdev);
 }
 
 /* Type definition.
@@ -56,7 +41,4 @@ const struct input_driver_type input_driver_type_evdev={
   .del=_evdev_del,
   .init=_evdev_init,
   .update=_evdev_update,
-  .device_get_ids=_evdev_device_get_ids,
-  .device_iterate=_evdev_device_iterate,
-  .device_drop=_evdev_device_drop,
 };

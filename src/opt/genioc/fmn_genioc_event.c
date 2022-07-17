@@ -124,3 +124,9 @@ int fmn_genioc_cb_event(struct input_driver *driver,int devid,int btnid,int valu
   fprintf(stderr,"TODO %s %d.0x%08x=%d\n",__func__,devid,btnid,value);
   return 0;
 }
+
+int fmn_genioc_cb_premapped_event(struct input_driver *driver,uint16_t btnid,int value) {
+  if (value) fmn_genioc.input|=btnid;
+  else fmn_genioc.input&=~btnid;
+  return 0;
+}

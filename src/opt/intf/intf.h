@@ -62,6 +62,7 @@ struct intf_delegate {
   int (*connect)(struct input_driver *driver,int devid);
   int (*disconnect)(struct input_driver *driver,int devid);
   int (*event)(struct input_driver *driver,int devid,int btnid,int value);
+  int (*premapped_event)(struct input_driver *driver,uint16_t btnid,int value);
 };
  
 struct intf {
