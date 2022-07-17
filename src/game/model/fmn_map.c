@@ -69,3 +69,41 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
   fmn_vy=vy;
   return 1;
 }
+
+/* Trivial accessors.
+ */
+ 
+void fmn_map_get_init_position(uint8_t *x,uint8_t *y) {
+  if (fmn_map) {
+    *x=fmn_map->initx;
+    *y=fmn_map->inity;
+  } else {
+    *x=FMN_SCREENW_TILES>>1;
+    *y=FMN_SCREENH_TILES>>1;
+  }
+}
+
+void fmn_map_get_scroll(uint8_t *x,uint8_t *y) {
+  *x=fmn_vx;
+  *y=fmn_vy;
+}
+
+void fmn_map_get_size(uint8_t *w,uint8_t *h) {
+  if (fmn_map) {
+    *w=fmn_map->w;
+    *h=fmn_map->h;
+  } else {
+    *w=FMN_SCREENW_TILES;
+    *h=FMN_SCREENH_TILES;
+  }
+}
+
+void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm) {
+  if (fmn_map) {
+    *wmm=fmn_map->w*FMN_MM_PER_TILE;
+    *hmm=fmn_map->h*FMN_MM_PER_TILE;
+  } else {
+    *wmm=FMN_SCREENW_MM;
+    *hmm=FMN_SCREENH_MM;
+  }
+}

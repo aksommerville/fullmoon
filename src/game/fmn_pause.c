@@ -1,6 +1,7 @@
 #include "fullmoon.h"
 #include "fmn_pause.h"
 #include "fmn_data.h"
+#include "game/model/fmn_hero.h"
 #include <string.h>
 
 /* Globals.
@@ -27,6 +28,13 @@ void fmn_pause_begin() {
 void fmn_pause_end() {
 }
 
+/* Get selection as action.
+ */
+ 
+uint8_t fmn_pause_get_action() {
+  return 1+cursorp;
+}
+
 /* Move selection.
  */
  
@@ -34,9 +42,11 @@ static void fmn_pause_move(int8_t dx,int8_t dy) {
   if (dx<0) {
     if (cursorp) cursorp--;
     else cursorp=3;
+    fmn_hero_set_action(1+cursorp);
   } else if (dx>0) {
     if (cursorp<3) cursorp++;
     else cursorp=0;
+    fmn_hero_set_action(1+cursorp);
   }
 }
 

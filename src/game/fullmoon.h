@@ -78,15 +78,47 @@ uint32_t fmn_password_encode(uint32_t pw);
 uint32_t fmn_password_decode(uint32_t display);
 
 // (FMN_SCREENW_TILES*FMN_TILESIZE==FMN_FBW) and (FMN_SCREENH_TILES*FMN_TILESIZE==FMN_FBH)
+// (FMN_MM_PER_PIXEL*FMN_TILESIZE==FMN_MM_PER_TILE)
+// (FMN_MM_PER_TILE*255<0x8000)
 #define FMN_TILESIZE 8
 #define FMN_SCREENW_TILES 9
 #define FMN_SCREENH_TILES 5
-#define FMN_MM_PER_TILE 256
+#define FMN_MM_PER_TILE 64 /* <128, and power of two probably a good idea */
+#define FMN_MM_PER_PIXEL 8
+#define FMN_SCREENW_MM (FMN_SCREENW_TILES*FMN_MM_PER_TILE)
+#define FMN_SCREENH_MM (FMN_SCREENH_TILES*FMN_MM_PER_TILE)
 
 struct fmn_map {
   uint8_t *v;
   uint8_t w,h; // Multiples of (FMN_SCREENW_TILES,FMN_SCREENH_TILES)
   uint8_t initx,inity; // Hero's default start position.
 };
+
+// Convenience to spare me some typing...
+static inline void fmn_blit_tile(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,
+  uint8_t tileid
+) {
+  fmn_blit(dst,dstx,dsty,src,(tileid&0x0f)*FMN_TILESIZE,(tileid>>4)*FMN_TILESIZE,FMN_TILESIZE,FMN_TILESIZE);
+}
+
+#define FMN_ACTION_NONE     0
+#define FMN_ACTION_BROOM    1
+#define FMN_ACTION_FEATHER  2
+#define FMN_ACTION_WAND     3
+#define FMN_ACTION_UMBRELLA 4
+
+#define FMN_DIR_NW  0x80
+#define FMN_DIR_N   0x40
+#define FMN_DIR_NE  0x20
+#define FMN_DIR_W   0x10
+#define FMN_DIR_CTR 0x00
+#define FMN_DIR_E   0x08
+#define FMN_DIR_SW  0x04
+#define FMN_DIR_S   0x02
+#define FMN_DIR_SE  0x01
+
+#define FMN_SPELL_LENGTH_LIMIT 10
 
 #endif

@@ -10,9 +10,9 @@ Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
 Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
 Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
 
-Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
-Xx. . . . . . . .   . . . . @@. . . .   . . . . . . . . Xx
-Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
+Xx. . . . . . . .   BbBbBb. . . WwWwWw  . . . . . . . . Xx
+Xx. . . . . . . .   BbBbBb. @@. WwWwWw  . . . . . . . . Xx
+Xx. . . . . . . .   BbBbBb. . . WwWwWw  . . . . . . . . Xx
 Xx. . . . . . . .   . . . . . . . . .   . . . . . . . . Xx
 XxXxXxXxXxXxXxXxXx  XxXxXxXxXxXxXxXxXx  XxXxXxXxXxXxXxXxXx
 

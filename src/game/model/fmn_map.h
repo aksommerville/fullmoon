@@ -28,4 +28,9 @@ uint8_t fmn_map_navigate(int8_t dx,int8_t dy);
 uint8_t fmn_map_load_default(const struct fmn_map *map);
 uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y);
 
+void fmn_map_get_init_position(uint8_t *x,uint8_t *y);
+void fmn_map_get_scroll(uint8_t *x,uint8_t *y);
+void fmn_map_get_size(uint8_t *w,uint8_t *h);
+void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
+
 #endif

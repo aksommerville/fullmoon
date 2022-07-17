@@ -10,8 +10,17 @@ But not a high priority.
 
 - [x] thumby timing
 - [x] genioc timing
+- [ ] I'm burning thru tilesheets with the multiple directions... Can we reconsider xform blits?
+- [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
 - [ ] Map editor.
 - [ ] Game logic.
+- - [x] broom
+- - [x] wand
+- - [x] umbrella
+- - [ ] static collisions
+- - [ ] monsters
+- - [ ] environmental puzzles
+- - [ ] password/state
 - [ ] evdev
 - [ ] Build for WebAssembly.
 - [ ] Web app to wrap the wasm build.

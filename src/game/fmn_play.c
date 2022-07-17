@@ -18,6 +18,8 @@ static struct fmn_image bgbits={
   .writeable=1,
 };
 static uint8_t bgbitsdirty=1;
+
+static uint16_t raintime=0;
  
 /* Begin.
  * Mind that this only means "ui mode changed"; not necessarily "start a fresh game".
@@ -32,6 +34,7 @@ void fmn_play_begin() {
  */
 
 void fmn_play_end() {
+  fmn_hero_set_input(0,0,0);
 }
 
 /* Input.
@@ -53,19 +56,26 @@ void fmn_play_input(uint16_t input,uint16_t prev) {
     case FMN_BUTTON_DOWN: dy=1; break;
   }
   fmn_hero_set_input(dx,dy,input&FMN_BUTTON_A);
+}
 
-  //XXX TEMP stateless dpad to navigate screenfuls
-  #define PRESS(tag) ((input&FMN_BUTTON_##tag)&&!(prev&FMN_BUTTON_##tag))
-  if (PRESS(LEFT)) fmn_game_navigate(-1,0);
-  if (PRESS(RIGHT)) fmn_game_navigate(1,0);
-  if (PRESS(UP)) fmn_game_navigate(0,-1);
-  if (PRESS(DOWN)) fmn_game_navigate(0,1);
+/* Finish the rain spell.
+ */
+ 
+static void fmn_finish_rain() {
+  //TODO ok now what? what does the rain spell do?
 }
 
 /* Update.
  */
  
 void fmn_play_update() {
+  fmn_hero_update();
+  
+  if (raintime>1) raintime--;
+  else if (raintime==1) {
+    raintime=0;
+    fmn_finish_rain();
+  }
 }
 
 /* Render bgbits.
@@ -100,6 +110,8 @@ static void fmn_render_bgbits() {
 /* Render.
  */
  
+static const uint8_t rainseed[]={ 0,5,2,1,3,7,4,6, 3,6,2,1,5,4,7,0, 5,2,4,3,0,6,7,1, };
+ 
 void fmn_play_render(struct fmn_image *fb) {
 
   // Rendering bgbits gets deferred to here, in case it gets multiple changes during an update.
@@ -110,17 +122,43 @@ void fmn_play_render(struct fmn_image *fb) {
   
   // bgbits and fb must be exactly the same size and format.
   memcpy(fb->v,bgbits.v,sizeof(bgbits_storage));
+  
+  //TODO render sprites below hero
+  fmn_hero_render(fb);
+  //TODO render sprites above hero
+  
+  // Rain.
+  if (raintime) {
+    uint8_t *row=fb->v;
+    uint8_t yi=5; for (;yi-->0;row+=fb->stride) {
+      uint8_t seedp=0;
+      uint8_t *p=row;
+      uint8_t xi=fb->w>>1;
+      for (;xi-->0;p+=2) {
+        uint8_t mask=0x80>>((rainseed[seedp]+(raintime/2))&7);
+        if (mask==0x80) mask|=1; else mask|=mask<<1;
+        if (xi&1) (*p)&=~mask;
+        else (*p)|=mask;
+        seedp++;
+        if (seedp>=sizeof(rainseed)) seedp=0;
+      }
+    }
+  }
+  
+  //TODO additional overlay?
 }
 
 /* Reset game.
  */
  
 void fmn_game_reset() {
+  raintime=0;
   fmn_map_reset();
   fmn_hero_reset();
 }
 
 void fmn_game_reset_with_password(uint32_t pw) {
+  raintime=0;
   fmn_map_reset();
   fmn_hero_reset();
 }
@@ -140,4 +178,47 @@ uint8_t fmn_game_navigate(int8_t dx,int8_t dy) {
   //TODO change sprites
   bgbitsdirty=1;
   return 1;
+}
+
+uint8_t fmn_game_focus_mm(int16_t xmm,int16_t ymm) {
+  int8_t x=xmm/FMN_MM_PER_TILE;
+  int8_t y=ymm/FMN_MM_PER_TILE;
+  uint8_t vx,vy;
+  fmn_map_get_scroll(&vx,&vy);
+  // We'll only change one thing at a time.
+  if (x<vx) return fmn_game_navigate(-1,0);
+  if (y<vy) return fmn_game_navigate(0,-1);
+  if (x>=vx+FMN_SCREENW_TILES) return fmn_game_navigate(1,0);
+  if (y>=vy+FMN_SCREENH_TILES) return fmn_game_navigate(0,1);
+  return 0;
+}
+
+/* Spells.
+ */
+ 
+static void fmn_spell_open() {
+  fprintf(stderr,"%s\n",__func__);
+}
+ 
+static void fmn_spell_rain() {
+  // Maybe check if we're indoors? Like, certain maps should be "rainproof".
+  raintime=180;
+}
+
+/* Cast a spell.
+ */
+ 
+uint8_t fmn_game_cast_spell(const uint8_t *src,uint8_t srcc) {
+  #define CHECKSPELL(fn,...) { \
+    const uint8_t expect[]={__VA_ARGS__}; \
+    if ((srcc==sizeof(expect))&&!memcmp(src,expect,srcc)) { \
+      fn(); \
+      return 1; \
+    } \
+  }
+  CHECKSPELL(fmn_spell_open,FMN_DIR_W,FMN_DIR_E,FMN_DIR_W,FMN_DIR_N,FMN_DIR_N)
+  CHECKSPELL(fmn_spell_rain,FMN_DIR_N,FMN_DIR_S,FMN_DIR_S,FMN_DIR_S)
+  //TODO spells. i want like a dozen
+  #undef CHECKSPELL
+  return 0;
 }

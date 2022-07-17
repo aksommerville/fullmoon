@@ -40,6 +40,8 @@ static int mapcvt_receive_line(struct mapcvt *mapcvt,const char *src,int srcc,in
          if (ISSYM(". ")) tmp[tmpc++]=0x08;
     else if (ISSYM("Xx")) tmp[tmpc++]=0x40;
     else if (ISSYM("@@")) { mapcvt->map.initx=tmpc; mapcvt->map.inity=mapcvt->map.h; tmp[tmpc++]=0x08; }
+    else if (ISSYM("Bb")) tmp[tmpc++]=0x00;
+    else if (ISSYM("Ww")) tmp[tmpc++]=0x0f;
     
     /*----------------------------*/
     #undef ISSYM
