@@ -71,6 +71,7 @@ void fmn_game_reset();
 /* (pw) is the decoded "internal use" password (the only kind that units outside the password manager see).
  */
 void fmn_game_reset_with_password(uint32_t pw);
+uint32_t fmn_game_generate_password();
 
 #define FMN_PASSWORD_LENGTH 5
 uint32_t fmn_password_encode(uint32_t pw);
