@@ -1,0 +1,73 @@
+html {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #666;
+  color: #fff;
+}
+
+body {
+  margin: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.RootController {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.RootController > .midRow {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.HeaderController {
+  height: 2em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.HeaderController > * {
+  margin: 0 0.25em;
+}
+
+.HeaderController .syncStatus {
+  background-color: #888;
+  width: 1em;
+  height: 1em;
+  border-radius: 1em;
+}
+.HeaderController .syncStatus.dirty {
+  background-color: #ff0;
+}
+.HeaderController .syncStatus.clean {
+  background-color: #0f0;
+}
+.HeaderController .syncStatus.error {
+  background-color: #f00;
+}
+
+.ToolboxController {
+  flex: 1;
+  max-width: 200px;
+  background-color: #444;
+}
+
+.ToolboxController .reslist {
+  list-style-type: none;
+  padding: 0;
+}
+
+.ToolboxController .reslist li {
+  cursor: pointer;
+}
+
+.CanvasController {
+  flex: 1;
+}

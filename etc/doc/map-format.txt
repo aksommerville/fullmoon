@@ -1,0 +1,54 @@
+Fullmoon Map Format
+
+After compilation, maps are C objects, see struct fmn_map in src/game/fullmoon.h.
+Those C files are produced from text files.
+Text, so they play nice with version control, and there's a chance that one could troubleshoot them manually.
+But realistically you should only edit via the web app.
+
+Each map is a grid of tiles no longer than 255 on each axis, in multiples of the screen size (9x5).
+You can go up to 28x51 screens in one map, surely larger than we'll ever need.
+
+File begins with a header, line-oriented with '#' introducing a line comment.
+
+--- HEADER ---
+
+tilesheet=NAME
+  REQUIRED. Must refer to an image and a tileprops.
+  There must be a const struct fmn_image* with exactly this name, and a const uint8_t[256] named {NAME}_props
+  
+size=W H
+  REQUIRED. Size of map, must be multiples of (9,5) in (9,5)..(252,255).
+  
+poi=X Y Q0 Q1 Q2 Q3 QP
+  Add a Point Of Interest generically.
+  (X,Y) are tile coordinates.
+  Q0 is the usage.
+  (Q1,Q2,Q3,QP) depend on Q0.
+  For doors, spawn points, etc.
+  POI are allowed to exceed the map's width and height where possible. (but not the left or top edges)
+  eg I expect to use that for exit doors from single-screen interiors.
+  
+poi Q0 (Q1,Q2,Q3,QP)
+  0x00 Default start point. (none,none,none,none). Default (w,h)/2 if unset.
+  0x01 Door. (dstx,dsty,none,map)
+  0x02 Sprite. (arg,arg,arg,sprdef)
+    All of a map's sprites exist at all times, even when offscreen.
+  0x03 Treadle. (arg,arg,arg,function). Call a function when the hero enters or leaves.
+    void function(uint8_t state/*0=leave,1=enter*/,uint8_t Q1,uint8_t Q2,uint8_t Q3);
+  0x04 Visibility. (arg,arg,arg,function). Same as Treadle, but call when hero enters or leaves the screen containing this POI.
+  0x05 Proximity. (arg,arg,arg,function). Call each frame with the hero's distance, if on-screen. And with 0xffff when exiting the screen.
+    void function(uint16_t distancemm,uint8_t Q1,uint8_t Q2,uint8_t Q3);
+  0x06 Edge Door. (offsetmsb,offsetlsb,none,map)
+    Point must be one of the corners; the other map is a neighbor on the edge clockwise of that corner.
+    (offset) is signed, where does the map line up relative to this one, in tiles.
+    It is expected but not mandatory that the other map contain an Edge Door pointing back here.
+    Hero can walk offscreen anywhere. We should arrange for there always to be an Door or Edge Door where that's possible.
+  
+--- BODY ---
+
+Header ends with a line containing exactly:
+BEGIN_BODY
+
+After that, comments and blank lines are no longer allowed.
+Each line is a packed string of hexadecimal digits exactly (w*2) long, and a newline.
+There must be exactly (h) lines.

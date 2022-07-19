@@ -2,6 +2,9 @@
 #include "game/fmn_data.h"
 #include "fmn_map.h"
 
+//XXX TEMP, until we get tileprop resources working
+const uint8_t bgtiles_props[256]={0};
+
 /* Globals.
  */
  
@@ -37,6 +40,8 @@ uint8_t *fmn_map_get_view(uint8_t *stride) {
 uint8_t fmn_map_navigate(int8_t dx,int8_t dy) {
   if (!fmn_map) return 0;
   
+  //TODO edge doors
+  
   int16_t nvx=fmn_vx+dx*FMN_SCREENW_TILES;
   if (nvx<0) return 0;
   if (nvx>fmn_map->w-FMN_SCREENW_TILES) return 0;
@@ -55,7 +60,16 @@ uint8_t fmn_map_navigate(int8_t dx,int8_t dy) {
  
 uint8_t fmn_map_load_default(const struct fmn_map *map) {
   if (!map) return 0;
-  return fmn_map_load_position(map,map->initx,map->inity);
+  uint8_t x=map->w>>1,y=map->h>>1;
+  const struct fmn_map_poi *poi=map->poiv;
+  uint16_t i=map->poic;
+  for (;i-->0;poi++) {
+    if (poi->q[0]!=FMN_POI_START) continue;
+    x=poi->x;
+    y=poi->y;
+    break;
+  }
+  return fmn_map_load_position(map,x,y);
 }
 
 uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
@@ -75,8 +89,16 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
  
 void fmn_map_get_init_position(uint8_t *x,uint8_t *y) {
   if (fmn_map) {
-    *x=fmn_map->initx;
-    *y=fmn_map->inity;
+    const struct fmn_map_poi *poi=fmn_map->poiv;
+    uint16_t i=fmn_map->poic;
+    for (;i-->0;poi++) {
+      if (poi->q[0]!=FMN_POI_START) continue;
+      *x=poi->x;
+      *y=poi->y;
+      return;
+    }
+    *x=fmn_map->w>>1;
+    *y=fmn_map->h>>1;
   } else {
     *x=FMN_SCREENW_TILES>>1;
     *y=FMN_SCREENH_TILES>>1;
@@ -111,16 +133,16 @@ void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm) {
 /* Tile properties.
  */
  
-static uint8_t fmn_map_tile_is_solid(uint8_t tile) {
-  //TODO Need to store this stuff somewhere. For now, the top two rows are passable, bottom 14 solid.
-  if (tile<0x20) return 0;
-  return 1;
+static uint8_t fmn_map_tile_is_solid(uint8_t tile,uint8_t mask) {
+  if (!fmn_map) return 0;
+  if (!fmn_map->tileprops) return 0;
+  return (fmn_map->tileprops[tile]&mask)?1:0;
 }
 
 /* Check collisions.
  */
  
-static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h,uint8_t panic) {
+static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h,uint8_t panic,uint8_t collmask) {
   if (!panic--) { if (adjx) *adjx=0; if (adjy) *adjy=0; return 1; }
   if ((w<1)||(h<1)) return 0;
   if (!fmn_map) return 0; // the fallback map has no solid cells
@@ -142,7 +164,7 @@ static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,i
     const uint8_t *srcp=srcrow;
     int16_t col=cola;
     for (;col<=colz;col++,srcp++) {
-      if (!fmn_map_tile_is_solid(*srcp)) continue;
+      if (!fmn_map_tile_is_solid(*srcp,collmask)) continue;
       if (!adjx||!adjy) return 1;
       
       int16_t hardl=col*FMN_MM_PER_TILE;
@@ -160,8 +182,8 @@ static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,i
       // First cell collision, and we have two candidate resolutions: escx and escy.
       // Try each of those. If they are legal or correct on the other axis, great. Otherwise report unresolvable.
       int16_t xadjx=0,xadjy=0,yadjx=0,yadjy=0;
-      uint8_t xcoll=fmn_map_check_collision_1(&xadjx,&xadjy,x+escx,y,w,h,panic);
-      uint8_t ycoll=fmn_map_check_collision_1(&yadjx,&yadjy,x,y+escy,w,h,panic);
+      uint8_t xcoll=fmn_map_check_collision_1(&xadjx,&xadjy,x+escx,y,w,h,panic,collmask);
+      uint8_t ycoll=fmn_map_check_collision_1(&yadjx,&yadjy,x,y+escy,w,h,panic,collmask);
       // Both collided? Unresolvable.
       if (xcoll&&ycoll) { *adjx=*adjy=0; return 1; }
       // One collided? Use the other.
@@ -180,6 +202,7 @@ static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,i
   return 0;
 }
 
-uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h) {
-  return fmn_map_check_collision_1(adjx,adjy,x,y,w,h,3);
+uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h,uint8_t collmask) {
+  if (!collmask) return 0;
+  return fmn_map_check_collision_1(adjx,adjy,x,y,w,h,3,collmask);
 }

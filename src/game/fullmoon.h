@@ -88,12 +88,6 @@ uint32_t fmn_password_decode(uint32_t display);
 #define FMN_SCREENW_MM (FMN_SCREENW_TILES*FMN_MM_PER_TILE)
 #define FMN_SCREENH_MM (FMN_SCREENH_TILES*FMN_MM_PER_TILE)
 
-struct fmn_map {
-  uint8_t *v;
-  uint8_t w,h; // Multiples of (FMN_SCREENW_TILES,FMN_SCREENH_TILES)
-  uint8_t initx,inity; // Hero's default start position.
-};
-
 // Convenience to spare me some typing...
 static inline void fmn_blit_tile(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
@@ -120,5 +114,45 @@ static inline void fmn_blit_tile(
 #define FMN_DIR_SE  0x01
 
 #define FMN_SPELL_LENGTH_LIMIT 10
+
+/* Maps.
+ * In general, the game outside fmn_map.c doesn't need to know this definition.
+ ****************************************************/
+
+struct fmn_map {
+  uint8_t *v;
+  uint8_t w,h; // Multiples of (FMN_SCREENW_TILES,FMN_SCREENH_TILES)
+  
+  const struct fmn_image *tilesheet;
+  const uint8_t *tileprops; // 256 bytes, one for each tile
+  
+  // POI must sort by (y,x) (sic not x,y; they sort in scan order).
+  uint16_t poic;
+  struct fmn_map_poi {
+    uint8_t x,y;
+    uint8_t q[4];
+    void *qp;
+  } *poiv;
+};
+
+// poi.q[0]
+#define FMN_POI_START          0x00 /* () default start point */
+#define FMN_POI_DOOR           0x01 /* (dstx,dsty,_,map) point door */
+#define FMN_POI_SPRITE         0x02 /* (arg,arg,arg,sprdef) npc spawn point */
+#define FMN_POI_TREADLE        0x03 /* (arg,arg,arg,function) point trigger */
+#define FMN_POI_VISIBILITY     0x04 /* (arg,arg,arg,function) screen trigger */
+#define FMN_POI_PROXIMITY      0x05 /* (arg,arg,arg,function) proximity updater */
+#define FMN_POI_EDGE_DOOR      0x06 /* (offsetmsb,offsetlsb,_,map) */
+
+// tileprops
+#define FMN_TILE_SOLID      0x01
+#define FMN_TILE_HOLE       0x02
+
+/* Sprites.
+ ************************************************************/
+ 
+struct fmn_sprdef {
+  uint8_t dummy;//TODO
+};
 
 #endif

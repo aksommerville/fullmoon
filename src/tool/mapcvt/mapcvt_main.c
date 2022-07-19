@@ -5,6 +5,15 @@
  
 static void fmn_map_cleanup(struct fmn_map *map) {
   if (map->v) free(map->v);
+  // (tilesheet,tileprops) not used
+  if (map->poiv) {
+    struct fmn_map_poi *poi=map->poiv;
+    int i=map->poic;
+    for (;i-->0;poi++) {
+      if (poi->qp) free(poi->qp);
+    }
+    free(map->poiv);
+  }
 }
  
 static void mapcvt_cleanup(struct mapcvt *mapcvt) {
@@ -14,6 +23,7 @@ static void mapcvt_cleanup(struct mapcvt *mapcvt) {
   if (mapcvt->src) free(mapcvt->src);
   if (mapcvt->dst) free(mapcvt->dst);
   fmn_map_cleanup(&mapcvt->map);
+  if (mapcvt->tilesheetname) free(mapcvt->tilesheetname);
 }
 
 /* Log error.

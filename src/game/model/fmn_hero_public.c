@@ -68,7 +68,8 @@ static void fmn_hero_update_motion() {
     fmn_hero.x+FMN_HERO_HITBOX_X,
     fmn_hero.y+FMN_HERO_HITBOX_Y,
     FMN_HERO_HITBOX_W,
-    FMN_HERO_HITBOX_H
+    FMN_HERO_HITBOX_H,
+    FMN_TILE_SOLID|FMN_TILE_HOLE // TODO no HOLE when flying
   )) {
     if (adjx||adjy) {
       fmn_hero.x+=adjx;
@@ -79,13 +80,14 @@ static void fmn_hero_update_motion() {
     }
   }
   
-  // Clamp hard to map boundaries. (TODO debatable. Will there ever be map neighbors that you can reach like screen neighbors?)
+  /* Clamp hard to map boundaries. XXX commenting out instead of deleting in case i change my mind, but i doubt that
   int16_t mapwmm,maphmm;
   fmn_map_get_size_mm(&mapwmm,&maphmm);
   if (fmn_hero.x<0) fmn_hero.x=0;
   else if (fmn_hero.x>mapwmm-FMN_MM_PER_TILE) fmn_hero.x=mapwmm-FMN_MM_PER_TILE;
   if (fmn_hero.y<0) fmn_hero.y=0;
   else if (fmn_hero.y>maphmm-FMN_MM_PER_TILE) fmn_hero.y=maphmm-FMN_MM_PER_TILE;
+  /**/
   
   /* Actuate footswitches etc, and scroll to neighbor screens.
    * For these purposes, our position is a single point, at the center of the body tile.

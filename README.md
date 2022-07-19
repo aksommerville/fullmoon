@@ -17,7 +17,7 @@ But not a high priority.
 - - [x] broom
 - - [x] wand
 - - [x] umbrella
-- - [ ] static collisions
+- - [x] static collisions
 - - [ ] monsters
 - - [ ] environmental puzzles
 - - [ ] password/state
