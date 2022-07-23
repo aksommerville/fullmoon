@@ -16,6 +16,53 @@ static int mapcvt_eval_poi_q0(uint8_t *dst,const char *src,int srcc) {
   return -1;
 }
 
+/* Compare POI for sorting.
+ */
+ 
+static int mapcvt_poicmp(const void *_a,const void *_b) {
+  const struct fmn_map_poi *a=_a,*b=_b;
+  if (a->y<b->y) return -1;
+  if (a->y>b->y) return 1;
+  if (a->x<b->x) return -1;
+  if (a->x>b->x) return 1;
+  return 0;
+}
+
+/* Validate POI.
+ */
+ 
+static int mapcvt_poi_validate(struct mapcvt *mapcvt,const struct fmn_map_poi *poi) {
+  if (poi->qp) {
+    const char *src=poi->qp;
+    int srcc=0; while (src[srcc]) srcc++;
+    if ((srcc<1)||(srcc>255)) return -1;
+    if ((src[0]>='0')&&(src[0]<='9')) return -1;
+    for (;srcc-->0;src++) {
+      if ((*src>='a')&&(*src<='z')) continue;
+      if ((*src>='A')&&(*src<='Z')) continue;
+      if ((*src>='0')&&(*src<='9')) continue;
+      if (*src=='_') continue;
+      return -1;
+    }
+  }
+  switch (poi->q[0]) {
+    case FMN_POI_START: if (poi->q[1]||poi->q[2]||poi->q[3]||poi->qp) return -1; break;
+    case FMN_POI_DOOR: {
+        if (poi->q[3]) return -1;
+        if (!poi->qp) return -1;
+      } break;
+    case FMN_POI_SPRITE: if (!poi->qp) return -1; break;
+    case FMN_POI_TREADLE: if (!poi->qp) return -1; break;
+    case FMN_POI_VISIBILITY: if (!poi->qp) return -1; break;
+    case FMN_POI_PROXIMITY: if (!poi->qp) return -1; break;
+    case FMN_POI_EDGE_DOOR: {
+        if (poi->q[3]) return -1;
+        if (!poi->qp) return -1;
+      } break;
+  }
+  return 0;
+}
+
 /* Decode POI.
  */
  
@@ -238,8 +285,19 @@ int mapcvt_fmn_from_text(struct mapcvt *mapcvt) {
     fprintf(stderr,"%s: Tilesheet name required.\n",mapcvt->srcpath);
     return -2;
   }
-  //TODO validate POI? ...yes we must
-  //TODO sort POI
+  const struct fmn_map_poi *poi=mapcvt->map.poiv;
+  int i=mapcvt->map.poic;
+  for (;i-->0;poi++) {
+    int err=mapcvt_poi_validate(mapcvt,poi);
+    if (err<0) {
+      if (err!=-2) fprintf(stderr,
+        "%s: Invalid POI: x=%d,y=%d,q=[%d,%d,%d,%d],qp=%s\n",
+        mapcvt->srcpath,poi->x,poi->y,poi->q[0],poi->q[1],poi->q[2],poi->q[3],poi->qp
+      );
+      return -2;
+    }
+  }
+  qsort(mapcvt->map.poiv,mapcvt->map.poic,sizeof(struct fmn_map_poi),mapcvt_poicmp);
   
   /* Read body.
    */
