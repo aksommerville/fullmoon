@@ -21,7 +21,8 @@ But not a high priority.
 - - [ ] monsters
 - - [ ] Edge doors
 - - [x] Point doors
-- - [ ] POI triggers
+- - [x] POI triggers
+- - [ ] Proximity triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
 - [ ] Build for WebAssembly.

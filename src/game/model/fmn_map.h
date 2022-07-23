@@ -49,4 +49,6 @@ uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,
 uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y);
 void fmn_map_exit_cell(uint8_t x,uint8_t y);
 
+void fmn_map_call_visibility_pois(uint8_t state);
+
 #endif
