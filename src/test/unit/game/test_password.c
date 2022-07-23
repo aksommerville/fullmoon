@@ -6,7 +6,7 @@
 void fmn_game_reset_with_password(uint32_t pw) {}
 void fmn_set_uimode(uint8_t mode) {}
 const struct fmn_image uibits={0};
-void fmn_blit(struct fmn_image *dst,int16_t dstx,int16_t dsty,const struct fmn_image *src,int16_t srcx,int16_t srcy,int16_t w,int16_t h) {}
+void fmn_blit(struct fmn_image *dst,int16_t dstx,int16_t dsty,const struct fmn_image *src,int16_t srcx,int16_t srcy,int16_t w,int16_t h,uint8_t xform) {}
 
 /* Exhaustive password encode/decode.
  */

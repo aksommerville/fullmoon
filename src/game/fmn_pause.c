@@ -98,11 +98,11 @@ void fmn_pause_render(struct fmn_image *fb) {
   fbdirty=0;
   memset(fb->v,0,(fb->w*fb->h)>>3);
   
-  fmn_blit(fb,cursorp*18,5,&uibits,cursorframe*18,94,18,18);
+  fmn_blit(fb,cursorp*18,5,&uibits,cursorframe*18,94,18,18,0);
   
   uint8_t i=0;
-  for (i=0;i<4;i++) fmn_blit(fb,1+i*18,6,&mainsprites,i*16,32,16,16);
+  for (i=0;i<4;i++) fmn_blit(fb,1+i*18,6,&mainsprites,i*16,32,16,16,0);
   
-  fmn_blit(fb,6,30,&uibits,0,112,34,7);
-  for (i=0;i<5;i++) fmn_blit(fb,44+i*4,30,&uibits,password[i]*3,119,3,7);
+  fmn_blit(fb,6,30,&uibits,0,112,34,7,0);
+  for (i=0;i<5;i++) fmn_blit(fb,44+i*4,30,&uibits,password[i]*3,119,3,7,0);
 }

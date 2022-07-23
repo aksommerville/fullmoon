@@ -46,6 +46,10 @@ uint16_t fmn_platform_read_input();
 #define FMN_FBH 40
 #define FMN_FBFMT FMN_IMGFMT_thumby
 
+#define FMN_XFORM_XREV 1
+#define FMN_XFORM_YREV 2
+#define FMN_XFORM_SWAP 4
+
 struct fmn_image {
   uint8_t *v;
   // NB size of (v) is not necessarily (h*stride); thumby format is different.
@@ -57,8 +61,53 @@ struct fmn_image {
 void fmn_blit(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
   const struct fmn_image *src,int16_t srcx,int16_t srcy,
-  int16_t w,int16_t h
+  int16_t w,int16_t h,
+  uint8_t xform
 );
+
+struct fmn_image_iterator_1d {
+  uint8_t *p;
+  uint8_t q;
+  int16_t stride;
+  void (*next)(struct fmn_image_iterator_1d *iter);
+};
+
+struct fmn_image_iterator {
+  uint32_t (*read)(const uint8_t *p,uint8_t q);
+  void (*write)(uint8_t *p,uint8_t q,uint32_t pixel);
+  struct fmn_image *image;
+  int16_t minorc,minorc0,majorc;
+  struct fmn_image_iterator_1d major,minor;
+};
+
+/* Request must be fully in bounds or we fail.
+ * On failure, return zero and neuter (iter) -- it is still safe to use.
+ * With FMN_XFORM_SWAP, we reverse (w,h). Be mindful of that when bounds-checking.
+ * You must write pixels of the correct size. Small formats might overwrite neighbors if you have unexpected bits set.
+ */
+uint8_t fmn_image_iterate(
+  struct fmn_image_iterator *iter,
+  const struct fmn_image *image,
+  int16_t x,int16_t y,int16_t w,int16_t h,
+  uint8_t xform
+);
+
+uint8_t fmn_image_iterator_next(struct fmn_image_iterator *iter);
+
+static inline uint32_t fmn_image_iterator_read(const struct fmn_image_iterator *iter) {
+  return iter->read(iter->minor.p,iter->minor.q);
+}
+
+static inline void fmn_image_iterator_write(struct fmn_image_iterator *iter,uint32_t src) {
+  iter->write(iter->minor.p,iter->minor.q,src);
+}
+
+typedef uint32_t (*fmn_pixcvt_fn)(uint32_t src);
+fmn_pixcvt_fn fmn_pixcvt_get(uint8_t dstfmt,uint8_t srcfmt);
+
+// 0 means fully opaque always; -1 means any nonzero pixel is opaque; otherwise at least one bit of the mask must be set.
+// We never blend during blits, it's all or nothing. (even if we add formats that in theory could, we won't).
+uint32_t fmn_imgfmt_get_alpha_mask(uint8_t imgfmt);
 
 #define FMN_UIMODE_TITLE    1
 #define FMN_UIMODE_PLAY     2
@@ -92,9 +141,9 @@ uint32_t fmn_password_decode(uint32_t display);
 static inline void fmn_blit_tile(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
   const struct fmn_image *src,
-  uint8_t tileid
+  uint8_t tileid,uint8_t xform
 ) {
-  fmn_blit(dst,dstx,dsty,src,(tileid&0x0f)*FMN_TILESIZE,(tileid>>4)*FMN_TILESIZE,FMN_TILESIZE,FMN_TILESIZE);
+  fmn_blit(dst,dstx,dsty,src,(tileid&0x0f)*FMN_TILESIZE,(tileid>>4)*FMN_TILESIZE,FMN_TILESIZE,FMN_TILESIZE,xform);
 }
 
 #define FMN_ACTION_NONE     0

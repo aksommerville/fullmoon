@@ -19,7 +19,7 @@ But not a high priority.
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
 - - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
 - [ ] Game logic.
-- - [ ] Blit with xform. I think we do need it.
+- - [x] Blit with xform. I think we do need it.
 - - [ ] monsters
 - - [x] Edge doors
 - - [x] Point doors
@@ -31,11 +31,16 @@ But not a high priority.
 - - [ ] Key flags, display at pause.
 - - [ ] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
-- [ ] Build for WebAssembly.
-- [ ] Web app to wrap the wasm build.
-- [ ] MacOS drivers (new IoC unit)
-- [ ] Windows drivers (genioc)
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - [ ] PulseAudio driver. If we're still doing audio.
-- [ ] Can I make a TTY driver for video and input?
-- [ ] Can we make this run on a 68k Mac?
+- [ ] Build for other targets
+- - [ ] MacOS -- just drivers
+- - [ ] Windows -- just drivers
+- - [ ] WebAssembly, highly desirable
+- - - [ ] Build wasm
+- - - [ ] Wrapper web app
+- - [ ] TTY video, and.... something? for input. just for fun
+- - [ ] Tiny?
+- - [ ] Pico?
+- - [ ] 68k Mac?
+- - [ ] Pippin?

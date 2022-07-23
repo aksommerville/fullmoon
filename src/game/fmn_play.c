@@ -108,7 +108,7 @@ static void fmn_render_bgbits() {
       for (;xi-->0;dstx+=FMN_TILESIZE,srcp++) {
         int16_t srcx=((*srcp)&0x0f)*FMN_TILESIZE;
         int16_t srcy=((*srcp)>>4)*FMN_TILESIZE;
-        fmn_blit(&bgbits,dstx,dsty,&bgtiles,srcx,srcy,FMN_TILESIZE,FMN_TILESIZE);
+        fmn_blit(&bgbits,dstx,dsty,&bgtiles,srcx,srcy,FMN_TILESIZE,FMN_TILESIZE,0);
       }
     }
   } else {

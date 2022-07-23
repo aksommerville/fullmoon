@@ -337,38 +337,39 @@ void fmn_hero_update() {
  */
  
 static void fmn_hero_render_broom(struct fmn_image *dst,int16_t dstx,int16_t dsty) {
-  int16_t srcx=96;
+  uint8_t xform=0;
   int16_t bodydsty=dsty-8;
   int16_t shadowsrcy=16;
   if (fmn_hero.facedir==FMN_DIR_W) {
-    srcx=112;
+    xform=FMN_XFORM_XREV;
   }
   if (fmn_hero.actionframe) {
     bodydsty++;
     shadowsrcy=24;
   }
   if (fmn_hero.actionparam&1) {
-    fmn_blit(dst,dstx-6,dsty+4,&mainsprites,96,shadowsrcy,16,8);
+    fmn_blit(dst,dstx-6,dsty+4,&mainsprites,40,shadowsrcy,16,8,0);
   }
-  fmn_blit(dst,dstx-6,bodydsty,&mainsprites,srcx,0,16,16);
+  fmn_blit(dst,dstx-6,bodydsty,&mainsprites,24,16,16,16,xform);
 }
 
 /* Render using magic wand.
  */
  
 static void fmn_hero_render_wand(struct fmn_image *dst,int16_t dstx,int16_t dsty) {
-  uint8_t frame=0; // (0..4)=idle,left,right,down,up
+  uint8_t frame=0; // (0..3)=idle,left,down,up
+  uint8_t xform=0;
   if (fmn_hero.spellrepudiation) {
-    frame=5+((fmn_hero.spellrepudiation&8)?1:0);
+    frame=4+((fmn_hero.spellrepudiation&8)?1:0);
     dstx-=4; dsty-=6;
   } else switch (fmn_hero.actionparam) {
     case 0: dstx-=4; dsty-=6; break;
     case FMN_DIR_W: frame=1; dstx-=8; dsty-=6; break;
-    case FMN_DIR_E: frame=2; dsty-=6; break;
-    case FMN_DIR_S: frame=3; dstx-=4; dsty-=6; break;
-    case FMN_DIR_N: frame=4; dstx-=4; dsty-=8; break;
+    case FMN_DIR_E: frame=1; dsty-=6; xform=FMN_XFORM_XREV; break;
+    case FMN_DIR_S: frame=2; dstx-=4; dsty-=6; break;
+    case FMN_DIR_N: frame=3; dstx-=4; dsty-=8; break;
   }
-  fmn_blit(dst,dstx,dsty,&mainsprites,frame*16,48,16,16);
+  fmn_blit(dst,dstx,dsty,&mainsprites,frame*16,48,16,16,xform);
 }
 
 /* Render arm.
@@ -381,7 +382,7 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
     switch (fmn_hero.action) {
     
       case FMN_ACTION_FEATHER: {
-          uint8_t tileid=0x08;
+          uint8_t tileid=0x01,xform=0;
           switch (fmn_hero.actionframe) {
             case 1: case 5: tileid+=0x10; break;
             case 2: case 4: tileid+=0x20; break;
@@ -389,28 +390,28 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
           }
           switch (fmn_hero.facedir) {
             case FMN_DIR_W: dstx-=6; dsty-=1; break;
-            case FMN_DIR_E: tileid+=1; dstx+=6; dsty-=1; break;
-            case FMN_DIR_N: tileid+=3; dsty-=6; break;
-            case FMN_DIR_S: tileid+=2; dstx-=2; dsty+=5; break;
+            case FMN_DIR_E: dstx+=6; dsty-=1; xform=FMN_XFORM_XREV; break;
+            case FMN_DIR_N: dsty-=6; xform=FMN_XFORM_SWAP|FMN_XFORM_YREV; break;
+            case FMN_DIR_S: dstx-=2; dsty+=5; xform=FMN_XFORM_SWAP|FMN_XFORM_XREV; break;
           }
-          fmn_blit_tile(dst,dstx,dsty,&mainsprites,tileid);
+          fmn_blit_tile(dst,dstx,dsty,&mainsprites,tileid,xform);
         } return;
         
       case FMN_ACTION_UMBRELLA: {
           if (fmn_hero.actionframe==0) { // deploying
             int16_t d=(fmn_hero.actionanimtime*FMN_TILESIZE)/20;
             switch (fmn_hero.facedir) {
-              case FMN_DIR_W: fmn_blit(dst,dstx-2-d,dsty,&mainsprites,64,32,16,8); break;
-              case FMN_DIR_E: fmn_blit(dst,dstx-2+d,dsty,&mainsprites,64,40,16,8); break;
-              case FMN_DIR_S: fmn_blit(dst,dstx-2,dsty-6+d,&mainsprites,80,32,8,16); break;
-              case FMN_DIR_N: fmn_blit(dst,dstx+6-(d>>1),dsty-10-d,&mainsprites,88,32,8,16); break;
+              case FMN_DIR_W: fmn_blit(dst,dstx-2-d,dsty,&mainsprites,64,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
+              case FMN_DIR_E: fmn_blit(dst,dstx-2+d,dsty,&mainsprites,64,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_YREV); break;
+              case FMN_DIR_S: fmn_blit(dst,dstx-2,dsty-6+d,&mainsprites,64,32,8,16,FMN_XFORM_YREV); break;
+              case FMN_DIR_N: fmn_blit(dst,dstx+6-(d>>1),dsty-10-d,&mainsprites,72,32,8,16,0); break;
             }
           } else { // stable
             switch (fmn_hero.facedir) {
-              case FMN_DIR_W: fmn_blit(dst,dstx-4,dsty-4,&mainsprites,96,32,8,16); break;
-              case FMN_DIR_E: fmn_blit(dst,dstx+4,dsty-4,&mainsprites,104,32,8,16); break;
-              case FMN_DIR_S: fmn_blit(dst,dstx-5,dsty+4,&mainsprites,112,40,16,8); break;
-              case FMN_DIR_N: fmn_blit(dst,dstx-4,dsty-10,&mainsprites,112,32,16,8); break;
+              case FMN_DIR_W: fmn_blit(dst,dstx-4,dsty-4,&mainsprites,80,32,8,16,0); break;
+              case FMN_DIR_E: fmn_blit(dst,dstx+4,dsty-4,&mainsprites,80,32,8,16,FMN_XFORM_XREV); break;
+              case FMN_DIR_S: fmn_blit(dst,dstx-5,dsty+4,&mainsprites,80,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
+              case FMN_DIR_N: fmn_blit(dst,dstx-4,dsty-10,&mainsprites,80,32,8,16,FMN_XFORM_SWAP); break;
             }
           }
         } return;
@@ -419,11 +420,11 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
   
   // General arm. North and west it's on the right. South and east on the left.
   if ((fmn_hero.facedir==FMN_DIR_N)||(fmn_hero.facedir==FMN_DIR_W)) {
-    fmn_blit_tile(dst,dstx+6,dsty-1,&mainsprites,0x33+fmn_hero.action);
-    fmn_blit_tile(dst,dstx+6,dsty-FMN_TILESIZE-1,&mainsprites,0x23+fmn_hero.action);
+    fmn_blit_tile(dst,dstx+6,dsty-1,&mainsprites,0x13+fmn_hero.action,FMN_XFORM_XREV);
+    fmn_blit_tile(dst,dstx+6,dsty-FMN_TILESIZE-1,&mainsprites,0x03+fmn_hero.action,FMN_XFORM_XREV);
   } else {
-    fmn_blit_tile(dst,dstx-6,dsty-1,&mainsprites,0x13+fmn_hero.action);
-    fmn_blit_tile(dst,dstx-6,dsty-FMN_TILESIZE-1,&mainsprites,0x03+fmn_hero.action);
+    fmn_blit_tile(dst,dstx-6,dsty-1,&mainsprites,0x13+fmn_hero.action,0);
+    fmn_blit_tile(dst,dstx-6,dsty-FMN_TILESIZE-1,&mainsprites,0x03+fmn_hero.action,0);
   }
 }
 
@@ -450,17 +451,17 @@ void fmn_hero_render(struct fmn_image *dst) {
   }
   
   // Head and body.
-  uint8_t tilex=0;
+  uint8_t tilex=0,xform=0;
   switch (fmn_hero.facedir) {
     case FMN_DIR_N: tilex=2; break;
-    case FMN_DIR_W: tilex=1; break;
+    case FMN_DIR_W: xform=FMN_XFORM_XREV; break;
   }
   switch (fmn_hero.bodyframe) {
-    case 0: case 2: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x10+tilex); break;
-    case 1: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x20+tilex); break;
-    case 3: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x30+tilex); break;
+    case 0: case 2: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x10+tilex,xform); break;
+    case 1: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x20+tilex,xform); break;
+    case 3: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x30+tilex,xform); break;
   }
-  fmn_blit_tile(dst,dstx,dsty-6,&mainsprites,0x00+tilex);
+  fmn_blit_tile(dst,dstx,dsty-6,&mainsprites,0x00+tilex,xform);
   
   // Arm after body+head, for all but north.
   if (fmn_hero.facedir!=FMN_DIR_N) {
