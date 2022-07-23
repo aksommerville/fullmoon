@@ -175,6 +175,13 @@ static void fmn_hero_begin_action() {
 static uint8_t fmn_hero_end_action() {
   switch (fmn_hero.action) {
     case FMN_ACTION_BROOM: {
+        // Reject if offscreen or over a hole.
+        if (fmn_hero.cellx<0) return 0;
+        if (fmn_hero.celly<0) return 0;
+        uint8_t mapw,maph;
+        fmn_map_get_size(&mapw,&maph);
+        if (fmn_hero.cellx>=mapw) return 0;
+        if (fmn_hero.celly>=maph) return 0;
         if (fmn_map_check_collision(0,0,
           fmn_hero.x+FMN_HERO_HITBOX_X,
           fmn_hero.y+FMN_HERO_HITBOX_Y,
@@ -482,6 +489,6 @@ void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx) {
 void fmn_hero_force_position(int16_t xmm,int16_t ymm) {
   fmn_hero.x=xmm;
   fmn_hero.y=ymm;
-  fmn_hero.cellx=xmm/FMN_MM_PER_TILE; if (xmm<0) fmn_hero.cellx--;
-  fmn_hero.celly=ymm/FMN_MM_PER_TILE; if (ymm<0) fmn_hero.celly--;
+  fmn_hero.cellx=(xmm+(FMN_MM_PER_TILE>>1))/FMN_MM_PER_TILE; if (xmm<0) fmn_hero.cellx--;
+  fmn_hero.celly=(ymm+(FMN_MM_PER_TILE>>1))/FMN_MM_PER_TILE; if (ymm<0) fmn_hero.celly--;
 }

@@ -51,5 +51,9 @@ void fmn_map_exit_cell(uint8_t x,uint8_t y);
 
 void fmn_map_call_visibility_pois(uint8_t state);
 void fmn_map_add_proximity_pois();
+struct fmn_map *fmn_map_find_edge_door_left(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm);
+struct fmn_map *fmn_map_find_edge_door_right(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm);
+struct fmn_map *fmn_map_find_edge_door_up(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm);
+struct fmn_map *fmn_map_find_edge_door_down(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm);
 
 #endif

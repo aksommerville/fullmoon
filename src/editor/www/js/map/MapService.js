@@ -17,6 +17,7 @@
  *  { event:"promptForEditPoi", index, poi } // same idea
  *  { event:"tilesheetChanged" } // signal for MapEditor to reload the sheet
  *  { event:"sizeChanged" }
+ *  { event:"hoverPosition", x, y } // cell the cursor hovers on
  */
  
 import { FullmoonMap } from "./FullmoonMap.js";
@@ -46,6 +47,8 @@ export class MapService {
     this.toolInProgress = null; // while mouse button down
     this.strokeDirty = false;
     this.poiDragIndex = -1;
+    this.hoverX = -1;
+    this.hoverY = -1;
     this.subscribers = [];
   }
   
@@ -142,6 +145,13 @@ export class MapService {
     this.broadcast({ event: "tilesheetChanged" });
     this.broadcast({ event: "dirty" });
     this.broadcast({ event: "finishEdit" });
+  }
+  
+  setHoverPosition(x, y) {
+    if ((x === this.hoverX) && (y === this.hoverY)) return;
+    this.hoverX = x;
+    this.hoverY = y;
+    this.broadcast({ event: "hoverPosition", x, y });
   }
   
   /* Resize.
@@ -374,6 +384,7 @@ export class MapService {
   }
   
   mouseMove(x, y) {
+    this.setHoverPosition(x, y);
     if ((x < 0) || (y < 0) || (x >= this.map.w) || (y >= this.map.h)) return;
     switch (this.toolInProgress) {
       case "pickup": this.pickupMouseMove(x, y); break;

@@ -25,12 +25,15 @@ export class MapEditor {
     this.tilesheet = null;
     this.tilesheetImage = null;
     this.mapSubscription = null;
-    this.mouseListener = null;
     this.mouseX = 0; // in cells, most recent observed position
     this.mouseY = 0;
+    this.mouseInProgress = false;
     
     this.poiIcons = new Image();
     this.poiIcons.src = "/img/poiicons.png";
+    
+    this.mouseListener = (event) => this.onMouseMove(event);
+    this.window.addEventListener("mousemove", this.mouseListener);
     
     this.buildUi();
     
@@ -166,13 +169,8 @@ export class MapEditor {
     if ((col < 0) || (row < 0) || (col >= this.map.w) || (row >= this.map.h)) return;
     this.mouseX = col;
     this.mouseY = row;
-    if (this.mouseListener) { // huh?
-      this.window.removeEventListener("mousemove", this.mouseListener);
-      this.mouseListener = null;
-    }
-    this.mouseListener = (event) => this.onMouseMove(event);
-    this.window.addEventListener("mousemove", this.mouseListener);
     this.mapService.mouseDown(event.button, col, row);
+    this.mouseInProgress = true;
   }
   
   onMouseMove(event) {
@@ -185,14 +183,15 @@ export class MapEditor {
     if ((col === this.mouseX) && (row === this.mouseY)) return;
     this.mouseX = col;
     this.mouseY = row;
-    this.mapService.mouseMove(col, row);
+    if (this.mouseInProgress) {
+      this.mapService.mouseMove(col, row);
+    } else {
+      this.mapService.setHoverPosition(col, row);
+    }
   }
   
   onMouseUp(event) {
-    if (this.mouseListener) {
-      this.window.removeEventListener("mousemove", this.mouseListener);
-      this.mouseListener = null;
-    }
+    this.mouseInProgress = false;
     this.mapService.mouseUp();
   }
   

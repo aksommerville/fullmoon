@@ -3,6 +3,7 @@
 #include "game/fmn_play.h"
 #include "fmn_hero.h"
 #include "fmn_proximity.h"
+#include "fmn_sprites.h"
 #include "fmn_map.h"
 
 /* Globals.
@@ -41,21 +42,32 @@ uint8_t *fmn_map_get_view(uint8_t *stride) {
 uint8_t fmn_map_navigate(int8_t dx,int8_t dy) {
   if (!fmn_map) return 0;
   
-  //TODO edge doors
-  
   int16_t nvx=fmn_vx+dx*FMN_SCREENW_TILES;
-  if (nvx<0) return 0;
-  if (nvx>fmn_map->w-FMN_SCREENW_TILES) return 0;
   int16_t nvy=fmn_vy+dy*FMN_SCREENH_TILES;
-  if (nvy<0) return 0;
-  if (nvy>fmn_map->h-FMN_SCREENH_TILES) return 0;
   if ((nvx==fmn_vx)&&(nvy==fmn_vy)) return 0;
+  int16_t hdx=0,hdy=0;
+  const struct fmn_map *nextmap=fmn_map;
+       if (nvx<0) { if (nextmap=fmn_map_find_edge_door_left(fmn_map,nvy,&hdx,&hdy)) { nvx=nextmap->w-FMN_SCREENW_TILES; nvy=fmn_vy+(hdy/FMN_MM_PER_TILE); }}
+  else if (nvy<0) { if (nextmap=fmn_map_find_edge_door_up(fmn_map,nvx,&hdx,&hdy)) { nvx=fmn_vx+hdx/FMN_MM_PER_TILE; nvy=nextmap->h-FMN_SCREENH_TILES; }}
+  else if (nvx>fmn_map->w-FMN_SCREENW_TILES) { if (nextmap=fmn_map_find_edge_door_right(fmn_map,nvy,&hdx,&hdy)) { nvx=0; nvy=fmn_vy+hdy/FMN_MM_PER_TILE; }}
+  else if (nvy>fmn_map->h-FMN_SCREENH_TILES) { if (nextmap=fmn_map_find_edge_door_down(fmn_map,nvx,&hdx,&hdy)) { nvx=fmn_vx+hdx/FMN_MM_PER_TILE; nvy=0; }}
+  if (!nextmap) return 0; // let her walk off the edge if there isn't a door
+  uint8_t switched=(fmn_map!=nextmap);
   
   fmn_map_call_visibility_pois(0);
   fmn_proximity_clear();
   
   fmn_vx=nvx;
   fmn_vy=nvy;
+  
+  if (switched) {
+    fmn_sprites_clear();
+    fmn_map=nextmap;
+    int16_t hx,hy;
+    fmn_hero_get_world_position(&hx,&hy);
+    fmn_hero_force_position(hx+hdx,hy+hdy);
+    fmn_sprites_load();
+  }
   
   fmn_map_add_proximity_pois();
   fmn_map_call_visibility_pois(1);
@@ -89,6 +101,7 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
   
   fmn_map_call_visibility_pois(0);
   fmn_proximity_clear();
+  fmn_sprites_clear();
   
   fmn_map=map;
   fmn_vx=vx;
@@ -98,6 +111,7 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
     x*FMN_MM_PER_TILE,
     y*FMN_MM_PER_TILE
   );
+  fmn_sprites_load();
   fmn_map_add_proximity_pois();
   fmn_map_call_visibility_pois(1);
   fmn_bgbits_dirty();
@@ -308,4 +322,100 @@ void fmn_map_add_proximity_pois() {
       poi->qp
     );
   }
+}
+
+/* Find edge doors.
+ */
+ 
+struct fmn_map_edge_door_context {
+  const struct fmn_map *from;
+  int16_t vx,vy;
+  int16_t *dx,*dy;
+  struct fmn_map *to;
+};
+
+static void fmn_map_find_edge_door(
+  struct fmn_map_edge_door_context *ctx,
+  uint8_t poix,uint8_t poiy,
+  uint8_t (*cb)(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi)
+) {
+  const struct fmn_map_poi *poi=ctx->from->poiv;
+  uint16_t i=ctx->from->poic;
+  for (;i-->0;poi++) {
+    if (poi->q[0]!=FMN_POI_EDGE_DOOR) continue;
+    if (poi->x!=poix) continue;
+    if (poi->y!=poiy) continue;
+    if (cb(ctx,poi)) {
+      ctx->to=poi->qp;
+      return;
+    }
+  }
+}
+
+static uint8_t fmn_map_match_edge_door_left(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
+  int16_t d=(poi->q[1]<<8)|poi->q[2];
+  int16_t vy=ctx->vy-d;
+  if (vy<0) return 0;
+  const struct fmn_map *to=poi->qp;
+  if (vy>=to->h) return 0;
+  *(ctx->dx)=to->w*FMN_MM_PER_TILE;
+  *(ctx->dy)=-d*FMN_MM_PER_TILE;
+  return 1;
+}
+
+static uint8_t fmn_map_match_edge_door_right(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
+  int16_t d=(poi->q[1]<<8)|poi->q[2];
+  int16_t vy=ctx->vy-d;
+  if (vy<0) return 0;
+  const struct fmn_map *to=poi->qp;
+  if (vy>=to->h) return 0;
+  *(ctx->dx)=-ctx->from->w*FMN_MM_PER_TILE;
+  *(ctx->dy)=-d*FMN_MM_PER_TILE;
+  return 1;
+}
+
+static uint8_t fmn_map_match_edge_door_up(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
+  int16_t d=(poi->q[1]<<8)|poi->q[2];
+  int16_t vx=ctx->vx-d;
+  if (vx<0) return 0;
+  const struct fmn_map *to=poi->qp;
+  if (vx>=to->w) return 0;
+  *(ctx->dx)=-d*FMN_MM_PER_TILE;
+  *(ctx->dy)=to->h*FMN_MM_PER_TILE;
+  return 1;
+}
+
+static uint8_t fmn_map_match_edge_door_down(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
+  int16_t d=(poi->q[1]<<8)|poi->q[2];
+  int16_t vx=ctx->vx-d;
+  if (vx<0) return 0;
+  const struct fmn_map *to=poi->qp;
+  if (vx>=to->w) return 0;
+  *(ctx->dx)=-d*FMN_MM_PER_TILE;
+  *(ctx->dy)=-ctx->from->h*FMN_MM_PER_TILE;
+  return 1;
+}
+ 
+struct fmn_map *fmn_map_find_edge_door_left(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm) {
+  struct fmn_map_edge_door_context ctx={from,0,vytiles,dxmm,dymm};
+  fmn_map_find_edge_door(&ctx,0,from->h-1,fmn_map_match_edge_door_left);
+  return ctx.to;
+}
+
+struct fmn_map *fmn_map_find_edge_door_right(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm) {
+  struct fmn_map_edge_door_context ctx={from,0,vytiles,dxmm,dymm};
+  fmn_map_find_edge_door(&ctx,from->w-1,0,fmn_map_match_edge_door_right);
+  return ctx.to;
+}
+
+struct fmn_map *fmn_map_find_edge_door_up(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm) {
+  struct fmn_map_edge_door_context ctx={from,vxtiles,0,dxmm,dymm};
+  fmn_map_find_edge_door(&ctx,0,0,fmn_map_match_edge_door_up);
+  return ctx.to;
+}
+
+struct fmn_map *fmn_map_find_edge_door_down(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm) {
+  struct fmn_map_edge_door_context ctx={from,vxtiles,0,dxmm,dymm};
+  fmn_map_find_edge_door(&ctx,from->w-1,from->h-1,fmn_map_match_edge_door_down);
+  return ctx.to;
 }

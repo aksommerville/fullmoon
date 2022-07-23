@@ -30,13 +30,20 @@ export class MapExtras {
   
   buildUi() {
     this.element.innerHTML = "";
+    this.dom.spawn(this.element, "DIV", ["positionTattle"]);
     //TODO scale control
     //TODO resize
     //TODO enter general metadata view
     //TODO set tilesheet
   }
   
+  onHoverPosition(event) {
+    this.element.querySelector(".positionTattle").innerText = `${event.x},${event.y}`;
+  }
+  
   onMapEvent(event) {
-    //console.log(`MapExtras.onMapEvent`, event);
+    switch (event.event) {
+      case "hoverPosition": this.onHoverPosition(event); break;
+    }
   }
 }

@@ -15,16 +15,22 @@ But not a high priority.
 - - [ ] MapEditor: zoom
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc
-- - [ ] MapEditor: position tattle
+- - [x] MapEditor: position tattle
+- - [ ] Setting negative poi.q (eg edge door), highly painful today.
+- - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
 - [ ] Game logic.
 - - [ ] Blit with xform. I think we do need it.
 - - [ ] monsters
-- - [ ] Edge doors
+- - [x] Edge doors
 - - [x] Point doors
 - - [x] POI triggers
 - - [x] Proximity triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
+- - [ ] Flags to enable items -- you don't start with all 4.
+- - [ ] Key flags, display at pause.
+- - [ ] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
+- - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Build for WebAssembly.
 - [ ] Web app to wrap the wasm build.
 - [ ] MacOS drivers (new IoC unit)

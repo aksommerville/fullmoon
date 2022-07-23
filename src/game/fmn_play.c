@@ -4,6 +4,7 @@
 #include "game/model/fmn_hero.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"
+#include "game/model/fmn_sprites.h"
 #include <string.h>
 
 /* Globals.
@@ -77,6 +78,8 @@ void fmn_play_update() {
   fmn_hero_get_world_position(&x,&y);
   fmn_proximity_update(x,y);
   
+  fmn_sprites_update();
+  
   if (raintime>1) raintime--;
   else if (raintime==1) {
     raintime=0;
@@ -129,9 +132,10 @@ void fmn_play_render(struct fmn_image *fb) {
   // bgbits and fb must be exactly the same size and format.
   memcpy(fb->v,bgbits.v,sizeof(bgbits_storage));
   
-  //TODO render sprites below hero
+  // Sprites.
+  fmn_sprites_render_low();
   fmn_hero_render(fb);
-  //TODO render sprites above hero
+  fmn_sprites_render_high();
   
   // Rain.
   if (raintime) {
