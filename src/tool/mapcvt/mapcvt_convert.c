@@ -111,6 +111,7 @@ static int mapcvt_decode_poi(struct fmn_map_poi *poi,struct mapcvt *mapcvt,const
       fprintf(stderr,"%s:%d: Expected integer in 0..255 for q[%d], found '%.*s'\n",mapcvt->srcpath,lineno,qi,tokenc,token);
       return -2;
     }
+    poi->q[qi]=n;
   }
   
   token=src+srcp;

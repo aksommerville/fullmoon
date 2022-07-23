@@ -44,4 +44,9 @@ void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
  */
 uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h,uint8_t collmask);
 
+/* Update DOOR and TREADLE POIs.
+ */
+uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y);
+void fmn_map_exit_cell(uint8_t x,uint8_t y);
+
 #endif

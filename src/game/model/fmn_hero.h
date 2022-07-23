@@ -7,6 +7,7 @@
 
 struct fmn_hero {
   int16_t x,y; // mm in map space (not screen space). Top left of body tile.
+  int16_t cellx,celly;
   int8_t dx,dy;
   uint8_t button;
   uint8_t walkspeed;
@@ -30,5 +31,6 @@ void fmn_hero_render(struct fmn_image *fb);
 void fmn_hero_get_world_position(int16_t *xmm,int16_t *ymm);
 void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx);
 uint8_t fmn_hero_set_action(uint8_t action); // => zero if rejected
+void fmn_hero_force_position(int16_t xmm,int16_t ymm);
 
 #endif

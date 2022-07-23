@@ -84,14 +84,32 @@ static void fmn_hero_update_motion() {
     }
   }
   
-  /* Actuate footswitches etc, and scroll to neighbor screens.
+  /* Scroll to neighbor screens or thru edge doors.
    * For these purposes, our position is a single point, at the center of the body tile.
+   * If the screen changes, remeasure. We might have moved to another map.
    */
   int16_t x=fmn_hero.x+(FMN_MM_PER_TILE>>1);
   int16_t y=fmn_hero.y+(FMN_MM_PER_TILE>>1);
-  if (fmn_game_focus_mm(x,y)) return;
+  if (fmn_game_focus_mm(x,y)) {
+    x=fmn_hero.x+(FMN_MM_PER_TILE>>1);
+    y=fmn_hero.y+(FMN_MM_PER_TILE>>1);
+  }
   
-  //TODO footswitches etc
+  //TODO proximity sensors
+  
+  /* Check treadle POIs if we change cells.
+   */
+  int16_t cellx=x/FMN_MM_PER_TILE; if (x<0) cellx--;
+  int16_t celly=y/FMN_MM_PER_TILE; if (y<0) celly--;
+  if ((cellx!=fmn_hero.cellx)||(celly!=fmn_hero.celly)) {
+    fmn_map_exit_cell(fmn_hero.cellx,fmn_hero.celly);
+    fmn_hero.cellx=cellx;
+    fmn_hero.celly=celly;
+    if (fmn_map_enter_cell(fmn_hero.cellx,fmn_hero.celly)) {
+      // Screen changed. If we're going to stay here, we must update position.
+      return;
+    }
+  }
 }
 
 /* Update facedir from (dx,dy). And possibly other things.
@@ -456,4 +474,14 @@ void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx) {
   fmn_map_get_scroll(&scrollx,&scrolly);
   *xpx=(fmn_hero.x-(scrollx*FMN_MM_PER_TILE))/FMN_MM_PER_PIXEL;
   *ypx=(fmn_hero.y-(scrolly*FMN_MM_PER_TILE))/FMN_MM_PER_PIXEL;
+}
+
+/* Force position eg on a map change.
+ */
+ 
+void fmn_hero_force_position(int16_t xmm,int16_t ymm) {
+  fmn_hero.x=xmm;
+  fmn_hero.y=ymm;
+  fmn_hero.cellx=xmm/FMN_MM_PER_TILE; if (xmm<0) fmn_hero.cellx--;
+  fmn_hero.celly=ymm/FMN_MM_PER_TILE; if (ymm<0) fmn_hero.celly--;
 }

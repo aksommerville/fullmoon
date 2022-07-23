@@ -1,5 +1,7 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
+#include "game/fmn_play.h"
+#include "fmn_hero.h"
 #include "fmn_map.h"
 
 /* Globals.
@@ -78,6 +80,11 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
   fmn_map=map;
   fmn_vx=vx;
   fmn_vy=vy;
+  fmn_hero_force_position(
+    x*FMN_MM_PER_TILE,
+    y*FMN_MM_PER_TILE
+  );
+  fmn_bgbits_dirty();
   return 1;
 }
 
@@ -202,4 +209,46 @@ static uint8_t fmn_map_check_collision_1(int16_t *adjx,int16_t *adjy,int16_t x,i
 uint8_t fmn_map_check_collision(int16_t *adjx,int16_t *adjy,int16_t x,int16_t y,int16_t w,int16_t h,uint8_t collmask) {
   if (!collmask) return 0;
   return fmn_map_check_collision_1(adjx,adjy,x,y,w,h,3,collmask);
+}
+
+/* Apply DOOR and TREADLE.
+ */
+ 
+uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y) {
+  if (!fmn_map) return 0;
+  const struct fmn_map_poi *poi=fmn_map->poiv;
+  uint16_t i=fmn_map->poic;
+  for (;i-->0;poi++) {
+    if (poi->x!=x) continue;
+    if (poi->y!=y) continue;
+    switch (poi->q[0]) {
+      case FMN_POI_TREADLE: {
+          void (*fn)(uint8_t,uint8_t,uint8_t,uint8_t)=poi->qp;
+          fn(1,poi->q[1],poi->q[2],poi->q[3]);
+        } break;
+      case FMN_POI_DOOR: {
+          return fmn_map_load_position(poi->qp,poi->q[1],poi->q[2]);
+        } break;
+    }
+  }
+  return 0;
+}
+
+/* Terminate TREADLE.
+ */
+ 
+void fmn_map_exit_cell(uint8_t x,uint8_t y) {
+  if (!fmn_map) return;
+  const struct fmn_map_poi *poi=fmn_map->poiv;
+  uint16_t i=fmn_map->poic;
+  for (;i-->0;poi++) {
+    if (poi->x!=x) continue;
+    if (poi->y!=y) continue;
+    switch (poi->q[0]) {
+      case FMN_POI_TREADLE: {
+          void (*fn)(uint8_t,uint8_t,uint8_t,uint8_t)=poi->qp;
+          fn(0,poi->q[1],poi->q[2],poi->q[3]);
+        } break;
+    }
+  }
 }

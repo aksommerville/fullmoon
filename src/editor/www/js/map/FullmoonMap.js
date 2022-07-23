@@ -97,7 +97,7 @@ export class FullmoonMap {
       if (nlp < 0) nlp = src.length;
       const line = src.substring(srcp, nlp);
       srcp = nlp + 1;
-      if (y >= this.w) throw new Error(`${lineno}: Too many rows, expected ${this.w}`);
+      if (y >= this.h) throw new Error(`${lineno}: Too many rows, expected ${this.h}`);
       if (line.length !== this.w*2) throw new Error(`${lineno}: Expected length ${this.w*2}, found ${line.length}`);
       for (let x=0; x<this.w; x++) {
         const tileid=parseInt(line.substr(x*2, 2), 16);

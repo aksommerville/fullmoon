@@ -15,11 +15,12 @@ But not a high priority.
 - - [ ] MapEditor: zoom
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc
+- - [ ] MapEditor: position tattle
 - [ ] Game logic.
 - - [ ] Blit with xform. I think we do need it.
 - - [ ] monsters
 - - [ ] Edge doors
-- - [ ] Point doors
+- - [x] Point doors
 - - [ ] POI triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
