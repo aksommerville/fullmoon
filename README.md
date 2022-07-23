@@ -22,7 +22,7 @@ But not a high priority.
 - - [ ] Edge doors
 - - [x] Point doors
 - - [x] POI triggers
-- - [ ] Proximity triggers
+- - [x] Proximity triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
 - [ ] Build for WebAssembly.

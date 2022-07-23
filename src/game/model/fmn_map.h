@@ -50,5 +50,6 @@ uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y);
 void fmn_map_exit_cell(uint8_t x,uint8_t y);
 
 void fmn_map_call_visibility_pois(uint8_t state);
+void fmn_map_add_proximity_pois();
 
 #endif

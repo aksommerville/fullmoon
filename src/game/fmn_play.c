@@ -3,6 +3,7 @@
 #include "fmn_data.h"
 #include "game/model/fmn_hero.h"
 #include "game/model/fmn_map.h"
+#include "game/model/fmn_proximity.h"
 #include <string.h>
 
 /* Globals.
@@ -69,7 +70,12 @@ static void fmn_finish_rain() {
  */
  
 void fmn_play_update() {
+
   fmn_hero_update();
+  
+  int16_t x,y;
+  fmn_hero_get_world_position(&x,&y);
+  fmn_proximity_update(x,y);
   
   if (raintime>1) raintime--;
   else if (raintime==1) {

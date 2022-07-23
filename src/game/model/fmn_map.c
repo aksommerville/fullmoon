@@ -2,6 +2,7 @@
 #include "game/fmn_data.h"
 #include "game/fmn_play.h"
 #include "fmn_hero.h"
+#include "fmn_proximity.h"
 #include "fmn_map.h"
 
 /* Globals.
@@ -18,6 +19,7 @@ static uint8_t fmn_panicmap[FMN_SCREENW_TILES*FMN_SCREENH_TILES]={0};
 void fmn_map_reset() {
   fmn_map=0;
   fmn_vx=fmn_vy=0;
+  fmn_proximity_clear();
   fmn_map_load_default(&outermap);
 }
 
@@ -50,9 +52,14 @@ uint8_t fmn_map_navigate(int8_t dx,int8_t dy) {
   if ((nvx==fmn_vx)&&(nvy==fmn_vy)) return 0;
   
   fmn_map_call_visibility_pois(0);
+  fmn_proximity_clear();
+  
   fmn_vx=nvx;
   fmn_vy=nvy;
+  
+  fmn_map_add_proximity_pois();
   fmn_map_call_visibility_pois(1);
+  
   return 1;
 }
 
@@ -79,16 +86,22 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
   int16_t vy=(y/FMN_SCREENH_TILES)*FMN_SCREENH_TILES;
   if (vx>map->w-FMN_SCREENW_TILES) return 0;
   if (vy>map->h-FMN_SCREENH_TILES) return 0;
+  
   fmn_map_call_visibility_pois(0);
+  fmn_proximity_clear();
+  
   fmn_map=map;
   fmn_vx=vx;
   fmn_vy=vy;
+
   fmn_hero_force_position(
     x*FMN_MM_PER_TILE,
     y*FMN_MM_PER_TILE
   );
+  fmn_map_add_proximity_pois();
   fmn_map_call_visibility_pois(1);
   fmn_bgbits_dirty();
+  
   return 1;
 }
 
@@ -272,5 +285,27 @@ void fmn_map_call_visibility_pois(uint8_t state) {
     if (poi->y>=fmn_vy+FMN_SCREENH_TILES) continue;
     void (*fn)(uint8_t,uint8_t,uint8_t,uint8_t)=poi->qp;
     fn(state,poi->q[1],poi->q[2],poi->q[3]);
+  }
+}
+
+/* Add PROXIMITY POI currently visible.
+ */
+ 
+void fmn_map_add_proximity_pois() {
+  if (!fmn_map) return;
+  const struct fmn_map_poi *poi=fmn_map->poiv;
+  uint16_t i=fmn_map->poic;
+  for (;i-->0;poi++) {
+    if (poi->q[0]!=FMN_POI_PROXIMITY) continue;
+    if (poi->x<fmn_vx) continue;
+    if (poi->y<fmn_vy) continue;
+    if (poi->x>=fmn_vx+FMN_SCREENW_TILES) continue;
+    if (poi->y>=fmn_vy+FMN_SCREENH_TILES) continue;
+    fmn_proximity_add(
+      poi->x*FMN_MM_PER_TILE,
+      poi->y*FMN_MM_PER_TILE,
+      poi->q[1],poi->q[2],poi->q[3],
+      poi->qp
+    );
   }
 }
