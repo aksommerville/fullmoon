@@ -36,14 +36,19 @@ export class RootController {
   }
   
   onEditResource(path, displayName) {
-    this.canvasController.setResource(path, displayName);
+    this.canvasController.setResource(path, displayName).then((data) => {
+      this.toolboxController.setResource(data);
+      this.headerController.setResource(data);
+    });
   }
   
   onNewMap() {
-    const name = this.window.prompt("Name for new map:", `${Date.now()}`);
+    const name = this.window.prompt("Name for new map:", `m${Date.now() % 10000}`);
     if (!name) return;
-    const path = "/res/map/" + name;
-    this.resourceService.dirty(path, () => "").then(() => {
+    const path = "/res/map/" + name + ".txt";
+    const row = "000000000000000000\n";
+    const content = "tilesheet=bgtiles\nsize=9 5\nBEGIN_BODY\n" + row + row + row +row + row;
+    this.resourceService.dirty(path, () => content).then(() => {
       return this.toolboxController.refreshResourcePaths();
     }).then(() => {
       this.onEditResource(path, name);

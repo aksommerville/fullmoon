@@ -62,6 +62,38 @@ export class Dom {
     }
   }
   
+  spawnModal() {
+    const layer = this.requireModalLayer();
+    const blotter = this.requireModalBlotter(layer);
+    blotter.parentNode.insertBefore(blotter, null);
+    const wrapper = this.spawn(layer, "DIV", ["modalWrapper"]);
+    layer.style.pointerEvents = "auto";
+    return wrapper;
+  }
+  
+  popModal(wrapperOrNone) {
+    const layer = this.document.querySelector(".modalLayer");
+    if (!layer) return;
+    let topModal = null, nextTopModal = null;
+    for (const wrapper of layer.querySelectorAll(".modalWrapper")) {
+      nextTopModal = topModal;
+      topModal = wrapper;
+    }
+    if (!topModal) return;
+    if (wrapperOrNone && (wrapperOrNone !== topModal)) {
+      wrapperOrNone.remove();
+    } else {
+      topModal.remove();
+      const blotter = layer.querySelector(".modalBlotter");
+      if (nextTopModal) {
+        layer.insertBefore(blotter, nextTopModal);
+      } else {
+        blotter.remove();
+        layer.style.pointerEvents = "none";
+      }
+    }
+  }
+  
   /* private **********************************************************************/
   
   tagNameForControllerClass(clazz) {
@@ -91,6 +123,27 @@ export class Dom {
         }
       }
     }
+  }
+  
+  requireModalLayer() {
+    let layer = this.document.querySelector(".modalLayer");
+    if (!layer) {
+      layer = this.spawn(this.document.body, "DIV", ["modalLayer"]);
+    }
+    return layer;
+  }
+  
+  requireModalBlotter(layer) {
+    let blotter = this.document.querySelector(".modalBlotter");
+    if (!blotter) {
+      blotter = this.spawn(layer, "DIV", ["modalBlotter"], { "on-click": (event) => this.onModalBlotterClick(event) });
+    }
+    return blotter;
+  }
+  
+  onModalBlotterClick(event) {
+    event.stopPropagation();
+    this.popModal();
   }
 }
 

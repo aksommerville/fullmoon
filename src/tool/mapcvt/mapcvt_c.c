@@ -1,15 +1,4 @@
 #include "mapcvt.h"
-#include "mapcvt.h"
-
-/* Measure image.
- */
- 
-int fmn_image_get_size(const struct fmn_image *image) {
-  switch (image->fmt) {
-    case FMN_IMGFMT_thumby: return image->stride*((image->h+7)>>3);
-    default: return image->stride*image->h;
-  }
-}
 
 /* Name of C object from path (or command line or something?).
  */
@@ -93,7 +82,7 @@ static int mapcvt_encode_poi(struct encoder *dst,struct mapcvt *mapcvt,const str
   if (encode_fmt(dst,"    .y=%d,\n",poi->y)<0) return -1;
   if (encode_fmt(dst,"    .q={%d,%d,%d,%d},\n",poi->q[0],poi->q[1],poi->q[2],poi->q[3])<0) return -1;
   if (poi->qp) {
-    if (encode_fmt(dst,"    .qp=&%s,\n",poi->qp)<0) return -1; // sic no quotes; it's a C identifier
+    if (encode_fmt(dst,"    .qp=(void*)&%s,\n",poi->qp)<0) return -1; // sic no quotes; it's a C identifier
   }
   if (encode_fmt(dst,"  },\n")<0) return -1;
   return 0;

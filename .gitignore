@@ -1,7 +1,8 @@
 *~
 ~*
-mid
-out
+/mid
+/out
+/bak
 .DS_Store
 /etc/config.mk
 

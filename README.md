@@ -10,15 +10,36 @@ But not a high priority.
 
 - [x] thumby timing
 - [x] genioc timing
-- [ ] I'm burning thru tilesheets with the multiple directions... Can we reconsider xform blits?
 - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
 - [ ] Map editor.
+- - [x] Launch game?
+- - [x] Rainbow pencil
+- - [x] POI
+- - [x] Set tilesheet
+- - [x] Tilesheet decode and make available to map editor
+- - [x] Tilesheet editor
+- - [x] Sort resources list.
+- - [x] Show images when selected, or filter from list.
+- - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
+- - [x] Resize map
+- - [x] New map
+- - [ ] Delete map
+- - [ ] MapEditor: zoom
+- - [x] MapToolbox: nearest neighbor palette, don't interpolate
+- - [ ] Gamepad controls for MapEditor? :D that would be so cool
+- - [ ] Tilesheet, cache group lists etc
+- [ ] Build tools
+- - [ ] mapcvt: Sort and validate POI.
 - [ ] Game logic.
 - - [x] broom
 - - [x] wand
 - - [x] umbrella
 - - [x] static collisions
+- - [ ] Blit with xform. I think we do need it.
 - - [ ] monsters
+- - [ ] Edge doors
+- - [ ] Point doors
+- - [ ] POI triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
 - [x] evdev

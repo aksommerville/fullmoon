@@ -2,9 +2,6 @@
 #include "game/fmn_data.h"
 #include "fmn_map.h"
 
-//XXX TEMP, until we get tileprop resources working
-const uint8_t bgtiles_props[256]={0};
-
 /* Globals.
  */
  

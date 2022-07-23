@@ -1,0 +1,41 @@
+Fullmoon Tilesheet Format
+
+By "tilesheet" we mean the metadata associated with an image containing 256 tiles.
+One byte per tile of metadata is stored for the game at runtime.
+Three additional bytes are stored for the editor only.
+
+Tilesheet sources should be named after their image eg:
+  "mylovelysprites.png" => "mylovelysprites_props.txt"
+
+At runtime, each tilesheet is (const uint8_t[256]), indexed by tileid, nice and simple.
+Stored as text, basically a hex dump.
+Like maps, one is not expected to work with the text format directly. Use the web editor.
+But it should play nice with version control and all that.
+
+Each line of the file is either empty or 32 hex digits.
+No comments, no fences, etc.
+
+First 16 lines are the tileprops. See FMN_TILE_* in src/game/fullmoon.h.
+  01 SOLID
+  02 HOLE
+
+Second 16 lines are group IDs.
+Each tile can be assigned to an arbitrary group for neighbor joining.
+Group zero is a catch-all meaning "no group".
+
+Third 16 lines are neighbor masks:
+  80 NW
+  40 N
+  20 NE
+  10 W
+  08 E
+  04 SW
+  02 S
+  01 SE
+If set, this tile expects a neighbor from the same group in that position.
+
+Fourth 16 lines are priority.
+When selecting a tile randomly, all those of the same group and mask are candidates.
+Their priority is the relative likelihood of choosing that tile.
+A tile with priority zero can only be selected explicitly, but still participates in neighbor joining.
+eg you might have a few grass tiles at priority 255, and then some flowers at like 30.

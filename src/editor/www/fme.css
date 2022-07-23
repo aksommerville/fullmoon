@@ -13,6 +13,73 @@ body {
   display: none;
 }
 
+.modalLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.modalBlotter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  opacity: 0.7;
+  cursor: default;
+}
+
+.modalWrapper {
+  background-color: #fff;
+  color: #000;
+  border-radius: 1em;
+  box-shadow: #000 0 0 1em;
+  min-width: 50px;
+  min-height: 50px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  padding: 1em;
+  display: flex;
+}
+
+.accordion {
+  list-style-type: none;
+  padding: 0;
+}
+
+.accordion-header {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.accordion.open .accordion-header::before {
+  content: 'v';
+  font-weight: normal;
+  margin-right: 1em;
+}
+
+.accordion.closed .accordion-header::before {
+  content: '>';
+  font-weight: normal;
+  margin-right: 1em;
+}
+
+.accordion.open li {
+  display: list-item;
+}
+
+.accordion.closed li {
+  display: none;
+}
+
+/* Controller-specific.
+ **********************************************************************************/
+
 .RootController {
   width: 100vw;
   height: 100vh;
@@ -31,6 +98,7 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
+  border-bottom: 1px solid #000;
 }
 
 .HeaderController > * {
@@ -57,11 +125,7 @@ body {
   flex: 1;
   max-width: 200px;
   background-color: #444;
-}
-
-.ToolboxController .reslist {
-  list-style-type: none;
-  padding: 0;
+  border-right: 1px solid #000;
 }
 
 .ToolboxController .reslist li {
@@ -70,4 +134,147 @@ body {
 
 .CanvasController {
   flex: 1;
+  display: flex;
+}
+
+.CanvasController > * {
+  flex: 1;
+}
+
+.MapEditor {
+  position: relative;
+}
+
+.MapEditor .scroller {
+  overflow: scroll;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.MapEditor .sizer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.MapEditor canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0;
+}
+
+.MapToolbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.MapToolbox .palette {
+  cursor: pointer;
+}
+
+.MapToolbox .toolsRow {
+  background-color: #ccc;
+}
+
+.MapToolbox .tool {
+  cursor: pointer;
+  background-color: #ccc;
+  margin: 2px;
+}
+
+.MapToolbox .tool.selected-left {
+  background-color: #ff0;
+}
+
+.MapToolbox .tool.selected-right {
+  background-color: #f00;
+}
+
+.TilesheetEditor {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.TilesheetEditor .buttonsRow {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  background-color: #000;
+}
+
+.TilesheetEditor .buttonsRow input {
+  display: none;
+}
+
+.TilesheetEditor .buttonsRow label {
+  color: #666;
+}
+
+.TilesheetEditor .buttonsRow input:checked + label {
+  color: #fff;
+}
+
+.TilesheetEditor canvas {
+  flex: 1;
+}
+
+.TileModal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.TileModal .idRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.TileModal .idRow .navButtons {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+}
+
+.TileModal .idRow .navButtons .vertNavColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.TileModal .idRow input {
+  flex: 1;
+}
+
+.TileModal hr {
+  width: 100%;
+}
+
+.TileModal tr {
+  vertical-align: top;
+}
+
+.TileModal ul.props {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  min-width: 100px;
+}
+
+.TileModal .idRow .thumbnail {
+  width: 64px;
+  height: 64px;
+  image-rendering: crisp-edges;
 }

@@ -3,14 +3,16 @@
  */
 
 import { Comm } from "../util/Comm.js";
+import { DataFactory } from "./DataFactory.js";
 
 export class ResourceService {
   static getDependencies() {
-    return [Comm, Window];
+    return [Comm, Window, DataFactory];
   }
-  constructor(comm, window) {
+  constructor(comm, window, dataFactory) {
     this.comm = comm;
     this.window = window;
+    this.dataFactory = dataFactory;
     
     this.statusListeners = [];
     this.nextStatusListenerId = 1;
@@ -24,11 +26,23 @@ export class ResourceService {
     this.resourcePathsUpdating = null; // null or Promise
   }
   
-  getResource(path) {
+  getResource(path, decode) {
     // We could check pendingChanges and if present there, sync first.
     // I think not worth it.
     if (!path.startsWith("/res/")) return Promise.reject(`Invalid resource path '${path}'`);
-    return this.comm.fetchBinary("GET", path);
+    return this.comm.fetchBinary("GET", path).then((serial) => {
+      const obj = decode ? this.dataFactory.decode(serial, path) : serial;
+      return obj || serial;
+    });
+  }
+  
+  getImage(path) {
+    return new Promise((resolve, reject) => {
+      const image = new this.window.Image();
+      image.onload = () => resolve(image);
+      image.onerror = (e) => reject(e);
+      image.src = path;
+    });
   }
   
   /* TOC.
@@ -70,7 +84,7 @@ export class ResourceService {
   
   dirty(name, encode) {
     const prior = this.pendingChanges[name];
-    if (prior) prior[1]("replaced");
+    if (prior) prior.reject("replaced");
     let resolve, reject;
     const promise = new Promise((rs, rj) => {
       resolve = rs;

@@ -22,12 +22,13 @@ export class CanvasController {
   }
   
   setResource(path, displayName) {
-    this.resourceService.getResource(path).then((content) => {
-      console.log(`CanvasController got resource '${displayName}'`, content);
+    return this.resourceService.getResource(path).then((content) => {
       const data = this.dataFactory.decode(content, path);
       this.populate(data);
+      return data;
     }).catch((e) => {
       console.log(`CanvasController failed to load resource '${displayName}' (${path})`, e);
+      return null;
     });
   }
   
@@ -35,7 +36,7 @@ export class CanvasController {
     this.element.innerHTML = "";
     if (!data) return;
     const controllerClass = this.dataFactory.controllerClassForData(data);
-    if (!controllerClass) throw new Error(`${path}: No editor controller class`);
+    if (!controllerClass) throw new Error(`No editor controller class`);
     this.dataController = this.dom.spawnController(this.element, controllerClass);
     this.dataController.setup(data);
   }

@@ -21,6 +21,7 @@ function findServlet(method, path) {
   if (path.startsWith("/api/")) {
     switch (method + path) {
       case "GET/api/reslist": return rest.getReslist;
+      case "POST/api/launch": return rest.launch;
     }
   } else if (path.startsWith("/res/")) {
     return serve_static(method, "src/data", "/res");

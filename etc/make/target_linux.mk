@@ -19,6 +19,7 @@ linux_DATA_C:=$(patsubst src/%,$(linux_MIDDIR)/%.c,$(linux_DATA_SRC))
 $(linux_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(linux_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
 $(linux_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
+$(linux_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 
 linux_CFILES:=$(filter %.c,$(linux_SRCFILES) $(linux_DATA_C))
 linux_OFILES:=$(patsubst src/%,$(linux_MIDDIR)/%,$(addsuffix .o,$(basename $(linux_CFILES))))

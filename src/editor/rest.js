@@ -1,5 +1,6 @@
 const fs = require("fs").promises;
 const pathlib = require("path");
+const child_process = require("child_process");
 
 function recursiveReaddir(path, removePrefix, output) {
   return fs.readdir(path, { withFileTypes: true }).then((files) => {
@@ -27,6 +28,23 @@ function getReslist(rsp, req, path, query, body, url, cliparams) {
   });
 }
 
+function launch(rsp, req, path, query, body, url, cliparams) {
+  return new Promise((resolve, reject) => {
+    const process = child_process.exec("make run", (error, stdout, stderr) => {
+      if (error) {
+        rsp.statusCode = 500;
+        console.error(error);
+        rsp.end();
+      } else {
+        rsp.setHeader("Content-Type", "text/plain");
+        rsp.end(stdout + "\n" + stderr);
+      }
+      resolve();
+    });
+  });
+}
+
 module.exports = {
   getReslist,
+  launch,
 };
