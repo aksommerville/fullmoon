@@ -12,6 +12,7 @@ static uint8_t cursorp=0;
 static uint8_t cursorframe=0;
 static uint8_t cursortime=0;
 static uint8_t password[5];
+static uint8_t lastokaction=1;
 
 /* Begin.
  */
@@ -26,6 +27,10 @@ void fmn_pause_begin() {
  */
  
 void fmn_pause_end() {
+  if (lastokaction!=1+cursorp) {
+    fmn_hero_set_action(lastokaction);
+    cursorp=lastokaction-1;
+  }
 }
 
 /* Get selection as action.
@@ -42,11 +47,12 @@ static void fmn_pause_move(int8_t dx,int8_t dy) {
   if (dx<0) {
     if (cursorp) cursorp--;
     else cursorp=3;
-    fmn_hero_set_action(1+cursorp);
   } else if (dx>0) {
     if (cursorp<3) cursorp++;
     else cursorp=0;
-    fmn_hero_set_action(1+cursorp);
+  } else return;
+  if (fmn_hero_set_action(1+cursorp)) {
+    lastokaction=1+cursorp;
   }
 }
 

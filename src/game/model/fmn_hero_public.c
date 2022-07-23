@@ -63,13 +63,17 @@ static void fmn_hero_update_motion() {
     else if (fmn_hero.walkspeed>FMN_HERO_WALKSPEED_MAX) fmn_hero.walkspeed--;
   }
   
+  // Resolve collisions.
+  uint8_t solids=FMN_TILE_SOLID;
+  if (fmn_hero.button&&(fmn_hero.action==FMN_ACTION_BROOM)) ;
+  else solids|=FMN_TILE_HOLE;
   int16_t adjx=0,adjy=0;
   if (fmn_map_check_collision(&adjx,&adjy,
     fmn_hero.x+FMN_HERO_HITBOX_X,
     fmn_hero.y+FMN_HERO_HITBOX_Y,
     FMN_HERO_HITBOX_W,
     FMN_HERO_HITBOX_H,
-    FMN_TILE_SOLID|FMN_TILE_HOLE // TODO no HOLE when flying
+    solids
   )) {
     if (adjx||adjy) {
       fmn_hero.x+=adjx;
@@ -79,15 +83,6 @@ static void fmn_hero_update_motion() {
       fmn_hero.y=pvy;
     }
   }
-  
-  /* Clamp hard to map boundaries. XXX commenting out instead of deleting in case i change my mind, but i doubt that
-  int16_t mapwmm,maphmm;
-  fmn_map_get_size_mm(&mapwmm,&maphmm);
-  if (fmn_hero.x<0) fmn_hero.x=0;
-  else if (fmn_hero.x>mapwmm-FMN_MM_PER_TILE) fmn_hero.x=mapwmm-FMN_MM_PER_TILE;
-  if (fmn_hero.y<0) fmn_hero.y=0;
-  else if (fmn_hero.y>maphmm-FMN_MM_PER_TILE) fmn_hero.y=maphmm-FMN_MM_PER_TILE;
-  /**/
   
   /* Actuate footswitches etc, and scroll to neighbor screens.
    * For these purposes, our position is a single point, at the center of the body tile.
@@ -158,10 +153,20 @@ static void fmn_hero_begin_action() {
   }
 }
 
-static void fmn_hero_end_action() {
+// Nonzero if ended. Some are conditional eg you can't stop flying over a hole.
+static uint8_t fmn_hero_end_action() {
   switch (fmn_hero.action) {
+    case FMN_ACTION_BROOM: {
+        if (fmn_map_check_collision(0,0,
+          fmn_hero.x+FMN_HERO_HITBOX_X,
+          fmn_hero.y+FMN_HERO_HITBOX_Y,
+          FMN_HERO_HITBOX_W,
+          FMN_HERO_HITBOX_H,
+          FMN_TILE_HOLE
+        )) return 0;
+      } break;
     case FMN_ACTION_WAND: {
-        if (!fmn_hero.spellc) return; // empty, just let it slide. they know it's not a valid spell.
+        if (!fmn_hero.spellc) return 1; // empty, just let it slide. they know it's not a valid spell.
         if ((fmn_hero.spellc<=FMN_SPELL_LENGTH_LIMIT)&&fmn_game_cast_spell(fmn_hero.spell,fmn_hero.spellc)) {
         } else {
           fmn_hero.spellrepudiation=63;
@@ -171,6 +176,8 @@ static void fmn_hero_end_action() {
         fmn_hero_update_facedir();
       } break;
   }
+  fmn_hero.end_action_when_possible=0;
+  return 1;
 }
  
 static void fmn_hero_update_action() {
@@ -205,10 +212,13 @@ static void fmn_hero_update_action() {
   }
 }
 
-void fmn_hero_set_action(uint8_t action) {
-  if (action==fmn_hero.action) return;
-  if (fmn_hero.button) fmn_hero_end_action();
+uint8_t fmn_hero_set_action(uint8_t action) {
+  if (action==fmn_hero.action) return 1;
+  if (fmn_hero.button) {
+    if (!fmn_hero_end_action()) return 0;
+  }
   fmn_hero.action=action;
+  return 1;
 }
 
 /* Set inputs.
@@ -250,8 +260,11 @@ void fmn_hero_set_input(int8_t dx,int8_t dy,uint8_t button) {
     fmn_hero.button=1;
     fmn_hero_begin_action();
   } else if (!button&&fmn_hero.button) {
-    fmn_hero.button=0;
-    fmn_hero_end_action();
+    if (fmn_hero_end_action()) {
+      fmn_hero.button=0;
+    } else {
+      fmn_hero.end_action_when_possible=1;
+    }
   }
 }
 
@@ -287,7 +300,11 @@ void fmn_hero_update() {
     fmn_hero_update_motion();
   }
   if (fmn_hero.button) {
-    fmn_hero_update_action();
+    if (fmn_hero.end_action_when_possible&&fmn_hero_end_action()) {
+      fmn_hero.button=0;
+    } else {
+      fmn_hero_update_action();
+    }
   }
 }
 

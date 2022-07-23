@@ -20,6 +20,7 @@ struct fmn_hero {
   uint8_t spell[FMN_SPELL_LENGTH_LIMIT]; // FMN_DIR_(N,S,E,W)
   uint8_t spellc; // may exceed FMN_SPELL_LENGTH_LIMIT
   uint8_t spellrepudiation;
+  uint8_t end_action_when_possible; // nonzero if an 'end action' is pending, eg flying over a hole
 };
 
 void fmn_hero_reset();
@@ -28,6 +29,6 @@ void fmn_hero_update();
 void fmn_hero_render(struct fmn_image *fb);
 void fmn_hero_get_world_position(int16_t *xmm,int16_t *ymm);
 void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx);
-void fmn_hero_set_action(uint8_t action);
+uint8_t fmn_hero_set_action(uint8_t action); // => zero if rejected
 
 #endif
