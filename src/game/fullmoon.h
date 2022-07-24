@@ -12,7 +12,7 @@ void setup();
 void loop();
 
 /***************************************************************
- * Platform must implement (genioc,thumby)
+ * Platform must implement (genioc,thumby,macos)
  */
  
 void fmn_platform_init();

@@ -6,6 +6,22 @@ It also builds for Linux, to facilitate development.
 I do intend to extend that, and also build for WebAssembly, MacOS, and Windows.
 But not a high priority.
 
+## Setup
+
+Create `etc/config.mk` if it's not there (TODO: put a generic example in this repo).
+In there, you must define `FMN_TARGETS:=` with the names of targets you want to build for.
+See `etc/make/target_*.mk`.
+Most targets will want some additional config, location of toolchains etc.
+
+Making a new target? Best idea is to copy `etc/make/target_linux.mk`.
+It's stable and pretty generic.
+Define `{TARGET}_OPT_ENABLE` with the names of directories under `src/opt/` to include in the source.
+You must include one opt unit with a `main()`: `genioc`, `macos`, `thumby`.
+Or if you need to write your own `main()`, you can make a new opt unit for it.
+See `src/game/fullmoon.h` for a few other hooks you must implement there.
+
+Targets must individually declare the rules for generating data sources, but these will probably be identical everywhere.
+
 ## TODO
 
 - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
@@ -34,7 +50,11 @@ But not a high priority.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - [ ] PulseAudio driver. If we're still doing audio.
 - [ ] Build for other targets
-- - [ ] MacOS -- just drivers
+- - [ ] MacOS
+- - - [ ] Review deprecated WM functions: -Wno-deprecated-declarations
+- - - [ ] machid
+- - - [x] App icon, using Plunder Squad's for now
+- - - [ ] Can we drop OpenGL? It's deprecated, and really not necessary, if we can get a plain old window framebuffer. (see x11 or drmfb)
 - - [ ] Windows -- just drivers
 - - [ ] WebAssembly, highly desirable
 - - - [ ] Build wasm

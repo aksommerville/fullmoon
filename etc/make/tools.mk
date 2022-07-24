@@ -4,7 +4,7 @@
 TOOLS_MIDDIR:=mid/tool
 TOOLS_OUTDIR:=out/tool
 
-TOOLS_CC:=gcc -c -MMD -O3 -Isrc -Werror -Wimplicit
+TOOLS_CC:=gcc -c -MMD -O3 -Isrc -Werror -Wimplicit -Wno-parentheses
 TOOLS_LD:=gcc
 TOOLS_LDPOST:=-lz
 

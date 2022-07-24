@@ -36,7 +36,7 @@ static const struct video_driver_type *video_driver_typev[]={
 #if FMN_USE_drmgx
   &video_driver_type_drmgx,
 #endif
-#if FMN_USE_macwm
+#if FMN_USE_macos
   &video_driver_type_macwm,
 #endif
 #if FMN_USE_mswm
@@ -52,9 +52,11 @@ static const struct audio_driver_type *audio_driver_typev[]={
 #if FMN_USE_pulse
   &audio_driver_type_pulse,
 #endif
-#if FMN_USE_macaudio
+/*XXX didn't bother implementing this
+#if FMN_USE_macos
   &audio_driver_type_macaudio,
 #endif
+/**/
 #if FMN_USE_msaudio
   &audio_driver_type_msaudio,
 #endif
@@ -65,7 +67,7 @@ static const struct input_driver_type *input_driver_typev[]={
 #if FMN_USE_evdev
   &input_driver_type_evdev,
 #endif
-#if FMN_USE_machid
+#if FMN_USE_macos
   &input_driver_type_machid,
 #endif
 #if FMN_USE_mshid
