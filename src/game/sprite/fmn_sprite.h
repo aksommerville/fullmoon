@@ -16,7 +16,7 @@ void fmn_sprites_render(struct fmn_image *fb);
  * They are stored in a statically-allocated list, so there's a global limit on sprite count.
  **************************************************************/
  
-#define FMN_SPRITE_LIMIT 1024
+#define FMN_SPRITE_LIMIT 256
 #define FMN_SPRITE_BV_COUNT 8
 #define FMN_SPRITE_SV_COUNT 8
 #define FMN_SPRITE_PV_COUNT 8

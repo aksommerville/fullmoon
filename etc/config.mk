@@ -4,12 +4,17 @@
 
 # What hosts are we building for?
 # "linux" is fairly generic, should be the template for other PCs.
-FMN_TARGETS:=linux thumby web
+FMN_TARGETS:=linux thumby web pico
 
 thumby_PICO_SDK:=/home/andy/proj/thirdparty/pico-sdk
 thumby_ELF2UF2:=$(thumby_PICO_SDK)/build/elf2uf2/elf2uf2
 thumby_GCCPFX:=arm-none-eabi-
 thumby_MOUNTPOINT:=/media/andy/RPI-RP2
+
+pico_PICO_SDK:=/home/andy/proj/thirdparty/pico-sdk
+pico_ELF2UF2:=$(thumby_PICO_SDK)/build/elf2uf2/elf2uf2
+pico_GCCPFX:=arm-none-eabi-
+pico_MOUNTPOINT:=/media/andy/RPI-RP2
 
 run:linux-run
 

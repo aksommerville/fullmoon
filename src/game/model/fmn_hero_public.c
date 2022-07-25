@@ -95,8 +95,6 @@ static void fmn_hero_update_motion() {
     y=fmn_hero.y+(FMN_MM_PER_TILE>>1);
   }
   
-  //TODO proximity sensors
-  
   /* Check treadle POIs if we change cells.
    */
   int16_t cellx=x/FMN_MM_PER_TILE; if (x<0) cellx--;
@@ -428,6 +426,20 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
   }
 }
 
+/* XXX TEMP show me the outer bounds or hitbox so i can tweak
+ */
+ 
+static uint8_t counter=0;
+ 
+static void xrender(struct fmn_image *dst) {
+  counter++;
+  if (counter&1) return;//strobe
+
+  int16_t outerx,outery,outerw,outerh;
+  fmn_hero_get_outer_bounds(&outerx,&outery,&outerw,&outerh);
+
+}
+
 /* Render.
  */
  
@@ -437,11 +449,12 @@ void fmn_hero_render(struct fmn_image *dst) {
   
   // Some actions change the rendering completely.
   if (fmn_hero.button) switch (fmn_hero.action) {
-    case FMN_ACTION_BROOM: fmn_hero_render_broom(dst,dstx,dsty); return;
-    case FMN_ACTION_WAND: fmn_hero_render_wand(dst,dstx,dsty); return;
+    case FMN_ACTION_BROOM: fmn_hero_render_broom(dst,dstx,dsty); xrender(dst); return;
+    case FMN_ACTION_WAND: fmn_hero_render_wand(dst,dstx,dsty); xrender(dst); return;
   }
   if (fmn_hero.spellrepudiation) {
     fmn_hero_render_wand(dst,dstx,dsty);
+    xrender(dst);
     return;
   }
   
@@ -467,6 +480,8 @@ void fmn_hero_render(struct fmn_image *dst) {
   if (fmn_hero.facedir!=FMN_DIR_N) {
     fmn_hero_render_arm(dst,dstx,dsty);
   }
+  
+  xrender(dst);
 }
 
 /* Get position.

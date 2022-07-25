@@ -3,8 +3,6 @@
 #include "game/model/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
 
-extern const struct fmn_sprdef bat;
-
 /* Misc globals.
  */
  
@@ -29,13 +27,6 @@ void fmn_sprites_load() {
   
   int16_t herox,heroy;
   struct fmn_sprite *hero=fmn_sprite_new(&fmn_sprtype_heroproxy,0,herox,heroy,0,0,0);
-  
-  //XXX temp make some bats to test performance etc
-  // 1000 is no problem, even on the Thumby!
-  uint16_t batc=100;
-  for (;batc-->0;) {
-    struct fmn_sprite *batsprite=fmn_sprite_new(0,&bat,0,0,0,0,0);
-  }
 }
 
 /* Update.
