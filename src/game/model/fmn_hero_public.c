@@ -477,6 +477,19 @@ void fmn_hero_get_world_position(int16_t *xmm,int16_t *ymm) {
   *ymm=fmn_hero.y;
 }
 
+void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm) {
+  *xmm=fmn_hero.x+(FMN_MM_PER_TILE>>1);
+  *ymm=fmn_hero.y+(FMN_MM_PER_TILE>>1);
+}
+
+void fmn_hero_get_outer_bounds(int16_t *xmm,int16_t *ymm,int16_t *w,int16_t *h) {
+  //TODO look around, how far outside the margin do we ever go?
+  *xmm=fmn_hero.x;
+  *ymm=fmn_hero.y;
+  *w=FMN_MM_PER_TILE;
+  *h=FMN_MM_PER_TILE;
+}
+
 void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx) {
   uint8_t scrollx,scrolly;
   fmn_map_get_scroll(&scrollx,&scrolly);

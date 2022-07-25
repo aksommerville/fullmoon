@@ -1,0 +1,4 @@
+type bat
+image mainsprites
+tileid 0x81
+xform 0

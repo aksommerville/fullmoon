@@ -147,6 +147,7 @@ $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
 $(thumby_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(thumby_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
+$(thumby_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
 
 thumby_CFILES:=$(filter %.c,$(thumby_SRCFILES)) $(thumby_DATA_C)
 thumby_OFILES:= \

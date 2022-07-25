@@ -3,7 +3,7 @@
 #include "game/fmn_play.h"
 #include "fmn_hero.h"
 #include "fmn_proximity.h"
-#include "fmn_sprites.h"
+#include "game/sprite/fmn_sprite.h"
 #include "fmn_map.h"
 
 /* Globals.
@@ -143,6 +143,11 @@ void fmn_map_get_init_position(uint8_t *x,uint8_t *y) {
 void fmn_map_get_scroll(uint8_t *x,uint8_t *y) {
   *x=fmn_vx;
   *y=fmn_vy;
+}
+
+void fmn_map_get_scroll_mm(int16_t *xmm,int16_t *ymm) {
+  *xmm=fmn_vx*FMN_MM_PER_TILE;
+  *ymm=fmn_vy*FMN_MM_PER_TILE;
 }
 
 void fmn_map_get_size(uint8_t *w,uint8_t *h) {
@@ -418,4 +423,45 @@ struct fmn_map *fmn_map_find_edge_door_down(const struct fmn_map *from,int16_t v
   struct fmn_map_edge_door_context ctx={from,vxtiles,0,dxmm,dymm};
   fmn_map_find_edge_door(&ctx,from->w-1,from->h-1,fmn_map_match_edge_door_down);
   return ctx.to;
+}
+
+/* Search POI by location. Always returns a valid position in map->poiv, possibly the very end.
+ * If any POI exist at this exact location, we return the first match (lowest index).
+ */
+ 
+static uint16_t fmn_map_poi_search(const struct fmn_map *map,uint8_t x,uint8_t y) {
+  uint16_t lo=0,hi=map->poic;
+  while (lo<hi) {
+    uint16_t ck=(lo+hi)>>1;
+    const struct fmn_map_poi *poi=map->poiv+ck;
+         if (y<poi->y) hi=ck;
+    else if (y>poi->y) lo=ck+1;
+    else if (x<poi->x) hi=ck;
+    else if (x>poi->x) lo=ck+1;
+    else {
+      while ((ck>lo)&&(poi[-1].x==x)&&(poi[-1].y==y)) { ck--; poi--; }
+      return ck;
+    }
+  }
+  return lo;
+}
+
+/* Iterate POI.
+ */
+ 
+int8_t fmn_map_for_each_poi(
+  uint8_t x,uint8_t y,uint8_t w,uint8_t h,
+  int8_t (*cb)(const struct fmn_map_poi *poi,void *userdata),
+  void *userdata
+) {
+  if (!fmn_map) return 0;
+  uint16_t p=fmn_map_poi_search(fmn_map,x,y);
+  const struct fmn_map_poi *poi=fmn_map->poiv+p;
+  for (;(p<fmn_map->poic)&&(poi->y<y+h);poi++,p++) {
+    if (poi->x<x) continue;
+    if (poi->x>=x+w) continue;
+    int8_t err=cb(poi,userdata);
+    if (err) return err;
+  }
+  return 0;
 }

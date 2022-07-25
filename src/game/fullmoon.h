@@ -198,11 +198,9 @@ struct fmn_map {
 #define FMN_TILE_SOLID      0x01
 #define FMN_TILE_HOLE       0x02
 
-/* Sprites.
- ************************************************************/
- 
-struct fmn_sprdef {
-  uint8_t dummy;//TODO
-};
+struct fmn_sprtype;
+struct fmn_sprdef;
+struct fmn_sprite;
+struct fmn_sprgrp;
 
 #endif

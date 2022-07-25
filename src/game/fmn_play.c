@@ -4,7 +4,7 @@
 #include "game/model/fmn_hero.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"
-#include "game/model/fmn_sprites.h"
+#include "game/sprite/fmn_sprite.h"
 #include <string.h>
 
 /* Globals.
@@ -133,9 +133,8 @@ void fmn_play_render(struct fmn_image *fb) {
   memcpy(fb->v,bgbits.v,sizeof(bgbits_storage));
   
   // Sprites.
-  fmn_sprites_render_low();
-  fmn_hero_render(fb);
-  fmn_sprites_render_high();
+  fmn_sprites_render(fb);
+  //fmn_hero_render(fb); sprites should take care of this
   
   // Rain.
   if (raintime) {

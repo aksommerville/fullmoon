@@ -31,6 +31,7 @@ uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y);
 
 void fmn_map_get_init_position(uint8_t *x,uint8_t *y);
 void fmn_map_get_scroll(uint8_t *x,uint8_t *y);
+void fmn_map_get_scroll_mm(int16_t *xmm,int16_t *ymm);
 void fmn_map_get_size(uint8_t *w,uint8_t *h);
 void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
 
@@ -55,5 +56,11 @@ struct fmn_map *fmn_map_find_edge_door_left(const struct fmn_map *from,int16_t v
 struct fmn_map *fmn_map_find_edge_door_right(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm);
 struct fmn_map *fmn_map_find_edge_door_up(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm);
 struct fmn_map *fmn_map_find_edge_door_down(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm);
+
+int8_t fmn_map_for_each_poi(
+  uint8_t x,uint8_t y,uint8_t w,uint8_t h,
+  int8_t (*cb)(const struct fmn_map_poi *poi,void *userdata),
+  void *userdata
+);
 
 #endif

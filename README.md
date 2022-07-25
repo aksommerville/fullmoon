@@ -44,7 +44,6 @@ Targets must individually declare the rules for generating data sources, but the
 - - [ ] environmental puzzles
 - - [ ] password/state
 - - [ ] Flags to enable items -- you don't start with all 4.
-- - [ ] Key flags, display at pause.
 - - [ ] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
