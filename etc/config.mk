@@ -4,8 +4,7 @@
 
 # What hosts are we building for?
 # "linux" is fairly generic, should be the template for other PCs.
-#FMN_TARGETS:=linux thumby web pico
-FMN_TARGETS:=tiny
+FMN_TARGETS:=linux thumby pico tiny web
 
 thumby_PICO_SDK:=/home/andy/proj/thirdparty/pico-sdk
 thumby_ELF2UF2:=$(thumby_PICO_SDK)/build/elf2uf2/elf2uf2
@@ -25,6 +24,8 @@ tiny_PKGROOT:=$(wildcard ~/.arduino15/packages)
 tiny_LIBSROOT:=$(wildcard ~/Arduino/libraries)
 tiny_MENU_BIN:=etc/ArcadeMenu.ino.bin
 tiny_BUILDER:=$(tiny_IDEROOT)/arduino-builder
+
+web_WASI_SDK:=/home/andy/proj/thirdparty/wasi-sdk/wasi-sdk-16.0
 
 run:linux-run
 

@@ -14,7 +14,7 @@ tiny_BIN_HOSTED:=out/tiny/$(PROJECT_NAME)-hosted.bin
 tiny_PACKAGE:=out/$(PROJECT_NAME).zip
 
 tiny_OPT_ENABLE:=tiny
-tiny_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(tiny_OPT_ENABLE),$(SRCFILES),mid/tiny))
+tiny_SRCFILES:=$(filter-out src/test/% src/www/%,$(call OPTFILTER,$(tiny_OPT_ENABLE),$(SRCFILES),mid/tiny))
 
 tiny_DATA_SRC:=$(filter src/data/%,$(tiny_SRCFILES))
 tiny_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(tiny_DATA_SRC))

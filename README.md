@@ -55,9 +55,9 @@ Targets must individually declare the rules for generating data sources, but the
 - - - [x] App icon, using Plunder Squad's for now
 - - - [ ] Can we drop OpenGL? It's deprecated, and really not necessary, if we can get a plain old window framebuffer. (see x11 or drmfb)
 - - [ ] Windows -- just drivers
-- - [ ] WebAssembly, highly desirable
-- - - [ ] Build wasm
-- - - [ ] Wrapper web app
+- - [x] WebAssembly, highly desirable
+- - - [x] Build wasm
+- - - [x] Wrapper web app -- copied from ivand. works but definitely not ideal
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [x] Tiny
 - - [x] Pico
