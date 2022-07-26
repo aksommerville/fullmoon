@@ -1,9 +1,9 @@
-#include "fullmoon.h"
-#include "fmn_data.h"
-#include "fmn_title.h"
-#include "fmn_play.h"
-#include "fmn_pause.h"
-#include "fmn_password.h"
+#include "game/fullmoon.h"
+#include "game/fmn_data.h"
+#include "game/fmn_title.h"
+#include "game/fmn_play.h"
+#include "game/fmn_pause.h"
+#include "game/fmn_password.h"
 #include <string.h>
 
 /* Globals.

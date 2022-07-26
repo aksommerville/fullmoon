@@ -3,7 +3,7 @@
 #include "game/fmn_data.h"
 #include "game/fmn_play.h"
 #include "game/fmn_pause.h"
-#include "fmn_hero.h"
+#include "game/model/fmn_hero.h"
 
 #define FMN_HERO_WALKSPEED_MAX 6
 #define FMN_HERO_FLYSPEED_MAX  9

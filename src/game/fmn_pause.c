@@ -1,6 +1,6 @@
-#include "fullmoon.h"
-#include "fmn_pause.h"
-#include "fmn_data.h"
+#include "game/fullmoon.h"
+#include "game/fmn_pause.h"
+#include "game/fmn_data.h"
 #include "game/model/fmn_hero.h"
 #include <string.h>
 

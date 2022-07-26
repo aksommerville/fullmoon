@@ -1,10 +1,10 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
 #include "game/fmn_play.h"
-#include "fmn_hero.h"
-#include "fmn_proximity.h"
+#include "game/model/fmn_hero.h"
+#include "game/model/fmn_proximity.h"
 #include "game/sprite/fmn_sprite.h"
-#include "fmn_map.h"
+#include "game/model/fmn_map.h"
 
 /* Globals.
  */

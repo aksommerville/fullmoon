@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "fmn_proximity.h"
+#include "game/model/fmn_proximity.h"
 
 // Limit for triggers active at one time. (this is per-screen, not per-map)
 #define FMN_PRX_TRIGGER_LIMIT 32

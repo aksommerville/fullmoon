@@ -1,6 +1,6 @@
-#include "fullmoon.h"
-#include "fmn_title.h"
-#include "fmn_data.h"
+#include "game/fullmoon.h"
+#include "game/fmn_title.h"
+#include "game/fmn_data.h"
 
 #define FMN_TITLE_SELECTION_NEW 0
 #define FMN_TITLE_SELECTION_PASSWORD 1

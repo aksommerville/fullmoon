@@ -59,7 +59,7 @@ Targets must individually declare the rules for generating data sources, but the
 - - - [ ] Build wasm
 - - - [ ] Wrapper web app
 - - [ ] TTY video, and.... something? for input. just for fun
-- - [ ] Tiny?
+- - [x] Tiny
 - - [x] Pico
 - - - [x] Runs at about 2/3 speed due to vsync. What can we do to work around that? (we have plenty of cpu to spare) ...skip every third vsync
 - - [ ] 68k Mac?

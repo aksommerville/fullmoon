@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "fmn_sprite.h"
+#include "game/sprite/fmn_sprite.h"
 #include <string.h>
 
 /* Globals.

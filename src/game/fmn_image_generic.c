@@ -1,4 +1,4 @@
-#include "fullmoon.h"
+#include "game/fullmoon.h"
 
 /* Format properties.
  */

@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+  extern "C" {
+#endif
+
 /***************************************************************
  * Game must implement.
  */
@@ -208,5 +212,9 @@ struct fmn_sprtype;
 struct fmn_sprdef;
 struct fmn_sprite;
 struct fmn_sprgrp;
+
+#ifdef __cplusplus
+  }
+#endif
 
 #endif

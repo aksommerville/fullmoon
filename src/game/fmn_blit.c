@@ -1,4 +1,4 @@
-#include "fullmoon.h"
+#include "game/fullmoon.h"
 #include <string.h>
 
 /* Blit one thumby image onto another without xform.
