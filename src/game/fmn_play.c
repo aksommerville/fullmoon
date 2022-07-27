@@ -133,12 +133,13 @@ static const int16_t rainseed[9]={
 };
 
 static void render_rain(struct fmn_image *fb) {
+  // TODO This visibly slows down the Pico. I bet we can do better.
   int16_t dstx=0;
   uint8_t xi=FMN_SCREENW_TILES;
   for (;xi-->0;dstx+=FMN_TILESIZE) {
     int16_t dsty=rainseed[xi]-(raintime%FMN_TILESIZE);
     for (;dsty<FMN_FBH;dsty+=FMN_TILESIZE) {
-      fmn_blit_tile(fb,dstx,dsty,&mainsprites,0x08,0);
+      fmn_blit_tile(fb,dstx,dsty,&mainsprites,0x27,0);
     }
   }
 }

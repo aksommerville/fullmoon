@@ -394,7 +394,7 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
             case FMN_DIR_W: dstx-=6*FMN_GFXSCALE; dsty-=1*FMN_GFXSCALE; break;
             case FMN_DIR_E: dstx+=6*FMN_GFXSCALE; dsty-=1*FMN_GFXSCALE; xform=FMN_XFORM_XREV; break;
             case FMN_DIR_N: dsty-=6*FMN_GFXSCALE; xform=FMN_XFORM_SWAP|FMN_XFORM_YREV; break;
-            case FMN_DIR_S: dstx-=2*FMN_GFXSCALE; dsty+=5*FMN_GFXSCALE; xform=FMN_XFORM_SWAP|FMN_XFORM_XREV; break;
+            case FMN_DIR_S: dstx-=2*FMN_GFXSCALE; dsty+=4*FMN_GFXSCALE; xform=FMN_XFORM_SWAP|FMN_XFORM_XREV; break;
           }
           fmn_blit_tile(dst,dstx,dsty,&mainsprites,tileid,xform);
         } return;
@@ -422,8 +422,10 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
   
   // General arm. North and west it's on the right. South and east on the left.
   if ((fmn_hero.facedir==FMN_DIR_N)||(fmn_hero.facedir==FMN_DIR_W)) {
-    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,0x13+fmn_hero.action,FMN_XFORM_XREV);
-    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,0x03+fmn_hero.action,FMN_XFORM_XREV);
+    uint8_t tileid=0x03+fmn_hero.action;
+    if (fmn_hero.facedir==FMN_DIR_N) tileid+=4;
+    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,tileid+0x10,FMN_XFORM_XREV);
+    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,tileid,FMN_XFORM_XREV);
   } else {
     fmn_blit_tile(dst,dstx-6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,0x13+fmn_hero.action,0);
     fmn_blit_tile(dst,dstx-6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,0x03+fmn_hero.action,0);
@@ -447,8 +449,13 @@ void fmn_hero_render(struct fmn_image *dst) {
     return;
   }
   
-  // Arm before body+head, if facing north.
-  if (fmn_hero.facedir==FMN_DIR_N) {
+  // Arm before body+head, if facing north or using feather.
+  uint8_t didarm=0;
+  if (
+    (fmn_hero.facedir==FMN_DIR_N)||
+    ((fmn_hero.action==FMN_ACTION_FEATHER)&&fmn_hero.button&&(fmn_hero.facedir!=FMN_DIR_S))
+  ) {
+    didarm=1;
     fmn_hero_render_arm(dst,dstx,dsty);
   }
   
@@ -465,8 +472,8 @@ void fmn_hero_render(struct fmn_image *dst) {
   }
   fmn_blit_tile(dst,dstx,dsty-6*FMN_GFXSCALE,&mainsprites,0x00+tilex,xform);
   
-  // Arm after body+head, for all but north.
-  if (fmn_hero.facedir!=FMN_DIR_N) {
+  // Arm after body+head, if we didn't already draw it.
+  if (!didarm) {
     fmn_hero_render_arm(dst,dstx,dsty);
   }
   
