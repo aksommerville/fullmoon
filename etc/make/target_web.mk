@@ -5,7 +5,7 @@ web_OUTDIR:=out/web
 
 web_OPT_ENABLE:=web
 
-web_CCOPT:=-nostdlib -c -MMD -Isrc -Wno-comment -Wno-parentheses -Wno-constant-conversion
+web_CCOPT:=-nostdlib -c -MMD -Isrc -Wno-comment -Wno-parentheses -Wno-constant-conversion -DFMN_IMAGE_SET_$(web_IMAGE_SET)=1
 web_LDOPT:=-nostdlib -Xlinker --no-entry -Xlinker --import-undefined -Xlinker --export-all
 web_CC:=$(web_WASI_SDK)/bin/clang $(web_CCOPT)
 web_LD:=$(web_WASI_SDK)/bin/clang $(web_LDOPT)
@@ -15,6 +15,7 @@ web_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(web_OPT_ENABLE),$(SRCFI
 
 web_DATA_SRC:=$(filter src/data/%,$(web_SRCFILES))
 web_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(web_DATA_SRC))
+web_DATA_SRC:=$(filter-out %.png,$(web_DATA_SRC)) $(filter %-$(web_IMAGE_SET).png,$(web_DATA_SRC))
 web_DATA_C:=$(patsubst src/%,$(web_MIDDIR)/%.c,$(web_DATA_SRC))
 $(web_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(web_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<

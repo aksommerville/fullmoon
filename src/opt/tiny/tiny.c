@@ -410,7 +410,14 @@ void fmn_platform_init() {
 /* Update.
  */
  
+static uint8_t throttlecounter=0;
+ 
 void fmn_platform_update() {
+  throttlecounter++;
+  if (throttlecounter>=3) {
+    throttlecounter=0;
+    delay(15);
+  }
 }
 
 uint16_t fmn_platform_read_input() {
@@ -427,12 +434,12 @@ uint16_t fmn_platform_read_input() {
 /* Send framebuffer.
  */
  
-static uint8_t outfb[96*64];
+static uint8_t outfb[96*64]={0};
 
 void fmn_platform_send_framebuffer(const void *fb) {
   startData();
   
-  // Convert from Thumby to Tiny. TODO Would be much better to select framebuffer format at build time, and not do this.
+  /* Convert from Thumby to Tiny. TODO Would be much better to select framebuffer format at build time, and not do this.
   memset(outfb,0,sizeof(outfb));
   uint8_t *dstrow=outfb+((64>>1)-(40>>1))*96+((96>>1)-(72>>1));
   const uint8_t *srcrow=fb;
@@ -452,6 +459,17 @@ void fmn_platform_send_framebuffer(const void *fb) {
       srcmask<<=1;
     }
   }
+  /**/
+  
+  /* We are receiving a framebuffer in the correct format, but smaller than the Tiny's screen.
+   * Rowwise memcpy into one of the correct size.
+   */
+  uint8_t *dstrow=outfb+((64>>1)-(FMN_FBH>>1))*96+((96>>1)-(FMN_FBW>>1));
+  const uint8_t *srcrow=fb;
+  uint8_t cpc=FMN_FBW;
+  uint8_t yi=FMN_FBH;
+  for (;yi-->0;dstrow+=96,srcrow+=FMN_FBW) memcpy(dstrow,srcrow,cpc);
+  /**/
   
   const uint8_t *FB=(const uint8_t*)outfb;
   for (int j=96*64;j-->0;FB++) {

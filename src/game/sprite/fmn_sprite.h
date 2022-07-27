@@ -20,11 +20,17 @@ void fmn_sprites_render(struct fmn_image *fb);
 #define FMN_SPRITE_BV_COUNT 8
 #define FMN_SPRITE_SV_COUNT 8
 #define FMN_SPRITE_PV_COUNT 8
+
+#define FMN_SPRITE_FLAG_SOLID     0x0001 /* hero can't walk thru */
+
+#define FMN_FOR_EACH_SPRITE_FLAG \
+  _(SOLID)
  
 struct fmn_sprite {
   const struct fmn_sprtype *type;
   int16_t x,y,w,h; // mm relative to map. Must contain both visual and physical bounds.
   int8_t layer; // for render sorting
+  uint16_t flags;
 // (type->render) may choose to ignore these, but most will use:
   const struct fmn_image *image;
   uint8_t tileid;
@@ -96,7 +102,8 @@ struct fmn_sprdef {
   const struct fmn_image *image;
   uint8_t tileid;
   uint8_t xform;
-  //TODO properties eg "solid", "pushable", "hazard"
+  uint16_t flags;
+  int8_t layer;
 };
 
 #endif

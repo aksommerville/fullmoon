@@ -28,6 +28,8 @@ struct fmn_sprite *fmn_sprite_new(
     sprite->image=def->image;
     sprite->tileid=def->tileid;
     sprite->xform=def->xform;
+    sprite->flags=def->flags;
+    sprite->layer=def->layer;
   }
   
   if (type->init&&(type->init(sprite,def)<0)) {
@@ -44,8 +46,8 @@ struct fmn_sprite *fmn_sprite_new(
 void fmn_sprite_render_default(struct fmn_image *dst,int16_t xscroll,int16_t yscroll,struct fmn_sprite *sprite) {
   if (!sprite||!sprite->image) return;
   fmn_blit_tile(dst,
-    (sprite->x+(sprite->w>>1)-xscroll)/FMN_MM_PER_PIXEL-(FMN_TILESIZE>>1),
-    (sprite->y+(sprite->h>>1)-yscroll)/FMN_MM_PER_PIXEL-(FMN_TILESIZE>>1),
+    ((sprite->x+(sprite->w>>1)-xscroll)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1),
+    ((sprite->y+(sprite->h>>1)-yscroll)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1),
     sprite->image,sprite->tileid,sprite->xform
   );
 }

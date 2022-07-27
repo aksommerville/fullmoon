@@ -1,8 +1,8 @@
 #include "spritecvt.h"
+#include "game/sprite/fmn_sprite.h"
 #include "tool/common/serial.h"
 
 /* Generic integer field.
- * Well that's odd, we only needed it once: tileid
  */
  
 static int spritecvt_parse_int(
@@ -84,6 +84,45 @@ static int spritecvt_parse_xform(struct spritecvt *spritecvt,const char *src,int
   return 0;
 }
 
+/* flags: Permit a few strings that only exist here.
+ */
+ 
+static int spritecvt_parse_flags(struct spritecvt *spritecvt,const char *src,int srcc,int lineno) {
+  // Plain integers 0..0xffff are just fine.
+  if (int_eval(&spritecvt->flags,src,srcc)>=2) {
+    if ((spritecvt->flags<0)||(spritecvt->flags>0xffff)) {
+      fprintf(stderr,"%s:%d: xform must be in 0..65535, found %d\n",spritecvt->srcpath,lineno,spritecvt->flags);
+      return -2;
+    }
+    return 0;
+  }
+  // Also accept space-delimited flag names.
+  spritecvt->flags=0;
+  int srcp=0;
+  while (srcp<srcc) {
+    if ((unsigned char)src[srcp]<=0x20) { srcp++; continue; }
+    const char *token=src+srcp;
+    int tokenc=0;
+    while ((srcp<srcc)&&((unsigned char)src[srcp]>0x20)) { srcp++; tokenc++; }
+    
+    #define _(tag) if ((tokenc==sizeof(#tag)-1)&&!memcmp(token,#tag,tokenc)) { \
+      spritecvt->flags|=FMN_SPRITE_FLAG_##tag; \
+      continue; \
+    }
+    FMN_FOR_EACH_SPRITE_FLAG
+    #undef _
+    
+    else {
+      fprintf(stderr,
+        "%s:%d: Unexpected sprite flag '%.*s'. See FMN_SPRITE_FLAG_* in src/game/sprite/fmn_sprite.h\n",
+        spritecvt->srcpath,lineno,tokenc,token
+      );
+      return -2;
+    }
+  }
+  return 0;
+}
+
 /* Evaluate and apply one line.
  */
  
@@ -107,6 +146,12 @@ static int spritecvt_parse_line(struct spritecvt *spritecvt,const char *src,int 
   }
   if ((kc==5)&&!memcmp(k,"xform",5)) {
     return spritecvt_parse_xform(spritecvt,src+srcp,srcc-srcp,lineno);
+  }
+  if ((kc==5)&&!memcmp(k,"flags",5)) {
+    return spritecvt_parse_flags(spritecvt,src+srcp,srcc-srcp,lineno);
+  }
+  if ((kc==5)&&!memcmp(k,"layer",5)) {
+    return spritecvt_parse_int(&spritecvt->layer,spritecvt,src+srcp,srcc-srcp,lineno,"layer",-128,127);
   }
   
   fprintf(stderr,"%s:%d: Unknown sprite key '%.*s'\n",spritecvt->srcpath,lineno,kc,k);

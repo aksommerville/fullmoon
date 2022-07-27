@@ -10,12 +10,12 @@
 /* Globals.
  */
  
-static uint8_t bgbits_storage[(FMN_FBW*FMN_FBH)>>3];
+static uint8_t bgbits_storage[FMN_FB_SIZE_BYTES];
 static struct fmn_image bgbits={
   .v=bgbits_storage,
   .w=FMN_FBW,
   .h=FMN_FBH,
-  .stride=FMN_FBW,
+  .stride=FMN_FB_STRIDE,
   .fmt=FMN_FBFMT,
   .writeable=1,
 };
@@ -108,6 +108,7 @@ static void fmn_render_bgbits() {
       for (;xi-->0;dstx+=FMN_TILESIZE,srcp++) {
         int16_t srcx=((*srcp)&0x0f)*FMN_TILESIZE;
         int16_t srcy=((*srcp)>>4)*FMN_TILESIZE;
+        //TODO not bgtiles. Get image from map
         fmn_blit(&bgbits,dstx,dsty,&bgtiles,srcx,srcy,FMN_TILESIZE,FMN_TILESIZE,0);
       }
     }
@@ -116,10 +117,34 @@ static void fmn_render_bgbits() {
   }
 }
 
-/* Render.
+/* Render rain.
  */
  
-static const uint8_t rainseed[]={ 0,5,2,1,3,7,4,6, 3,6,2,1,5,4,7,0, 5,2,4,3,0,6,7,1, };
+static const int16_t rainseed[9]={
+  -3*FMN_GFXSCALE,
+  -7*FMN_GFXSCALE,
+  -1*FMN_GFXSCALE,
+  -5*FMN_GFXSCALE,
+  -7*FMN_GFXSCALE,
+  -4*FMN_GFXSCALE,
+  -6*FMN_GFXSCALE,
+  -2*FMN_GFXSCALE,
+  -0*FMN_GFXSCALE,
+};
+
+static void render_rain(struct fmn_image *fb) {
+  int16_t dstx=0;
+  uint8_t xi=FMN_SCREENW_TILES;
+  for (;xi-->0;dstx+=FMN_TILESIZE) {
+    int16_t dsty=rainseed[xi]-(raintime%FMN_TILESIZE);
+    for (;dsty<FMN_FBH;dsty+=FMN_TILESIZE) {
+      fmn_blit_tile(fb,dstx,dsty,&mainsprites,0x08,0);
+    }
+  }
+}
+
+/* Render.
+ */
  
 void fmn_play_render(struct fmn_image *fb) {
 
@@ -134,25 +159,9 @@ void fmn_play_render(struct fmn_image *fb) {
   
   // Sprites.
   fmn_sprites_render(fb);
-  //fmn_hero_render(fb); sprites should take care of this
   
   // Rain.
-  if (raintime) {
-    uint8_t *row=fb->v;
-    uint8_t yi=5; for (;yi-->0;row+=fb->stride) {
-      uint8_t seedp=0;
-      uint8_t *p=row;
-      uint8_t xi=fb->w>>1;
-      for (;xi-->0;p+=2) {
-        uint8_t mask=0x80>>((rainseed[seedp]+(raintime/2))&7);
-        if (mask==0x80) mask|=1; else mask|=mask<<1;
-        if (xi&1) (*p)&=~mask;
-        else (*p)|=mask;
-        seedp++;
-        if (seedp>=sizeof(rainseed)) seedp=0;
-      }
-    }
-  }
+  if (raintime) render_rain(fb);
   
   //TODO additional overlay?
 }

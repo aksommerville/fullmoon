@@ -373,7 +373,7 @@ void akpico_send_framebuffer(const void *src) {
   }
   /**/
   
-  /* Zoom 3x. Looks great!* */
+  /* Zoom 3x. Looks great!* *
   color_t *dstrow=_fb+((240>>1)-(120>>1))*240+((240>>1)-(216>>1));
   int cpc=72*3*sizeof(color_t);
   const uint8_t *srcrow=src;
@@ -395,6 +395,16 @@ void akpico_send_framebuffer(const void *src) {
       srcmask<<=1;
     }
   }
+  /**/
+  
+  /* Or better yet, now we should have a framebuffer in the native format.
+   * It's not the correct size, and it's never going to be, but we can do a simple simple rowwise memcpy.
+   */
+  color_t *dstrow=_fb+((240>>1)-(FMN_FBH>>1))*240+((240>>1)-(FMN_FBW>>1));
+  uint16_t cpc=FMN_FBW<<1;
+  const uint16_t *srcrow=src;
+  uint8_t yi=FMN_FBH;
+  for (;yi-->0;dstrow+=240,srcrow+=FMN_FBW) memcpy(dstrow,srcrow,cpc);
   /**/
   
   _wait_vsync();

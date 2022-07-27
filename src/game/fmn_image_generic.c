@@ -7,6 +7,10 @@ uint32_t fmn_imgfmt_get_alpha_mask(uint8_t imgfmt) {
   switch (imgfmt) {
     case FMN_IMGFMT_thumby: return 0;
     case FMN_IMGFMT_ya11: return 1;
+    case FMN_IMGFMT_bgr565be: return 0xffff;
+    case FMN_IMGFMT_rgba8888: return 0x000000ff;
+    case FMN_IMGFMT_argb4444be: return 0xf000;
+    case FMN_IMGFMT_bgr332: return 0xff;
   }
   return 0;
 }
@@ -141,6 +145,116 @@ static void fmn_image_iterator_init_ya11(
   else if (dymajor>0) iter->major.next=fmn_next_down_ya11;
 }
 
+/* bgr565be iterator.
+ * Also argb4444be, they're the same thing to us.
+ */
+ 
+static uint32_t fmn_pxrd_bgr565be(const uint8_t *p,uint8_t q) {
+  return (p[0]<<8)|p[1];
+}
+
+static void fmn_pxwr_bgr565be(uint8_t *p,uint8_t q,uint32_t src) {
+  p[0]=src>>8;
+  p[1]=src;
+}
+
+static void fmn_next_left_bgr565be(struct fmn_image_iterator_1d *iter) { iter->p-=2; }
+static void fmn_next_right_bgr565be(struct fmn_image_iterator_1d *iter) { iter->p+=2; }
+static void fmn_next_up_bgr565be(struct fmn_image_iterator_1d *iter) { iter->p-=iter->stride; }
+static void fmn_next_down_bgr565be(struct fmn_image_iterator_1d *iter) { iter->p+=iter->stride; }
+ 
+static void fmn_image_iterator_init_bgr565be(
+  struct fmn_image_iterator *iter,
+  int16_t x,int16_t y,
+  int16_t dxminor,int16_t dyminor,
+  int16_t dxmajor,int16_t dymajor
+) {
+  iter->major.p=iter->image->v+y*iter->image->stride+(x<<1);
+  iter->read=fmn_pxrd_bgr565be;
+  iter->write=fmn_pxwr_bgr565be;
+       if (dxminor<0) iter->minor.next=fmn_next_left_bgr565be;
+  else if (dxminor>0) iter->minor.next=fmn_next_right_bgr565be;
+  else if (dyminor<0) iter->minor.next=fmn_next_up_bgr565be;
+  else if (dyminor>0) iter->minor.next=fmn_next_down_bgr565be;
+       if (dxmajor<0) iter->major.next=fmn_next_left_bgr565be;
+  else if (dxmajor>0) iter->major.next=fmn_next_right_bgr565be;
+  else if (dymajor<0) iter->major.next=fmn_next_up_bgr565be;
+  else if (dymajor>0) iter->major.next=fmn_next_down_bgr565be;
+}
+
+/* rgba8888 iterator.
+ */
+ 
+static uint32_t fmn_pxrd_rgba8888(const uint8_t *p,uint8_t q) {
+  return (p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3];
+}
+
+static void fmn_pxwr_rgba8888(uint8_t *p,uint8_t q,uint32_t src) {
+  p[0]=src>>24;
+  p[1]=src>>16;
+  p[2]=src>>8;
+  p[3]=src;
+}
+
+static void fmn_next_left_rgba8888(struct fmn_image_iterator_1d *iter) { iter->p-=4; }
+static void fmn_next_right_rgba8888(struct fmn_image_iterator_1d *iter) { iter->p+=4; }
+static void fmn_next_up_rgba8888(struct fmn_image_iterator_1d *iter) { iter->p-=iter->stride; }
+static void fmn_next_down_rgba8888(struct fmn_image_iterator_1d *iter) { iter->p+=iter->stride; }
+ 
+static void fmn_image_iterator_init_rgba8888(
+  struct fmn_image_iterator *iter,
+  int16_t x,int16_t y,
+  int16_t dxminor,int16_t dyminor,
+  int16_t dxmajor,int16_t dymajor
+) {
+  iter->major.p=iter->image->v+y*iter->image->stride+(x<<2);
+  iter->read=fmn_pxrd_rgba8888;
+  iter->write=fmn_pxwr_rgba8888;
+       if (dxminor<0) iter->minor.next=fmn_next_left_rgba8888;
+  else if (dxminor>0) iter->minor.next=fmn_next_right_rgba8888;
+  else if (dyminor<0) iter->minor.next=fmn_next_up_rgba8888;
+  else if (dyminor>0) iter->minor.next=fmn_next_down_rgba8888;
+       if (dxmajor<0) iter->major.next=fmn_next_left_rgba8888;
+  else if (dxmajor>0) iter->major.next=fmn_next_right_rgba8888;
+  else if (dymajor<0) iter->major.next=fmn_next_up_rgba8888;
+  else if (dymajor>0) iter->major.next=fmn_next_down_rgba8888;
+}
+
+/* bgr332 iterator.
+ */
+ 
+static uint32_t fmn_pxrd_bgr332(const uint8_t *p,uint8_t q) {
+  return *p;
+}
+
+static void fmn_pxwr_bgr332(uint8_t *p,uint8_t q,uint32_t src) {
+  *p=src;
+}
+
+static void fmn_next_left_bgr332(struct fmn_image_iterator_1d *iter) { iter->p-=1; }
+static void fmn_next_right_bgr332(struct fmn_image_iterator_1d *iter) { iter->p+=1; }
+static void fmn_next_up_bgr332(struct fmn_image_iterator_1d *iter) { iter->p-=iter->stride; }
+static void fmn_next_down_bgr332(struct fmn_image_iterator_1d *iter) { iter->p+=iter->stride; }
+ 
+static void fmn_image_iterator_init_bgr332(
+  struct fmn_image_iterator *iter,
+  int16_t x,int16_t y,
+  int16_t dxminor,int16_t dyminor,
+  int16_t dxmajor,int16_t dymajor
+) {
+  iter->major.p=iter->image->v+y*iter->image->stride+x;
+  iter->read=fmn_pxrd_bgr332;
+  iter->write=fmn_pxwr_bgr332;
+       if (dxminor<0) iter->minor.next=fmn_next_left_bgr332;
+  else if (dxminor>0) iter->minor.next=fmn_next_right_bgr332;
+  else if (dyminor<0) iter->minor.next=fmn_next_up_bgr332;
+  else if (dyminor>0) iter->minor.next=fmn_next_down_bgr332;
+       if (dxmajor<0) iter->major.next=fmn_next_left_bgr332;
+  else if (dxmajor>0) iter->major.next=fmn_next_right_bgr332;
+  else if (dymajor<0) iter->major.next=fmn_next_up_bgr332;
+  else if (dymajor>0) iter->major.next=fmn_next_down_bgr332;
+}
+
 /* Initialize iterator with digested transform.
  */
  
@@ -172,6 +286,12 @@ static void fmn_image_iterator_init(
      */
     case FMN_IMGFMT_thumby: fmn_image_iterator_init_thumby(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
     case FMN_IMGFMT_ya11: fmn_image_iterator_init_ya11(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
+    case FMN_IMGFMT_bgr565be: fmn_image_iterator_init_bgr565be(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
+    case FMN_IMGFMT_argb4444be: fmn_image_iterator_init_bgr565be/*sic*/(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
+    case FMN_IMGFMT_rgba8888: fmn_image_iterator_init_rgba8888(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
+    //case FMN_IMGFMT_y1: fmn_image_iterator_init_y1(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break; // XXX i doubt we'll use this
+    case FMN_IMGFMT_y8: fmn_image_iterator_init_bgr332/*sic*/(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
+    case FMN_IMGFMT_bgr332: fmn_image_iterator_init_bgr332(iter,x,y,dxminor,dyminor,dxmajor,dymajor); break;
   }
   iter->minor.p=iter->major.p;
   iter->minor.q=iter->major.q;
@@ -246,6 +366,8 @@ uint8_t fmn_image_iterator_next(struct fmn_image_iterator *iter) {
 /* Pixel conversion.
  * This is an anything-to-anything deal, so the count of functions we need is the square of the count of formats.
  * If we start adding lots of formats (why would we?), consider splitting these with a generic intermediate format.
+ * ...update: welp i *did* add lots of formats. For now I'm relying on hope that we'll generally only blit same-to-same formats.
+ * thumby/ya11 are a special case.
  */
  
 static uint32_t fmn_pixcvt_identity(uint32_t src) {

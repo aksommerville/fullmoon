@@ -19,6 +19,8 @@ struct imgcvt {
   int srcc,dstc;
   struct png_image png;
   struct fmn_image image;
+  int progmem;
+  int format;
 };
 
 #define IMGCVT ((struct imgcvt*)cli)

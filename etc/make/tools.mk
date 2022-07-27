@@ -10,7 +10,7 @@ TOOLS_LDPOST:=-lz
 
 TOOLS:=$(filter-out common,$(notdir $(wildcard src/tool/*)))
 
-TOOLS_SRCFILES:=$(filter src/tool/%,$(SRCFILES))
+TOOLS_SRCFILES:=$(filter src/tool/%,$(SRCFILES)) src/game/fmn_image_generic.c
 TOOLS_CFILES:=$(filter %.c,$(TOOLS_SRCFILES))
 TOOLS_OFILES:=$(patsubst src/%.c,$(TOOLS_MIDDIR)/%.o,$(TOOLS_CFILES))
 -include $(TOOLS_OFILES:.o=.d)
@@ -20,7 +20,7 @@ $(TOOLS_MIDDIR)/%.o:src/%.c;$(PRECMD) $(TOOLS_CC) -o$@ $<
 TOOLS_EXES:=
 
 define TOOL_RULES # $1=name
-  TOOL_$1_OFILES:=$(filter $(TOOLS_MIDDIR)/tool/common/% $(TOOLS_MIDDIR)/tool/$1/%,$(TOOLS_OFILES))
+  TOOL_$1_OFILES:=$(filter $(TOOLS_MIDDIR)/tool/common/% $(TOOLS_MIDDIR)/tool/$1/% $(TOOLS_MIDDIR)/game/%,$(TOOLS_OFILES))
   TOOL_$1:=$(TOOLS_OUTDIR)/$1
   TOOLS_EXES+=$$(TOOL_$1)
   $$(TOOL_$1):$$(TOOL_$1_OFILES);$$(PRECMD) $(TOOLS_LD) -o$$@ $$^ $(TOOLS_LDPOST)

@@ -107,6 +107,10 @@ static int mapcvt_arg_option(struct cli *cli,const char *k,int kc,const char *v,
     case 'o': return mapcvt_set_dstpath(MAPCVT,v,vc);
     case 'i': return mapcvt_set_srcpath(MAPCVT,v,vc);
   }
+  if ((kc==7)&&!memcmp(k,"progmem",7)) {
+    MAPCVT->progmem=1;
+    return 0;
+  }
   return -1;
 }
 
@@ -114,6 +118,7 @@ static void mapcvt_help_extra(struct cli *cli) {
   fprintf(stderr,
     "  -oPATH             Output path.\n"
     "  -iPATH             Input path.\n"
+    "  --progmem          Insert PROGMEM declaration, for Arduino.\n"
     "\n"
   );
 }

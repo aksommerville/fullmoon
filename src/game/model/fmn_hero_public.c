@@ -4,11 +4,13 @@
 #include "game/fmn_play.h"
 #include "game/fmn_pause.h"
 #include "game/model/fmn_hero.h"
+#include "game/sprite/fmn_sprite.h"
 
 #define FMN_HERO_WALKSPEED_MAX 6
 #define FMN_HERO_FLYSPEED_MAX  9
 
 // Hitbox in mm relative to canonical position (near left shoulder).
+// Beware these must match src/game/sprite/type/fmn_sprite_heroproxy.c
 #define FMN_HERO_HITBOX_X FMN_MM_PER_PIXEL
 #define FMN_HERO_HITBOX_Y FMN_MM_PER_PIXEL
 #define FMN_HERO_HITBOX_W (FMN_MM_PER_TILE-(FMN_MM_PER_PIXEL*2))
@@ -73,7 +75,8 @@ static void fmn_hero_update_motion() {
     fmn_hero.y+FMN_HERO_HITBOX_Y,
     FMN_HERO_HITBOX_W,
     FMN_HERO_HITBOX_H,
-    solids
+    solids,
+    FMN_SPRITE_FLAG_SOLID
   )) {
     if (adjx||adjy) {
       fmn_hero.x+=adjx;
@@ -185,7 +188,8 @@ static uint8_t fmn_hero_end_action() {
           fmn_hero.y+FMN_HERO_HITBOX_Y,
           FMN_HERO_HITBOX_W,
           FMN_HERO_HITBOX_H,
-          FMN_TILE_HOLE
+          FMN_TILE_HOLE,
+          FMN_SPRITE_FLAG_SOLID
         )) return 0;
       } break;
     case FMN_ACTION_WAND: {
@@ -336,19 +340,19 @@ void fmn_hero_update() {
  
 static void fmn_hero_render_broom(struct fmn_image *dst,int16_t dstx,int16_t dsty) {
   uint8_t xform=0;
-  int16_t bodydsty=dsty-8;
-  int16_t shadowsrcy=16;
+  int16_t bodydsty=dsty-8*FMN_GFXSCALE;
+  int16_t shadowsrcy=16*FMN_GFXSCALE;
   if (fmn_hero.facedir==FMN_DIR_W) {
     xform=FMN_XFORM_XREV;
   }
   if (fmn_hero.actionframe) {
-    bodydsty++;
-    shadowsrcy=24;
+    bodydsty+=FMN_GFXSCALE;
+    shadowsrcy=24*FMN_GFXSCALE;
   }
   if (fmn_hero.actionparam&1) {
-    fmn_blit(dst,dstx-6,dsty+4,&mainsprites,40,shadowsrcy,16,8,0);
+    fmn_blit(dst,dstx-6*FMN_GFXSCALE,dsty+4*FMN_GFXSCALE,&mainsprites,40*FMN_GFXSCALE,shadowsrcy,FMN_NSCOORD(16,8),0);
   }
-  fmn_blit(dst,dstx-6,bodydsty,&mainsprites,24,16,16,16,xform);
+  fmn_blit(dst,dstx-6*FMN_GFXSCALE,bodydsty,&mainsprites,FMN_NSCOORD(24,16),FMN_NSCOORD(16,16),xform);
 }
 
 /* Render using magic wand.
@@ -359,15 +363,15 @@ static void fmn_hero_render_wand(struct fmn_image *dst,int16_t dstx,int16_t dsty
   uint8_t xform=0;
   if (fmn_hero.spellrepudiation) {
     frame=4+((fmn_hero.spellrepudiation&8)?1:0);
-    dstx-=4; dsty-=6;
+    dstx-=4*FMN_GFXSCALE; dsty-=6*FMN_GFXSCALE;
   } else switch (fmn_hero.actionparam) {
-    case 0: dstx-=4; dsty-=6; break;
-    case FMN_DIR_W: frame=1; dstx-=8; dsty-=6; break;
-    case FMN_DIR_E: frame=1; dsty-=6; xform=FMN_XFORM_XREV; break;
-    case FMN_DIR_S: frame=2; dstx-=4; dsty-=6; break;
-    case FMN_DIR_N: frame=3; dstx-=4; dsty-=8; break;
+    case 0: dstx-=4*FMN_GFXSCALE; dsty-=6*FMN_GFXSCALE; break;
+    case FMN_DIR_W: frame=1; dstx-=8*FMN_GFXSCALE; dsty-=6*FMN_GFXSCALE; break;
+    case FMN_DIR_E: frame=1; dsty-=6*FMN_GFXSCALE; xform=FMN_XFORM_XREV; break;
+    case FMN_DIR_S: frame=2; dstx-=4*FMN_GFXSCALE; dsty-=6*FMN_GFXSCALE; break;
+    case FMN_DIR_N: frame=3; dstx-=4*FMN_GFXSCALE; dsty-=8*FMN_GFXSCALE; break;
   }
-  fmn_blit(dst,dstx,dsty,&mainsprites,frame*16,48,16,16,xform);
+  fmn_blit(dst,dstx,dsty,&mainsprites,FMN_NSCOORD(frame*16,48),FMN_NSCOORD(16,16),xform);
 }
 
 /* Render arm.
@@ -387,10 +391,10 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
             case 3: tileid+=0x30; break;
           }
           switch (fmn_hero.facedir) {
-            case FMN_DIR_W: dstx-=6; dsty-=1; break;
-            case FMN_DIR_E: dstx+=6; dsty-=1; xform=FMN_XFORM_XREV; break;
-            case FMN_DIR_N: dsty-=6; xform=FMN_XFORM_SWAP|FMN_XFORM_YREV; break;
-            case FMN_DIR_S: dstx-=2; dsty+=5; xform=FMN_XFORM_SWAP|FMN_XFORM_XREV; break;
+            case FMN_DIR_W: dstx-=6*FMN_GFXSCALE; dsty-=1*FMN_GFXSCALE; break;
+            case FMN_DIR_E: dstx+=6*FMN_GFXSCALE; dsty-=1*FMN_GFXSCALE; xform=FMN_XFORM_XREV; break;
+            case FMN_DIR_N: dsty-=6*FMN_GFXSCALE; xform=FMN_XFORM_SWAP|FMN_XFORM_YREV; break;
+            case FMN_DIR_S: dstx-=2*FMN_GFXSCALE; dsty+=5*FMN_GFXSCALE; xform=FMN_XFORM_SWAP|FMN_XFORM_XREV; break;
           }
           fmn_blit_tile(dst,dstx,dsty,&mainsprites,tileid,xform);
         } return;
@@ -399,17 +403,17 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
           if (fmn_hero.actionframe==0) { // deploying
             int16_t d=(fmn_hero.actionanimtime*FMN_TILESIZE)/20;
             switch (fmn_hero.facedir) {
-              case FMN_DIR_W: fmn_blit(dst,dstx-2-d,dsty,&mainsprites,64,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
-              case FMN_DIR_E: fmn_blit(dst,dstx-2+d,dsty,&mainsprites,64,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_YREV); break;
-              case FMN_DIR_S: fmn_blit(dst,dstx-2,dsty-6+d,&mainsprites,64,32,8,16,FMN_XFORM_YREV); break;
-              case FMN_DIR_N: fmn_blit(dst,dstx+6-(d>>1),dsty-10-d,&mainsprites,72,32,8,16,0); break;
+              case FMN_DIR_W: fmn_blit(dst,dstx-2*FMN_GFXSCALE-d,dsty,&mainsprites,FMN_NSCOORD(64,32),FMN_NSCOORD(8,16),FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
+              case FMN_DIR_E: fmn_blit(dst,dstx-2*FMN_GFXSCALE+d,dsty,&mainsprites,FMN_NSCOORD(64,32),FMN_NSCOORD(8,16),FMN_XFORM_SWAP|FMN_XFORM_YREV); break;
+              case FMN_DIR_S: fmn_blit(dst,dstx-2*FMN_GFXSCALE,dsty-6*FMN_GFXSCALE+d,&mainsprites,FMN_NSCOORD(64,32),FMN_NSCOORD(8,16),FMN_XFORM_YREV); break;
+              case FMN_DIR_N: fmn_blit(dst,dstx+6*FMN_GFXSCALE-(d>>1),dsty-10*FMN_GFXSCALE-d,&mainsprites,FMN_NSCOORD(72,32),FMN_NSCOORD(8,16),0); break;
             }
           } else { // stable
             switch (fmn_hero.facedir) {
-              case FMN_DIR_W: fmn_blit(dst,dstx-4,dsty-4,&mainsprites,80,32,8,16,0); break;
-              case FMN_DIR_E: fmn_blit(dst,dstx+4,dsty-4,&mainsprites,80,32,8,16,FMN_XFORM_XREV); break;
-              case FMN_DIR_S: fmn_blit(dst,dstx-5,dsty+4,&mainsprites,80,32,8,16,FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
-              case FMN_DIR_N: fmn_blit(dst,dstx-4,dsty-10,&mainsprites,80,32,8,16,FMN_XFORM_SWAP); break;
+              case FMN_DIR_W: fmn_blit(dst,dstx-4*FMN_GFXSCALE,dsty-4*FMN_GFXSCALE,&mainsprites,FMN_NSCOORD(80,32),FMN_NSCOORD(8,16),0); break;
+              case FMN_DIR_E: fmn_blit(dst,dstx+4*FMN_GFXSCALE,dsty-4*FMN_GFXSCALE,&mainsprites,FMN_NSCOORD(80,32),FMN_NSCOORD(8,16),FMN_XFORM_XREV); break;
+              case FMN_DIR_S: fmn_blit(dst,dstx-5*FMN_GFXSCALE,dsty+4*FMN_GFXSCALE,&mainsprites,FMN_NSCOORD(80,32),FMN_NSCOORD(8,16),FMN_XFORM_SWAP|FMN_XFORM_XREV); break;
+              case FMN_DIR_N: fmn_blit(dst,dstx-4*FMN_GFXSCALE,dsty-10*FMN_GFXSCALE,&mainsprites,FMN_NSCOORD(80,32),FMN_NSCOORD(8,16),FMN_XFORM_SWAP); break;
             }
           }
         } return;
@@ -418,26 +422,12 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
   
   // General arm. North and west it's on the right. South and east on the left.
   if ((fmn_hero.facedir==FMN_DIR_N)||(fmn_hero.facedir==FMN_DIR_W)) {
-    fmn_blit_tile(dst,dstx+6,dsty-1,&mainsprites,0x13+fmn_hero.action,FMN_XFORM_XREV);
-    fmn_blit_tile(dst,dstx+6,dsty-FMN_TILESIZE-1,&mainsprites,0x03+fmn_hero.action,FMN_XFORM_XREV);
+    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,0x13+fmn_hero.action,FMN_XFORM_XREV);
+    fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,0x03+fmn_hero.action,FMN_XFORM_XREV);
   } else {
-    fmn_blit_tile(dst,dstx-6,dsty-1,&mainsprites,0x13+fmn_hero.action,0);
-    fmn_blit_tile(dst,dstx-6,dsty-FMN_TILESIZE-1,&mainsprites,0x03+fmn_hero.action,0);
+    fmn_blit_tile(dst,dstx-6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,0x13+fmn_hero.action,0);
+    fmn_blit_tile(dst,dstx-6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,0x03+fmn_hero.action,0);
   }
-}
-
-/* XXX TEMP show me the outer bounds or hitbox so i can tweak
- */
- 
-static uint8_t counter=0;
- 
-static void xrender(struct fmn_image *dst) {
-  counter++;
-  if (counter&1) return;//strobe
-
-  int16_t outerx,outery,outerw,outerh;
-  fmn_hero_get_outer_bounds(&outerx,&outery,&outerw,&outerh);
-
 }
 
 /* Render.
@@ -449,12 +439,11 @@ void fmn_hero_render(struct fmn_image *dst) {
   
   // Some actions change the rendering completely.
   if (fmn_hero.button) switch (fmn_hero.action) {
-    case FMN_ACTION_BROOM: fmn_hero_render_broom(dst,dstx,dsty); xrender(dst); return;
-    case FMN_ACTION_WAND: fmn_hero_render_wand(dst,dstx,dsty); xrender(dst); return;
+    case FMN_ACTION_BROOM: fmn_hero_render_broom(dst,dstx,dsty); return;
+    case FMN_ACTION_WAND: fmn_hero_render_wand(dst,dstx,dsty); return;
   }
   if (fmn_hero.spellrepudiation) {
     fmn_hero_render_wand(dst,dstx,dsty);
-    xrender(dst);
     return;
   }
   
@@ -474,14 +463,13 @@ void fmn_hero_render(struct fmn_image *dst) {
     case 1: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x20+tilex,xform); break;
     case 3: fmn_blit_tile(dst,dstx,dsty,&mainsprites,0x30+tilex,xform); break;
   }
-  fmn_blit_tile(dst,dstx,dsty-6,&mainsprites,0x00+tilex,xform);
+  fmn_blit_tile(dst,dstx,dsty-6*FMN_GFXSCALE,&mainsprites,0x00+tilex,xform);
   
   // Arm after body+head, for all but north.
   if (fmn_hero.facedir!=FMN_DIR_N) {
     fmn_hero_render_arm(dst,dstx,dsty);
   }
   
-  xrender(dst);
 }
 
 /* Get position.
@@ -498,18 +486,19 @@ void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm) {
 }
 
 void fmn_hero_get_outer_bounds(int16_t *xmm,int16_t *ymm,int16_t *w,int16_t *h) {
-  //TODO look around, how far outside the margin do we ever go?
-  *xmm=fmn_hero.x;
-  *ymm=fmn_hero.y;
-  *w=FMN_MM_PER_TILE;
-  *h=FMN_MM_PER_TILE;
+  // This is not a perfect fit. There's some waste most of the time, and the umbrella escapes it while deploying.
+  // I think it's close enough.
+  *xmm=fmn_hero.x-FMN_MM_PER_TILE;
+  *ymm=fmn_hero.y-FMN_MM_PER_TILE-(FMN_MM_PER_TILE>>1);
+  *w=FMN_MM_PER_TILE*3;
+  *h=FMN_MM_PER_TILE*3;
 }
 
 void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx) {
   uint8_t scrollx,scrolly;
   fmn_map_get_scroll(&scrollx,&scrolly);
-  *xpx=(fmn_hero.x-(scrollx*FMN_MM_PER_TILE))/FMN_MM_PER_PIXEL;
-  *ypx=(fmn_hero.y-(scrolly*FMN_MM_PER_TILE))/FMN_MM_PER_PIXEL;
+  *xpx=((fmn_hero.x-(scrollx*FMN_MM_PER_TILE))*FMN_TILESIZE)/FMN_MM_PER_TILE;
+  *ypx=((fmn_hero.y-(scrolly*FMN_MM_PER_TILE))*FMN_TILESIZE)/FMN_MM_PER_TILE;
 }
 
 /* Force position eg on a map change.

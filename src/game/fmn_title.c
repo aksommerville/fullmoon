@@ -76,9 +76,9 @@ void fmn_title_update() {
  
 void fmn_title_render(struct fmn_image *fb) {
   if (!fbdirty) return;
-  fmn_blit(fb,0,0,&titlesplash,0,0,fb->w,fb->h,0);
-  fmn_blit(fb,23,18,&uibits,0,selection*12,48,12,0);
-  fmn_blit(fb,44,13,&uibits,48+arrowframe*7,0,7,5,0);
-  fmn_blit(fb,44,30,&uibits,48+arrowframe*7,5,7,5,0);
+  fmn_blit(fb,FMN_NSCOORD( 0, 0),&titlesplash,FMN_NSCOORD(0,0),fb->w,fb->h,0);
+  fmn_blit(fb,FMN_NSCOORD(23,18),&uibits,FMN_NSCOORD(0,selection*12),FMN_NSCOORD(48,12),0);
+  fmn_blit(fb,FMN_NSCOORD(44,13),&uibits,FMN_NSCOORD(48+arrowframe*7,0),FMN_NSCOORD(7,5),0);
+  fmn_blit(fb,FMN_NSCOORD(44,30),&uibits,FMN_NSCOORD(48+arrowframe*7,5),FMN_NSCOORD(7,5),0);
   fbdirty=0;
 }

@@ -26,6 +26,11 @@ tiny_MENU_BIN:=etc/ArcadeMenu.ino.bin
 tiny_BUILDER:=$(tiny_IDEROOT)/arduino-builder
 
 web_WASI_SDK:=/home/andy/proj/thirdparty/wasi-sdk/wasi-sdk-16.0
+web_IMAGE_SET:=24c
+
+linux_IMAGE_SET:=24c
+
+macos_IMAGE_SET:=24c
 
 run:linux-run
 

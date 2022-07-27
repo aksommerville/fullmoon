@@ -21,6 +21,8 @@ struct spritecvt {
   char *tname,*imagename;
   int tnamec,imagenamec;
   int tileid,xform;
+  int flags;
+  int layer;
 };
 
 #define MAPCVT ((struct spritecvt*)cli)

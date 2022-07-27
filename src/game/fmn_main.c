@@ -9,12 +9,12 @@
 /* Globals.
  */
 
-static uint8_t fb_storage[(FMN_FBW*FMN_FBH)>>3]={0};
+static uint8_t fb_storage[FMN_FB_SIZE_BYTES]={0};
 static struct fmn_image fb={
   .v=fb_storage,
   .w=FMN_FBW,
   .h=FMN_FBH,
-  .stride=FMN_FBW,
+  .stride=FMN_FB_STRIDE,
   .fmt=FMN_FBFMT,
   .writeable=1,
 };

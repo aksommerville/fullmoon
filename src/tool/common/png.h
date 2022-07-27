@@ -34,5 +34,10 @@ int png_image_iterate_ya88(
   int (*cb)(uint8_t y,uint8_t a,void *userdata),
   void *userdata
 );
+int png_image_iterate_rgba8888(
+  const struct png_image *image,
+  int (*cb)(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userdata),
+  void *userdata
+);
 
 #endif

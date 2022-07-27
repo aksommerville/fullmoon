@@ -70,6 +70,8 @@ static int spritecvt_encode_c_to_encoder(struct encoder *dst,struct spritecvt *s
   }
   if (encode_fmt(dst,"  .tileid=%d,\n",spritecvt->tileid)<0) return -1;
   if (encode_fmt(dst,"  .xform=%d,\n",spritecvt->xform)<0) return -1;
+  if (encode_fmt(dst,"  .flags=%d,\n",spritecvt->flags)<0) return -1;
+  if (encode_fmt(dst,"  .layer=%d,\n",spritecvt->layer)<0) return -1;
   if (encode_fmt(dst,"};\n")<0) return -1;
   
   return 0;

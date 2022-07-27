@@ -7,7 +7,7 @@ macos_OPT_ENABLE:=intf macos
 
 macos_CCWARN:=-Werror -Wimplicit -Wno-parentheses -Wno-comment -Wno-deprecated-declarations
 macos_CCINC:=-I/usr/include/libdrm
-macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE))
+macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE)) -DFMN_IMAGE_SET_$(macos_IMAGE_SET)=1
 macos_CC:=gcc -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_OBJC:=gcc -xobjective-c -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_LD:=gcc
@@ -16,6 +16,7 @@ macos_LDPOST:=-framework Cocoa -framework OpenGL -framework IOKit
 macos_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(macos_OPT_ENABLE),$(SRCFILES),$(macos_MIDDIR)))
 
 macos_DATA_SRC:=$(filter src/data/%,$(macos_SRCFILES))
+macos_DATA_SRC:=$(filter-out %.png,$(macos_DATA_SRC)) $(filter %-$(macos_IMAGE_SET).png,$(macos_DATA_SRC))
 macos_DATA_C:=$(patsubst src/%,$(macos_MIDDIR)/%.c,$(macos_DATA_SRC))
 $(macos_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
 $(macos_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<

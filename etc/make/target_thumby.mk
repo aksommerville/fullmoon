@@ -6,6 +6,9 @@
 thumby_MIDDIR:=mid/thumby
 thumby_OUTDIR:=out/thumby
 
+# not negotiable
+thumby_IMAGE_SET:=8b
+
 # Generate this list by creating a dummy CMake project, follow the pico-sdk instructions.
 # Copy its list, then: sed -En 's/^\t@echo.*pico-sdk\/(.*)\.obj"$/  \1.c \\/p' etc/make/target_thumby.mk
 # You'll also get pico/version.h at that step, copy it to src/opt/thumby/pico/version.h. (and config_autogen.h)
@@ -128,7 +131,7 @@ thumby_OPT_ENABLE:=thumby
 
 thumby_CCWARN:=-Werror -Wimplicit
 thumby_CCINC:=$(addprefix -I,$(thumby_EXTHDIRS)) -Isrc -Isrc/opt/thumby
-thumby_CCDEF:=-DNDEBUG $(patsubst %,-DFMN_USE_%=1,$(thumby_OPT_ENABLE))
+thumby_CCDEF:=-DNDEBUG $(patsubst %,-DFMN_USE_%=1,$(thumby_OPT_ENABLE)) -DFMN_IMAGE_SET_$(thumby_IMAGE_SET)=1
 thumby_CCOPT:=-c -MMD -O3 -mcpu=cortex-m0plus -mthumb
 thumby_CC:=$(thumby_GCCPFX)gcc $(thumby_CCOPT) -I$(thumby_MIDDIR) $(thumby_CCWARN) $(thumby_CCINC) $(thumby_CCDEF)
 thumby_AS:=$(thumby_GCCPFX)gcc -xassembler-with-cpp $(thumby_CCOPT) -I$(thumby_MIDDIR) $(thumby_CCWARN) $(thumby_CCINC) $(thumby_CCDEF)
@@ -142,6 +145,7 @@ thumby_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(thumby_OPT_ENABLE),$
 
 thumby_DATA_SRC:=$(filter src/data/%,$(thumby_SRCFILES))
 thumby_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(thumby_DATA_SRC))
+thumby_DATA_SRC:=$(filter-out %.png,$(thumby_DATA_SRC)) $(filter %-$(thumby_IMAGE_SET).png,$(thumby_DATA_SRC))
 thumby_DATA_C:=$(patsubst src/%,$(thumby_MIDDIR)/%.c,$(thumby_DATA_SRC))
 $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(thumby_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<

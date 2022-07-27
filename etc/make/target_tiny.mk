@@ -3,6 +3,8 @@
 
 tiny_PROJECT_NAME:=fullmoon
 
+tiny_IMAGE_SET:=8c
+
 tiny_TMPDIR_SOLO:=mid/tiny/build-solo
 tiny_TMPDIR_HOSTED:=mid/tiny/build-hosted
 tiny_CACHEDIR_SOLO:=mid/tiny/cache-solo
@@ -18,10 +20,11 @@ tiny_SRCFILES:=$(filter-out src/test/% src/www/%,$(call OPTFILTER,$(tiny_OPT_ENA
 
 tiny_DATA_SRC:=$(filter src/data/%,$(tiny_SRCFILES))
 tiny_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(tiny_DATA_SRC))
+tiny_DATA_SRC:=$(filter-out %.png,$(tiny_DATA_SRC)) $(filter %-$(tiny_IMAGE_SET).png,$(tiny_DATA_SRC))
 tiny_DATA_C:=$(patsubst src/%,mid/tiny/%.c,$(tiny_DATA_SRC))
 mid/tiny/%.c:src/%;$(PRECMD) cp $< $@
-mid/tiny/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
-mid/tiny/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
+mid/tiny/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --progmem --format=bgr332
+mid/tiny/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$< --progmem
 mid/tiny/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 mid/tiny/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
 

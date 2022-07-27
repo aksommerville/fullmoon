@@ -44,11 +44,62 @@ uint16_t fmn_platform_read_input();
 #define FMN_IMGFMT_rgba8888   4
 #define FMN_IMGFMT_y1         5 /* Ordinary big-endian y1. */
 #define FMN_IMGFMT_y8         6
+#define FMN_IMGFMT_bgr332     7
+#define FMN_IMGFMT_argb4444be 8 /* Picosystem */
 
-// Not negotiable.
-#define FMN_FBW 72
-#define FMN_FBH 40
-#define FMN_FBFMT FMN_IMGFMT_thumby
+#define FMN_FOR_EACH_IMGFMT \
+  _(thumby) \
+  _(ya11) \
+  _(bgr565be) \
+  _(rgba8888) \
+  _(y1) \
+  _(y8) \
+  _(bgr332) \
+  _(argb4444be)
+
+// Image set must be declared by make.
+// Since we use arduino-builder for Tiny, it's hard to set C flags, so Tiny is the default: 8c
+#if FMN_IMAGE_SET_24c
+  #define FMN_FBW (72*3)
+  #define FMN_FBH (40*3)
+  #define FMN_TILESIZE 24
+  #define FMN_MM_PER_PIXEL 3 /* not exact! TODO will that be a problem? 24 is not a factor of 64 ...it's a problem, avoid using MM_PER_PIXEL */
+  #define FMN_NSCOORD(x,y) (x)*3,(y)*3 /* normalized screen coordinates, for places where we assume it's 72x40, ie everywhere */
+  #define FMN_GFXSCALE 3 /* ...or more generally */
+  #if FMN_FRAMEBUFFER_bgr565be
+    #define FMN_FBFMT FMN_IMGFMT_bgr565be
+    #define FMN_FB_STRIDE (FMN_FBW*2)
+    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
+  #elif FMN_FRAMEBUFFER_argb4444be
+    #define FMN_FBFMT FMN_IMGFMT_argb4444be
+    #define FMN_FB_STRIDE (FMN_FBW*2)
+    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
+  #else /* rgba8888 */
+    #define FMN_FBFMT FMN_IMGFMT_rgba8888
+    #define FMN_FB_STRIDE (FMN_FBW*4)
+    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*4)
+  #endif
+#elif FMN_IMAGE_SET_8b
+  #define FMN_FBW 72
+  #define FMN_FBH 40
+  #define FMN_FBFMT FMN_IMGFMT_thumby
+  #define FMN_FB_STRIDE FMN_FBW
+  #define FMN_FB_SIZE_BYTES ((FMN_FBW*FMN_FBH)>>3)
+  #define FMN_TILESIZE 8
+  #define FMN_MM_PER_PIXEL 8
+  #define FMN_NSCOORD(x,y) (x),(y)
+  #define FMN_GFXSCALE 1
+#else
+  #define FMN_FBW 72
+  #define FMN_FBH 40
+  #define FMN_FBFMT FMN_IMGFMT_bgr332
+  #define FMN_FB_STRIDE FMN_FBW
+  #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH)
+  #define FMN_TILESIZE 8
+  #define FMN_MM_PER_PIXEL 8
+  #define FMN_NSCOORD(x,y) (x),(y)
+  #define FMN_GFXSCALE 1
+#endif
 
 #define FMN_XFORM_XREV 1
 #define FMN_XFORM_YREV 2
@@ -139,11 +190,9 @@ uint32_t fmn_password_decode(uint32_t display);
 // (FMN_SCREENW_TILES*FMN_TILESIZE==FMN_FBW) and (FMN_SCREENH_TILES*FMN_TILESIZE==FMN_FBH)
 // (FMN_MM_PER_PIXEL*FMN_TILESIZE==FMN_MM_PER_TILE)
 // (FMN_MM_PER_TILE*255<0x8000)
-#define FMN_TILESIZE 8
 #define FMN_SCREENW_TILES 9
 #define FMN_SCREENH_TILES 5
 #define FMN_MM_PER_TILE 64 /* <128, and power of two probably a good idea */
-#define FMN_MM_PER_PIXEL 8
 #define FMN_SCREENW_MM (FMN_SCREENW_TILES*FMN_MM_PER_TILE)
 #define FMN_SCREENH_MM (FMN_SCREENH_TILES*FMN_MM_PER_TILE)
 

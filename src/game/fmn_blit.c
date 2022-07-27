@@ -349,3 +349,25 @@ void fmn_blit(
     }
   }
 }
+
+/* Fill rect.
+ */
+
+void fmn_image_fill_rect(
+  struct fmn_image *dst,
+  int16_t x,int16_t y,int16_t w,int16_t h,
+  uint32_t pixel
+) {
+  if (!dst||!dst->writeable) return;
+  if (x<0) { w+=x; x=0; }
+  if (y<0) { h+=y; y=0; }
+  if (x>dst->w-w) w=dst->w-x;
+  if (y>dst->h-h) h=dst->h-y;
+  if ((w<1)||(h<1)) return;
+  //TODO I'm only using this for troubleshooting. If it comes up in real life, optimize for specific formats.
+  struct fmn_image_iterator iter={0};
+  if (!fmn_image_iterate(&iter,dst,x,y,w,h,0)) return;
+  do {
+    fmn_image_iterator_write(&iter,pixel);
+  } while (fmn_image_iterator_next(&iter));
+}

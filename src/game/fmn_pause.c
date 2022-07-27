@@ -96,13 +96,13 @@ void fmn_pause_update() {
 void fmn_pause_render(struct fmn_image *fb) {
   if (!fbdirty) return;
   fbdirty=0;
-  memset(fb->v,0,(fb->w*fb->h)>>3);
+  memset(fb->v,0,FMN_FB_SIZE_BYTES);
   
-  fmn_blit(fb,cursorp*18,5,&uibits,cursorframe*18,94,18,18,0);
+  fmn_blit(fb,FMN_NSCOORD(cursorp*18,5),&uibits,FMN_NSCOORD(cursorframe*18,94),FMN_NSCOORD(18,18),0);
   
   uint8_t i=0;
-  for (i=0;i<4;i++) fmn_blit(fb,1+i*18,6,&mainsprites,i*16,32,16,16,0);
+  for (i=0;i<4;i++) fmn_blit(fb,FMN_NSCOORD(1+i*18,6),&mainsprites,FMN_NSCOORD(i*16,32),FMN_NSCOORD(16,16),0);
   
-  fmn_blit(fb,6,30,&uibits,0,112,34,7,0);
-  for (i=0;i<5;i++) fmn_blit(fb,44+i*4,30,&uibits,password[i]*3,119,3,7,0);
+  fmn_blit(fb,FMN_NSCOORD(6,30),&uibits,FMN_NSCOORD(0,112),FMN_NSCOORD(34,7),0);
+  for (i=0;i<5;i++) fmn_blit(fb,FMN_NSCOORD(44+i*4,30),&uibits,FMN_NSCOORD(password[i]*3,119),FMN_NSCOORD(3,7),0);
 }

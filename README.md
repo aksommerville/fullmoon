@@ -48,6 +48,9 @@ Targets must individually declare the rules for generating data sources, but the
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - [ ] PulseAudio driver. If we're still doing audio.
+- [x] 8x8x8 color framebuffer and images, for Tiny
+- [x] 24x24x16 color framebuffer and images, for Pico and PCs
+- [ ] Optimized blitters. It matters, now that we have more pixel formats.
 - [ ] Build for other targets
 - - [ ] MacOS
 - - - [ ] Review deprecated WM functions: -Wno-deprecated-declarations

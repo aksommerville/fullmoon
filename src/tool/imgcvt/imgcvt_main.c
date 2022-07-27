@@ -103,6 +103,17 @@ static int imgcvt_arg_option(struct cli *cli,const char *k,int kc,const char *v,
     case 'o': return imgcvt_set_dstpath(IMGCVT,v,vc);
     case 'i': return imgcvt_set_srcpath(IMGCVT,v,vc);
   }
+  if ((kc==7)&&!memcmp(k,"progmem",7)) {
+    IMGCVT->progmem=1;
+    return 0;
+  }
+  if ((kc==6)&&!memcmp(k,"format",6)) {
+    #define _(tag) if ((vc==sizeof(#tag)-1)&&!memcmp(v,#tag,vc)) { IMGCVT->format=FMN_IMGFMT_##tag; return 0; }
+    FMN_FOR_EACH_IMGFMT
+    #undef _
+    fprintf(stderr,"%s: Unknown image format '%.*s'\n",cli->exename,vc,v);
+    return -2;
+  }
   return -1;
 }
 
@@ -110,8 +121,13 @@ static void imgcvt_help_extra(struct cli *cli) {
   fprintf(stderr,
     "  -oPATH             Output path.\n"
     "  -iPATH             Input path.\n"
-    "\n"
+    "  --progmem          Add PROGMEM declaration, for Arduino.\n"
+    "  --format=NAME      "
   );
+  #define _(tag) fprintf(stderr,"%s, ",#tag);
+  FMN_FOR_EACH_IMGFMT
+  #undef _
+  fprintf(stderr,"or omit to infer from input.\n");
 }
 
 /* Main.

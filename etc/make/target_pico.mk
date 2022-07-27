@@ -4,6 +4,8 @@
 pico_MIDDIR:=mid/pico
 pico_OUTDIR:=out/pico
 
+pico_IMAGE_SET:=24c
+
 # Generate this list by creating a dummy CMake project, follow the pico-sdk instructions.
 # Copy its list, then: sed -En 's/^\t@echo.*pico-sdk\/(.*)\.obj"$/  \1.c \\/p' etc/make/target_pico.mk
 # You'll also get pico/version.h at that step, copy it to src/opt/pico/pico/version.h. (and config_autogen.h)
@@ -132,7 +134,7 @@ pico_OPT_ENABLE:=pico
 
 pico_CCWARN:=-Werror -Wimplicit
 pico_CCINC:=$(addprefix -I,$(pico_EXTHDIRS)) -Isrc -Isrc/opt/pico
-pico_CCDEF:=-DNDEBUG $(patsubst %,-DFMN_USE_%=1,$(pico_OPT_ENABLE))
+pico_CCDEF:=-DNDEBUG $(patsubst %,-DFMN_USE_%=1,$(pico_OPT_ENABLE)) -DFMN_IMAGE_SET_$(pico_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_argb4444be=1
 pico_CCOPT:=-c -MMD -O3 -mcpu=cortex-m0plus -mthumb
 pico_CC:=$(pico_GCCPFX)gcc $(pico_CCOPT) -I$(pico_MIDDIR) $(pico_CCWARN) $(pico_CCINC) $(pico_CCDEF)
 pico_AS:=$(pico_GCCPFX)gcc -xassembler-with-cpp $(pico_CCOPT) -I$(pico_MIDDIR) $(pico_CCWARN) $(pico_CCINC) $(pico_CCDEF)
@@ -146,9 +148,11 @@ pico_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(pico_OPT_ENABLE),$(SRC
 
 pico_DATA_SRC:=$(filter src/data/%,$(pico_SRCFILES))
 pico_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(pico_DATA_SRC))
+pico_DATA_SRC:=$(filter-out %.png,$(pico_DATA_SRC)) $(filter %-$(pico_IMAGE_SET).png,$(pico_DATA_SRC))
 pico_DATA_C:=$(patsubst src/%,$(pico_MIDDIR)/%.c,$(pico_DATA_SRC))
 $(pico_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
-$(pico_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
+#TODO pretty sure the format is like rgba4444, it's def not bgr565be
+$(pico_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=argb4444be
 $(pico_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(pico_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(pico_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<

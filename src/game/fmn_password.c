@@ -183,14 +183,14 @@ void fmn_password_update() {
 void fmn_password_render(struct fmn_image *fb) {
   if (!fbdirty) return;
   fbdirty=0;
-  fmn_blit(fb,0,0,&uibits,0,24,72,40,0);
+  fmn_blit(fb,0,0,&uibits,FMN_NSCOORD(0,24),FMN_NSCOORD(72,40),0);
   int16_t dstx=5,i;
   for (i=0;i<FMN_PASSWORD_LENGTH;i++,dstx+=13) {
     if (password[i]<1) ;
-    else if (password[i]<=12) fmn_blit(fb,dstx,14,&uibits,(password[i]-1)*10,64,10,10,0);
-    else if (password[i]<=24) fmn_blit(fb,dstx,14,&uibits,(password[i]-13)*10,74,10,10,0);
-    else if (password[i]<=32) fmn_blit(fb,dstx,14,&uibits,(password[i]-25)*10,84,10,10,0);
+    else if (password[i]<=12) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-1)*10,64),FMN_NSCOORD(10,10),0);
+    else if (password[i]<=24) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-13)*10,74),FMN_NSCOORD(10,10),0);
+    else if (password[i]<=32) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-25)*10,84),FMN_NSCOORD(10,10),0);
   }
-  fmn_blit(fb,6+cursorp*13,9,&uibits,48+cursorframe*7,0,7,5,0);
-  fmn_blit(fb,6+cursorp*13,24,&uibits,48+cursorframe*7,5,7,5,0);
+  fmn_blit(fb,FMN_NSCOORD(6+cursorp*13,9),&uibits,FMN_NSCOORD(48+cursorframe*7,0),FMN_NSCOORD(7,5),0);
+  fmn_blit(fb,FMN_NSCOORD(6+cursorp*13,24),&uibits,FMN_NSCOORD(48+cursorframe*7,5),FMN_NSCOORD(7,5),0);
 }

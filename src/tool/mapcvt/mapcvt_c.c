@@ -48,6 +48,9 @@ static int mapcvt_encode_linked_objects(struct encoder *dst,struct mapcvt *mapcv
 
   if (encode_fmt(dst,"extern const struct fmn_image %s;\n",mapcvt->tilesheetname)<0) return -1;
   if (encode_fmt(dst,"extern const uint8_t %s_props[256];\n",mapcvt->tilesheetname)<0) return -1;
+  if (mapcvt->progmem) {
+    if (encode_fmt(dst,"#include <avr/pgmspace.h>\n")<0) return -1;
+  }
   
   const struct fmn_map_poi *poi=mapcvt->map.poiv;
   int i=mapcvt->map.poic;
@@ -106,7 +109,7 @@ static int mapcvt_encode_c_to_encoder(struct encoder *dst,struct mapcvt *mapcvt)
   }
   
   const int LINE_LENGTH_LIMIT=100;
-  if (encode_fmt(dst,"static const uint8_t %.*s_STORAGE[]={\n",namec,name)<0) return -1;
+  if (encode_fmt(dst,"static const uint8_t %.*s_STORAGE[]%s={\n",namec,name,mapcvt->progmem?" PROGMEM":"")<0) return -1;
   int linelen=0;
   const uint8_t *v=mapcvt->map.v;
   int i=mapcvt->map.w*mapcvt->map.h;

@@ -16,6 +16,7 @@ struct mapcvt {
   char *dstpath;
   char *src,*dst;
   int srcc,dstc;
+  int progmem;
   
   /* (tilesheet,tileprops) are not used, must be null.
    * (poiv[].qp) if not null are strings to insert verbatim in the C text (eg name of a map or sprdef).

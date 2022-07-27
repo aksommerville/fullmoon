@@ -58,6 +58,9 @@ static int imgcvt_encode_c_to_encoder(struct encoder *dst,struct imgcvt *imgcvt)
 
   if (encode_fmt(dst,"#include <stdint.h>\n")<0) return -1;
   if (encode_fmt(dst,"#include \"game/fullmoon.h\"\n")<0) return -1;
+  if (imgcvt->progmem) {
+    if (encode_fmt(dst,"#include <avr/pgmspace.h>\n")<0) return -1;
+  }
   
   char name[64];
   int namec=imgcvt_get_c_object_name(name,sizeof(name),imgcvt);
@@ -66,19 +69,62 @@ static int imgcvt_encode_c_to_encoder(struct encoder *dst,struct imgcvt *imgcvt)
     return -2;
   }
   
+  // Use an appropriate word size. This matters if we're using Arduino PROGMEM.
+  int wordsize=8;
+  char byteorder='>';
+  switch (imgcvt->image.fmt) {
+    case FMN_IMGFMT_bgr565be: byteorder='>'; wordsize=16; break;
+  }
+  
   const int LINE_LENGTH_LIMIT=100;
-  if (encode_fmt(dst,"static const uint8_t %.*s_STORAGE[]={\n",namec,name)<0) return -1;
+  if (encode_fmt(dst,"static const uint%d_t %.*s_STORAGE[]%s={\n",wordsize,namec,name,imgcvt->progmem?" PROGMEM":"")<0) return -1;
   int linelen=0;
-  const uint8_t *v=imgcvt->image.v;
-  int i=fmn_image_get_size(&imgcvt->image);
-  for (;i-->0;v++) {
-    int err=encode_fmt(dst,"%d,",*v);
-    if (err<0) return -1;
-    linelen+=err;
-    if (linelen>=LINE_LENGTH_LIMIT) {
-      encode_raw(dst,"\n",1);
-      linelen=0;
-    }
+  switch (wordsize) {
+    case 8: {
+        const uint8_t *v=imgcvt->image.v;
+        int i=fmn_image_get_size(&imgcvt->image);
+        for (;i-->0;v++) {
+          int err=encode_fmt(dst,"%d,",*v);
+          if (err<0) return -1;
+          linelen+=err;
+          if (linelen>=LINE_LENGTH_LIMIT) {
+            encode_raw(dst,"\n",1);
+            linelen=0;
+          }
+        }
+      } break;
+    case 16: {
+        const uint8_t *v=imgcvt->image.v;
+        int i=fmn_image_get_size(&imgcvt->image)/2;
+        for (;i-->0;v+=2) {
+          int n;
+          if (byteorder=='>') n=(v[0]<<8)|v[1];
+          else n=v[0]|(v[1]<<8);
+          int err=encode_fmt(dst,"%d,",n);
+          if (err<0) return -1;
+          linelen+=err;
+          if (linelen>=LINE_LENGTH_LIMIT) {
+            encode_raw(dst,"\n",1);
+            linelen=0;
+          }
+        }
+      } break;
+    case 32: {
+        const uint8_t *v=imgcvt->image.v;
+        int i=fmn_image_get_size(&imgcvt->image)/4;
+        for (;i-->0;v+=4) {
+          int n;
+          if (byteorder=='>') n=(v[0]<<24)|(v[1]<<16)|(v[2]<<8)|v[3];
+          else n=v[0]|(v[1]<<8)|(v[2]<<16)|(v[3]<<24);
+          int err=encode_fmt(dst,"%d,",n);
+          if (err<0) return -1;
+          linelen+=err;
+          if (linelen>=LINE_LENGTH_LIMIT) {
+            encode_raw(dst,"\n",1);
+            linelen=0;
+          }
+        }
+      } break;
   }
   if (linelen) encode_raw(dst,"\n",1);
   if (encode_fmt(dst,"};\n")<0) return -1;
