@@ -38,143 +38,17 @@ uint16_t fmn_platform_read_input();
 #define FMN_BUTTON_A       0x0010
 #define FMN_BUTTON_B       0x0020
 
-#define FMN_IMGFMT_thumby     1 /* The Thumby framebuffer. y1 where each byte is 8 rows (not columns!) */
-#define FMN_IMGFMT_ya11       2 /* Big-endian 2-bit luma+alpha, for sprites. */
-#define FMN_IMGFMT_bgr565be   3
-#define FMN_IMGFMT_rgba8888   4
-#define FMN_IMGFMT_y1         5 /* Ordinary big-endian y1. */
-#define FMN_IMGFMT_y8         6
-#define FMN_IMGFMT_bgr332     7
-#define FMN_IMGFMT_argb4444be 8 /* Picosystem */
-
-#define FMN_FOR_EACH_IMGFMT \
-  _(thumby) \
-  _(ya11) \
-  _(bgr565be) \
-  _(rgba8888) \
-  _(y1) \
-  _(y8) \
-  _(bgr332) \
-  _(argb4444be)
-
-// Image set must be declared by make.
-// Since we use arduino-builder for Tiny, it's hard to set C flags, so Tiny is the default: 8c
-#if FMN_IMAGE_SET_24c
-  #define FMN_FBW (72*3)
-  #define FMN_FBH (40*3)
-  #define FMN_TILESIZE 24
-  #define FMN_MM_PER_PIXEL 3 /* not exact! TODO will that be a problem? 24 is not a factor of 64 ...it's a problem, avoid using MM_PER_PIXEL */
-  #define FMN_NSCOORD(x,y) (x)*3,(y)*3 /* normalized screen coordinates, for places where we assume it's 72x40, ie everywhere */
-  #define FMN_GFXSCALE 3 /* ...or more generally */
-  #if FMN_FRAMEBUFFER_bgr565be
-    #define FMN_FBFMT FMN_IMGFMT_bgr565be
-    #define FMN_FB_STRIDE (FMN_FBW*2)
-    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
-  #elif FMN_FRAMEBUFFER_argb4444be
-    #define FMN_FBFMT FMN_IMGFMT_argb4444be
-    #define FMN_FB_STRIDE (FMN_FBW*2)
-    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
-  #else /* rgba8888 */
-    #define FMN_FBFMT FMN_IMGFMT_rgba8888
-    #define FMN_FB_STRIDE (FMN_FBW*4)
-    #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*4)
-  #endif
-#elif FMN_IMAGE_SET_8b
-  #define FMN_FBW 72
-  #define FMN_FBH 40
-  #define FMN_FBFMT FMN_IMGFMT_thumby
-  #define FMN_FB_STRIDE FMN_FBW
-  #define FMN_FB_SIZE_BYTES ((FMN_FBW*FMN_FBH)>>3)
-  #define FMN_TILESIZE 8
-  #define FMN_MM_PER_PIXEL 8
-  #define FMN_NSCOORD(x,y) (x),(y)
-  #define FMN_GFXSCALE 1
-#else
-  #define FMN_FBW 72
-  #define FMN_FBH 40
-  #define FMN_FBFMT FMN_IMGFMT_bgr332
-  #define FMN_FB_STRIDE FMN_FBW
-  #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH)
-  #define FMN_TILESIZE 8
-  #define FMN_MM_PER_PIXEL 8
-  #define FMN_NSCOORD(x,y) (x),(y)
-  #define FMN_GFXSCALE 1
-#endif
-
-#define FMN_XFORM_XREV 1
-#define FMN_XFORM_YREV 2
-#define FMN_XFORM_SWAP 4
-
-struct fmn_image {
-  uint8_t *v;
-  // NB size of (v) is not necessarily (h*stride); thumby format is different.
-  int16_t w,h,stride;
-  uint8_t fmt;
-  uint8_t writeable;
-};
-
-void fmn_image_fill_rect(
-  struct fmn_image *dst,
-  int16_t x,int16_t y,int16_t w,int16_t h,
-  uint32_t pixel
-);
-
-void fmn_blit(
-  struct fmn_image *dst,int16_t dstx,int16_t dsty,
-  const struct fmn_image *src,int16_t srcx,int16_t srcy,
-  int16_t w,int16_t h,
-  uint8_t xform
-);
-
-struct fmn_image_iterator_1d {
-  uint8_t *p;
-  uint8_t q;
-  int16_t stride;
-  void (*next)(struct fmn_image_iterator_1d *iter);
-};
-
-struct fmn_image_iterator {
-  uint32_t (*read)(const uint8_t *p,uint8_t q);
-  void (*write)(uint8_t *p,uint8_t q,uint32_t pixel);
-  struct fmn_image *image;
-  int16_t minorc,minorc0,majorc;
-  struct fmn_image_iterator_1d major,minor;
-};
-
-/* Request must be fully in bounds or we fail.
- * On failure, return zero and neuter (iter) -- it is still safe to use.
- * With FMN_XFORM_SWAP, we reverse (w,h). Be mindful of that when bounds-checking.
- * You must write pixels of the correct size. Small formats might overwrite neighbors if you have unexpected bits set.
- */
-uint8_t fmn_image_iterate(
-  struct fmn_image_iterator *iter,
-  const struct fmn_image *image,
-  int16_t x,int16_t y,int16_t w,int16_t h,
-  uint8_t xform
-);
-
-uint8_t fmn_image_iterator_next(struct fmn_image_iterator *iter);
-
-static inline uint32_t fmn_image_iterator_read(const struct fmn_image_iterator *iter) {
-  return iter->read(iter->minor.p,iter->minor.q);
-}
-
-static inline void fmn_image_iterator_write(struct fmn_image_iterator *iter,uint32_t src) {
-  iter->write(iter->minor.p,iter->minor.q,src);
-}
-
-typedef uint32_t (*fmn_pixcvt_fn)(uint32_t src);
-fmn_pixcvt_fn fmn_pixcvt_get(uint8_t dstfmt,uint8_t srcfmt);
-
-// 0 means fully opaque always; -1 means any nonzero pixel is opaque; otherwise at least one bit of the mask must be set.
-// We never blend during blits, it's all or nothing. (even if we add formats that in theory could, we won't).
-uint32_t fmn_imgfmt_get_alpha_mask(uint8_t imgfmt);
+#include "fmn_image.h"
+#include "fmn_framebuffer.h"
 
 #define FMN_UIMODE_TITLE    1
 #define FMN_UIMODE_PLAY     2
 #define FMN_UIMODE_PAUSE    3
 #define FMN_UIMODE_PASSWORD 4
 void fmn_set_uimode(uint8_t mode);
+
+/* Business.
+ ***********************************************************************/
 
 void fmn_game_reset();
 
@@ -186,15 +60,6 @@ uint32_t fmn_game_generate_password();
 #define FMN_PASSWORD_LENGTH 5
 uint32_t fmn_password_encode(uint32_t pw);
 uint32_t fmn_password_decode(uint32_t display);
-
-// (FMN_SCREENW_TILES*FMN_TILESIZE==FMN_FBW) and (FMN_SCREENH_TILES*FMN_TILESIZE==FMN_FBH)
-// (FMN_MM_PER_PIXEL*FMN_TILESIZE==FMN_MM_PER_TILE)
-// (FMN_MM_PER_TILE*255<0x8000)
-#define FMN_SCREENW_TILES 9
-#define FMN_SCREENH_TILES 5
-#define FMN_MM_PER_TILE 64 /* <128, and power of two probably a good idea */
-#define FMN_SCREENW_MM (FMN_SCREENW_TILES*FMN_MM_PER_TILE)
-#define FMN_SCREENH_MM (FMN_SCREENH_TILES*FMN_MM_PER_TILE)
 
 // Convenience to spare me some typing...
 static inline void fmn_blit_tile(

@@ -11,10 +11,10 @@
 
 // Hitbox in mm relative to canonical position (near left shoulder).
 // Beware these must match src/game/sprite/type/fmn_sprite_heroproxy.c
-#define FMN_HERO_HITBOX_X FMN_MM_PER_PIXEL
-#define FMN_HERO_HITBOX_Y FMN_MM_PER_PIXEL
-#define FMN_HERO_HITBOX_W (FMN_MM_PER_TILE-(FMN_MM_PER_PIXEL*2))
-#define FMN_HERO_HITBOX_H (FMN_MM_PER_TILE-(FMN_MM_PER_PIXEL*2))
+#define FMN_HERO_HITBOX_X 8
+#define FMN_HERO_HITBOX_Y 8
+#define FMN_HERO_HITBOX_W (FMN_MM_PER_TILE-16)
+#define FMN_HERO_HITBOX_H (FMN_MM_PER_TILE-16)
 
 /* Globals.
  */
