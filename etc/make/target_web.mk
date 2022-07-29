@@ -18,7 +18,7 @@ web_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(web_DATA_SRC))
 web_DATA_SRC:=$(filter-out %.png,$(web_DATA_SRC)) $(filter %-$(web_IMAGE_SET).png,$(web_DATA_SRC))
 web_DATA_C:=$(patsubst src/%,$(web_MIDDIR)/%.c,$(web_DATA_SRC))
 $(web_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
-$(web_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
+$(web_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=$(web_FBFMT)
 $(web_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(web_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(web_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<

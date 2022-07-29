@@ -110,6 +110,12 @@ int imgcvt_fmn_from_png(struct imgcvt *imgcvt) {
   int err;
   if (!imgcvt->format) {
     if ((err=imgcvt_guess_format(imgcvt))<0) return err;
+  } else if (imgcvt->format==FMN_IMGFMT_thumby) {
+    // If they ask for Thumby, take that to mean "thumby if opaque, ya11 if alpha".
+    // (beware, this means you can't really force thumby format).
+    int alpha=png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_alpha,0);
+    imgcvt->image.alpha=alpha;
+    if (alpha) imgcvt->format=FMN_IMGFMT_ya11;
   }
   
   imgcvt->image.w=imgcvt->png.w;

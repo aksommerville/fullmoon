@@ -18,7 +18,7 @@ linux_DATA_SRC:=$(filter src/data/%,$(linux_SRCFILES))
 linux_DATA_SRC:=$(filter-out %.png,$(linux_DATA_SRC)) $(filter %-$(linux_IMAGE_SET).png,$(linux_DATA_SRC))
 linux_DATA_C:=$(patsubst src/%,$(linux_MIDDIR)/%.c,$(linux_DATA_SRC))
 $(linux_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
-$(linux_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$<
+$(linux_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=$(linux_FBFMT)
 $(linux_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(linux_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(linux_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<

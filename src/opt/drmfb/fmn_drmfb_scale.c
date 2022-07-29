@@ -141,6 +141,36 @@ static void fmn_drmfb_scale_thumby(struct fmn_drmfb_fb *dst,struct video_driver 
   }
 }
 
+/* From bgr332.
+ */
+ 
+static void fmn_drmfb_scale_bgr332(struct fmn_drmfb_fb *dst,struct video_driver *driver,const void *src) {
+  uint32_t *dstrow=dst->v;
+  int dststride=DRIVER->stridewords;
+  dstrow+=DRIVER->dsty*dststride+DRIVER->dstx;
+  int cpc=DRIVER->dstw<<2;
+  const uint8_t *srcrow=src;
+  int srcstride=driver->delegate.fbw;
+  int yi=driver->delegate.fbh;
+  for (;yi-->0;srcrow+=srcstride) {
+    uint32_t *dstp=dstrow;
+    const uint8_t *srcp=srcrow;
+    int xi=driver->delegate.fbw;
+    for (;xi-->0;srcp++) {
+      uint8_t b=(*srcp)&0xe0; b|=b>>3; b|=b>>6;
+      uint8_t g=(*srcp)&0x1c; g|=g<<3; g|=g>>6;
+      uint8_t r=(*srcp)&0x03; r|=r<<2; r|=r<<4;
+      uint32_t pixel=(r<<DRIVER->rshift)|(g<<DRIVER->gshift)|(b<<DRIVER->bshift);
+      int ri=DRIVER->scale;
+      for (;ri-->0;dstp++) *dstp=pixel;
+    }
+    const void *dstrow0=dstrow;
+    dstrow+=dststride;
+    int ri=DRIVER->scale-1;
+    for (;ri-->0;dstrow+=dststride) memcpy(dstrow,dstrow0,cpc);
+  }
+}
+
 /* Scale.
  */
  
@@ -150,5 +180,6 @@ void fmn_drmfb_scale(struct fmn_drmfb_fb *dst,struct video_driver *driver,const 
     case FMN_IMGFMT_rgba8888: fmn_drmfb_scale_rgba8888(dst,driver,src); return;
     //case FMN_IMGFMT_xrgbn: fmn_drmfb_scale_xrgbn(dst,driver,src); return;
     case FMN_IMGFMT_thumby: fmn_drmfb_scale_thumby(dst,driver,src); return;
+    case FMN_IMGFMT_bgr332: fmn_drmfb_scale_bgr332(dst,driver,src); return;
   }
 }

@@ -59,7 +59,11 @@
   #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH)
   #define FMN_TILESIZE 8
   #define FMN_GFXSCALE 1
-  #define FMN_PLATFORM_FRAMEBUFFER 1 /* tiny */
+  #if FMN_USE_x11 || FMN_USE_drmfb || FMN_USE_macos
+    #define FMN_PLATFORM_FRAMEBUFFER 0
+  #else
+    #define FMN_PLATFORM_FRAMEBUFFER 1 /* tiny */
+  #endif
 #endif
 
 /* Normalized screen coordinates.

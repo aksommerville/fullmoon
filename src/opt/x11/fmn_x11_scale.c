@@ -165,6 +165,34 @@ static void fmn_x11_scale_y1(struct video_driver *driver,const void *src) {
   }
 }
 
+/* From bgr332
+ */
+ 
+static void fmn_x11_scale_bgr332(struct video_driver *driver,const void *src) {
+  uint32_t *dstrow=(void*)DRIVER->image->data;
+  int dststride=DRIVER->image->width;
+  int cpc=dststride<<2;
+  const uint8_t *srcrow=src;
+  int srcstride=driver->delegate.fbw;
+  int yi=driver->delegate.fbh;
+  for (;yi-->0;srcrow+=srcstride) {
+    uint32_t *dstp=dstrow;
+    const uint8_t *srcp=srcrow;
+    int xi=driver->delegate.fbw;
+    for (;xi-->0;srcp++) {
+      uint8_t b=(*srcp)&0xe0; b|=b>>3; b|=b>>6;
+      uint8_t g=(*srcp)&0x1c; g|=g<<3; g|=g>>6;
+      uint8_t r=(*srcp)&0x03; r|=r<<2; r|=r<<4;
+      uint32_t pixel=(r<<DRIVER->rshift)|(g<<DRIVER->gshift)|(b<<DRIVER->bshift);
+      int ri=DRIVER->scale;
+      for (;ri-->0;dstp++) *dstp=pixel;
+    }
+    int ri=DRIVER->scale-1;
+    for (;ri-->0;dstp+=dststride) memcpy(dstp,dstrow,cpc);
+    dstrow=dstp;
+  }
+}
+
 /* Scale framebuffer into our intermediate image, dispatch on format.
  */
  
@@ -175,5 +203,6 @@ void fmn_x11_scale(struct video_driver *driver,const void *src) {
     //case FMN_IMGFMT_xrgbn: fmn_x11_scale_xrgbn(driver,src); return;
     case FMN_IMGFMT_thumby: fmn_x11_scale_thumby(driver,src); return;
     case FMN_IMGFMT_y1: fmn_x11_scale_y1(driver,src); return;
+    case FMN_IMGFMT_bgr332: fmn_x11_scale_bgr332(driver,src); return;
   }
 }
