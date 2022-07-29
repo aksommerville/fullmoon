@@ -3,7 +3,7 @@
 macos_MIDDIR:=mid/macos
 macos_OUTDIR:=out/macos
 
-macos_OPT_ENABLE:=intf macos
+macos_OPT_ENABLE:=intf macos minisyni
 
 macos_CCWARN:=-Werror -Wimplicit -Wno-parentheses -Wno-comment -Wno-deprecated-declarations
 macos_CCINC:=-I/usr/include/libdrm

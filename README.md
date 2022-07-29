@@ -41,17 +41,22 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
-- [ ] PulseAudio driver. If we're still doing audio.
+- - YES. Not for Thumby or Pico, but it's worth having for Tiny, Web, and the PCs.
+- - [ ] Consider a limited set of sound effects for Thumby and Pico.
+- [ ] PulseAudio driver.
 - [ ] Build for other targets
 - - [ ] MacOS
 - - - [ ] Review deprecated WM functions: -Wno-deprecated-declarations
 - - - [ ] machid
+- - - [ ] macaudio
 - - - [ ] Can we drop OpenGL? It's deprecated, and really not necessary, if we can get a plain old window framebuffer. (see x11 or drmfb)
 - - - [ ] Update for hi-res framebuffer
 - - [ ] Windows -- just drivers
 - - [x] WebAssembly, highly desirable
 - - - [x] Update for hi-res framebuffer
 - - - [ ] Clean up web wrapper
+- - - [ ] It currently exports every function. Can we limit that?
+- - - [ ] Using ScriptProcessorNode for audio despite deprecation. How does AudioWorklet work?
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [ ] 68k Mac?
 - - [ ] Pippin?

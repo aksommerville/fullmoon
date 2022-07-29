@@ -3,7 +3,7 @@
 web_MIDDIR:=mid/web
 web_OUTDIR:=out/web
 
-web_OPT_ENABLE:=web
+web_OPT_ENABLE:=web minisyni
 
 web_CCOPT:=-nostdlib -c -MMD -Isrc -Wno-comment -Wno-parentheses -Wno-constant-conversion -DFMN_IMAGE_SET_$(web_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(web_FBFMT)=1
 web_LDOPT:=-nostdlib -Xlinker --no-entry -Xlinker --import-undefined -Xlinker --export-all
@@ -39,4 +39,4 @@ web_WWW_DSTFILES:=$(patsubst src/www/%,$(web_OUTDIR)/%,$(web_WWW_SRCFILES))
 all:$(web_WWW_DSTFILES)
 $(web_OUTDIR)/%:src/www/%;$(PRECMD) cp $< $@
 
-web-run:$(web_EXE) $(web_WWW_DSTFILES);http-server $(web_OUTDIR)
+web-run:$(web_EXE) $(web_WWW_DSTFILES);http-server $(web_OUTDIR) -c-1

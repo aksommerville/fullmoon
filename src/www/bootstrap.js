@@ -1,10 +1,12 @@
 import { WasmAdapter } from "./js/WasmAdapter.js";
 import { VideoOut } from "./js/VideoOut.js";
 import { InputManager } from "./js/InputManager.js";
+import { AudioManager } from "./js/AudioManager.js";
 
 const wasmAdapter = new WasmAdapter();
 const videoOut = new VideoOut();
 const inputManager = new InputManager();
+const audioManager = new AudioManager(wasmAdapter);
 
 function render() {
   const fb = wasmAdapter.getFramebufferIfDirty();

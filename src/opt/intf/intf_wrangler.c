@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+
+#if FMN_USE_minisyni
+  #include "opt/minisyni/minisyni.h"
+#endif
  
 /* Delete.
  */
@@ -63,11 +67,35 @@ static int intf_init_video(struct intf *intf,const char *name) {
   return 0;
 }
 
+/* PCM callback.
+ */
+ 
+static int intf_cb_pcm(struct audio_driver *driver,int16_t *v,int c) {
+  #if FMN_USE_minisyni
+    minisyni_update(v,c);
+  #else
+    memset(v,0,c<<1);
+  #endif
+  return 0;
+}
+
+/* Initialize synthesizer.
+ */
+ 
+static int intf_init_synth(struct intf *intf) {
+  #if FMN_USE_minisyni
+    minisyni_init(intf->audio->rate,intf->audio->chanc);
+    fprintf(stderr,"%s: Using synthesizer 'minisyni', rate=%d, chanc=%d\n",intf->exename,intf->audio->rate,intf->audio->chanc);
+  #else
+    fprintf(stderr,"%s: Audio running but no synthesizer available.\n",intf->exename);
+  #endif
+  return 0;
+}
+
 /* Initialize audio driver.
  */
  
 static int intf_init_audio(struct intf *intf,const char *name) {
-  return 0;//XXX Disabling audio, I expect we're going to remove it.
   if (name) {
     const struct audio_driver_type *type=audio_driver_type_by_name(name,-1);
     if (!type) {
@@ -95,7 +123,10 @@ static int intf_init_audio(struct intf *intf,const char *name) {
     "%s: Using audio driver '%s', rate=%d, chanc=%d\n",
     intf->exename,intf->audio->type->name,intf->audio->rate,intf->audio->chanc
   );
-  //TODO Should we create the synthesizer first? Who do we see about that?
+  if (intf_init_synth(intf)<0) {
+    fprintf(stderr,"%s: Failed to initialize synthesizer.\n",intf->exename);
+    return -1;
+  }
   if (audio_driver_play(intf->audio,1)<0) {
     fprintf(stderr,"%s: Failed to start audio.\n",intf->exename);
     return -1;
@@ -209,6 +240,7 @@ struct intf *intf_new(const struct intf_delegate *delegate) {
   if (!intf) return 0;
   intf->refc=1;
   if (delegate) intf->delegate=*delegate;
+  intf->delegate.pcm=intf_cb_pcm;
   if (intf_init(intf)<0) {
     intf_del(intf);
     return 0;

@@ -15,7 +15,7 @@ tiny_BIN_SOLO:=out/tiny/$(PROJECT_NAME)-solo.bin
 tiny_BIN_HOSTED:=out/tiny/$(PROJECT_NAME)-hosted.bin
 tiny_PACKAGE:=out/$(PROJECT_NAME).zip
 
-tiny_OPT_ENABLE:=tiny
+tiny_OPT_ENABLE:=tiny minisyni
 tiny_SRCFILES:=$(filter-out src/test/% src/www/%,$(call OPTFILTER,$(tiny_OPT_ENABLE),$(SRCFILES),mid/tiny))
 
 tiny_DATA_SRC:=$(filter src/data/%,$(tiny_SRCFILES))

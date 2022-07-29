@@ -3,7 +3,7 @@
 linux_MIDDIR:=mid/linux
 linux_OUTDIR:=out/linux
 
-linux_OPT_ENABLE:=genioc intf x11 drmfb evdev alsa
+linux_OPT_ENABLE:=genioc intf x11 drmfb evdev alsa minisyni
 
 linux_CCWARN:=-Werror -Wimplicit
 linux_CCINC:=-I/usr/include/libdrm

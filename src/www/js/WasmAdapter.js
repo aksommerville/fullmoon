@@ -11,6 +11,7 @@ export class WasmAdapter {
     this.fb = null;
     this._input = 0;
     this.highscore = 0;
+    this.waitingForReady = [];
   }
   
   /* Download and instantiate.
@@ -21,8 +22,19 @@ export class WasmAdapter {
     const params = this._generateParams();
     return WebAssembly.instantiateStreaming(fetch(path), params).then((instance) => {
       this.instance = instance;
+      console.log(`wasm instance`, this.instance);
+      for (const cb of this.waitingForReady) cb();
+      this.waitingForReady = [];
       return instance;
     });
+  }
+  
+  whenReady(cb) {
+    if (this.instance) {
+      cb();
+    } else {
+      this.waitingForReady.push(cb);
+    }
   }
   
   /* Call setup() in Wasm code.

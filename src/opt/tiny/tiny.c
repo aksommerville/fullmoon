@@ -8,8 +8,13 @@
 #include <stdint.h>
 #include "game/fullmoon.h"
 
-// This is disabled and we're probably not going to do audio. Just need it for linking. Consider removing all audio.
-int16_t audio_next() { return 0; }
+#if 1 /* FMN_USE_minisyni, but the compiler doesn't pass our flags thru */
+  #define FMN_USE_minisyni 1
+  #define FMN_AUDIO_ENABLE 1
+  #include "opt/minisyni/minisyni.h"
+#else
+  #define FMN_AUDIO_ENABLE 0
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -124,6 +129,14 @@ static void tcReset() {
 }
 
 static void tiny_audio_init() {
+
+  #if FMN_AUDIO_ENABLE
+    #if FMN_USE_minisyni
+      minisyni_init(AUDIO_RATE,1);
+    #endif
+  #endif
+  // Proceed with the rest even if disabled, it seems to be necessary.
+
   analogWrite(A0, 0);
   // Enable GCLK for TCC2 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
@@ -149,7 +162,53 @@ static void tiny_audio_init() {
   while(tcIsSyncing());
 }
 
-/* Update audio.
+/* Update audio -- refill buffer if needed.
+ */
+ 
+#if FMN_AUDIO_ENABLE
+
+#define FMN_AUDIO_BUFFER_SIZE 512
+
+static int16_t fmn_audio_buffer[FMN_AUDIO_BUFFER_SIZE]={0};
+static int16_t fmn_audio_bufferp=0;
+static uint8_t fmn_audio_buffer_front=0,fmn_audio_buffer_back=0;
+
+static int16_t audio_next() {
+  if (fmn_audio_bufferp<FMN_AUDIO_BUFFER_SIZE>>1) {
+    if (!fmn_audio_buffer_back) {
+      #if FMN_USE_minisyni
+        minisyni_update(fmn_audio_buffer+(FMN_AUDIO_BUFFER_SIZE>>1),FMN_AUDIO_BUFFER_SIZE>>1);
+      #else
+        memset(fmn_audio_buffer+(FMN_AUDIO_BUFFER_SIZE>>1),0,FMN_AUDIO_BUFFER_SIZE>>1);
+      #endif
+      fmn_audio_buffer_back=1;
+    }
+  } else {
+    if (!fmn_audio_buffer_front) {
+      #if FMN_USE_minisyni
+        minisyni_update(fmn_audio_buffer,FMN_AUDIO_BUFFER_SIZE>>1);
+      #else
+        memset(fmn_audio_buffer,0,FMN_AUDIO_BUFFER_SIZE>>1);
+      #endif
+      fmn_audio_buffer_front=1;
+    }
+  }
+  int16_t sample=fmn_audio_buffer[fmn_audio_bufferp];
+  fmn_audio_bufferp++;
+  if (fmn_audio_bufferp>=FMN_AUDIO_BUFFER_SIZE) {
+    fmn_audio_bufferp=0;
+    fmn_audio_buffer_back=0;
+  } else if (fmn_audio_bufferp==FMN_AUDIO_BUFFER_SIZE>>1) {
+    fmn_audio_buffer_front=0;
+  }
+  return sample;
+}
+
+#else
+static int16_t audio_next() { return 0; }
+#endif
+
+/* Update audio -- DAC callback.
  */
 
 void TC5_Handler() {

@@ -51,7 +51,7 @@ int main(int argc,char **argv) {
     .iconh=appicon.h,
     .title="Full Moon",
     .audio_rate=44100,//TODO configurable
-    .chanc=2,//TODO configurable
+    .chanc=1,//TODO configurable
     
     .close=fmn_genioc_cb_close,
     .focus=fmn_genioc_cb_focus,
@@ -61,8 +61,6 @@ int main(int argc,char **argv) {
     .mmotion=fmn_genioc_cb_mmotion,
     .mbutton=fmn_genioc_cb_mbutton,
     .mwheel=fmn_genioc_cb_mwheel,
-    
-    .pcm=fmn_genioc_cb_pcm,
     
     .connect=fmn_genioc_cb_connect,
     .disconnect=fmn_genioc_cb_disconnect,

@@ -56,6 +56,7 @@ struct intf_delegate {
   int (*mwheel)(struct video_driver *driver,int dx,int dy);
   
 // Callback from audio driver. You must fill (v). (c) is in samples -- not frames, not bytes.
+// Using the wrangler 'intf', your pcm callback will not be used. We take care of it.
   int (*pcm)(struct audio_driver *driver,int16_t *v,int c);
   
 // Callbacks from input drivers. (devid) are unique across all drivers.

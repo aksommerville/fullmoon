@@ -99,14 +99,6 @@ int fmn_genioc_cb_mwheel(struct video_driver *driver,int dx,int dy) {
   return 0;
 }
 
-/* Generate PCM. Probably ought to remove this, but punt that. Maybe there will be audio eventually.
- */
-  
-int fmn_genioc_cb_pcm(struct audio_driver *driver,int16_t *v,int c) {
-  memset(v,0,c<<1);
-  return 0;
-}
-
 /* Joystick events. TODO
  */
   
