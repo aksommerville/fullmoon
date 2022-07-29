@@ -50,7 +50,7 @@ Targets must individually declare the rules for generating data sources, but the
 - - - [ ] Update for hi-res framebuffer
 - - [ ] Windows -- just drivers
 - - [x] WebAssembly, highly desirable
-- - - [ ] Update for hi-res framebuffer
+- - - [x] Update for hi-res framebuffer
 - - - [ ] Clean up web wrapper
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [ ] 68k Mac?

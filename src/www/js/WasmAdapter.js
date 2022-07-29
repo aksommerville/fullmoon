@@ -2,6 +2,8 @@
  * Load, link, and communicate with the Wasm module.
  */
  
+import { Fullmoon } from "./Fullmoon.js";
+ 
 export class WasmAdapter {
   constructor() {
     this.instance = null;
@@ -68,7 +70,7 @@ export class WasmAdapter {
   _receiveFramebuffer(p) {
     if (typeof(p) !== "number") return;
     const buffer = this.instance.instance.exports.memory.buffer;
-    const fblen = 72 * 5;
+    const fblen = Fullmoon.FBW * Fullmoon.FBH * 4;
     if ((p < 0) || (p + fblen > buffer.byteLength)) return;
     this.fb = new Uint8Array(buffer, p, fblen);
     this.fbdirty = true;
