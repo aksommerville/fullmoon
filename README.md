@@ -8,7 +8,7 @@ But not a high priority.
 
 ## Setup
 
-Create `etc/config.mk` if it's not there (TODO: put a generic example in this repo).
+Create `etc/config.mk` if it's not there.
 In there, you must define `FMN_TARGETS:=` with the names of targets you want to build for.
 See `etc/make/target_*.mk`.
 Most targets will want some additional config, location of toolchains etc.
@@ -31,16 +31,10 @@ Targets must individually declare the rules for generating data sources, but the
 - - [ ] MapEditor: zoom
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc
-- - [x] MapEditor: position tattle
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
 - - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
 - [ ] Game logic.
-- - [x] Blit with xform. I think we do need it.
 - - [ ] monsters
-- - [x] Edge doors
-- - [x] Point doors
-- - [x] POI triggers
-- - [x] Proximity triggers
 - - [ ] environmental puzzles
 - - [ ] password/state
 - - [ ] Flags to enable items -- you don't start with all 4.
@@ -48,23 +42,17 @@ Targets must individually declare the rules for generating data sources, but the
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - [ ] PulseAudio driver. If we're still doing audio.
-- [x] 8x8x8 color framebuffer and images, for Tiny
-- [x] 24x24x16 color framebuffer and images, for Pico and PCs
-- [ ] Optimized blitters. It matters, now that we have more pixel formats.
 - [ ] Build for other targets
 - - [ ] MacOS
 - - - [ ] Review deprecated WM functions: -Wno-deprecated-declarations
 - - - [ ] machid
-- - - [x] App icon, using Plunder Squad's for now
 - - - [ ] Can we drop OpenGL? It's deprecated, and really not necessary, if we can get a plain old window framebuffer. (see x11 or drmfb)
+- - - [ ] Update for hi-res framebuffer
 - - [ ] Windows -- just drivers
 - - [x] WebAssembly, highly desirable
-- - - [x] Build wasm
-- - - [x] Wrapper web app -- copied from ivand. works but definitely not ideal
+- - - [ ] Update for hi-res framebuffer
+- - - [ ] Clean up web wrapper
 - - [ ] TTY video, and.... something? for input. just for fun
-- - [x] Tiny
-- - [x] Pico
-- - - [x] Runs at about 2/3 speed due to vsync. What can we do to work around that? (we have plenty of cpu to spare) ...skip every third vsync
 - - [ ] 68k Mac?
 - - [ ] Pippin?
 - [ ] Update face dir when releasing umbrella
