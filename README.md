@@ -20,7 +20,7 @@ You must include one opt unit with a `main()`: `genioc`, `macos`, `thumby`.
 Or if you need to write your own `main()`, you can make a new opt unit for it.
 See `src/game/fullmoon.h` for a few other hooks you must implement there.
 
-Targets must individually declare the rules for generating data sources, but these will probably be identical everywhere.
+Targets must individually declare the rules for generating data sources, even data like maps that won't change from platform to platform.
 
 ## TODO
 
@@ -55,4 +55,5 @@ Targets must individually declare the rules for generating data sources, but the
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [ ] 68k Mac?
 - - [ ] Pippin?
-- [ ] Update face dir when releasing umbrella
+- [x] Update face dir when releasing umbrella
+- [x] Enable true black in bgr332 with alpha, find some strategy. eg pick an ugly color to treat as transparent.

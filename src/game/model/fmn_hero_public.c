@@ -200,6 +200,7 @@ static uint8_t fmn_hero_end_action() {
         }
       } break;
     case FMN_ACTION_UMBRELLA: {
+        fmn_hero.button=0; // we need it zeroed before examining facedir
         fmn_hero_update_facedir();
       } break;
   }

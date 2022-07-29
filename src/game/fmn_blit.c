@@ -411,7 +411,7 @@ static void fmn_blit_bgr332_NONE(
       const uint8_t *srcp=srcrow;
       int16_t xi=w;
       for (;xi-->0;dstp+=1,srcp+=1) {
-        if (!srcp[0]) continue;
+        if (srcp[0]==0x1c) continue; // Full green for bgr332 is transparent (and y8 has no alpha)
         dstp[0]=srcp[0];
       }
     }
@@ -454,7 +454,7 @@ static void fmn_blit_bgr332_ANY(
       int16_t xi=w;
       for (;xi-->0;dstp+=1) {
         uint32_t pixel=fmn_image_iterator_read(&srciter);
-        if (pixel) {
+        if (pixel!=0x1c) {
           dstp[0]=pixel;
         }
         if (!fmn_image_iterator_next(&srciter)) return;
@@ -610,7 +610,6 @@ void fmn_blit(
       case (FMN_IMGFMT_y8<<8)|(FMN_IMGFMT_y8): fmn_blit_bgr332_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
     #endif
   }
-  //TODO bgr332
   
   // In all other scenarios, we do it generically at terrible performance cost.
   struct fmn_image_iterator srciter={0},dstiter={0};
@@ -634,12 +633,21 @@ void fmn_blit(
     fmn_pixcvt_fn pixcvt=fmn_pixcvt_get(dst->fmt,src->fmt);
     if (!pixcvt) return;
     if (alpha) {
-      do {
-        uint32_t pixel=fmn_image_iterator_read(&srciter);
-        if (pixel&alpha) {
-          fmn_image_iterator_write(&dstiter,pixcvt(pixel));
-        }
-      } while (fmn_image_iterator_next(&dstiter)&&fmn_image_iterator_next(&srciter));
+      if (src->fmt==FMN_IMGFMT_bgr332) {
+        do {
+          uint32_t pixel=fmn_image_iterator_read(&srciter);
+          if (pixel!=0x1c) {
+            fmn_image_iterator_write(&dstiter,pixcvt(pixel));
+          }
+        } while (fmn_image_iterator_next(&dstiter)&&fmn_image_iterator_next(&srciter));
+      } else {
+        do {
+          uint32_t pixel=fmn_image_iterator_read(&srciter);
+          if (pixel&alpha) {
+            fmn_image_iterator_write(&dstiter,pixcvt(pixel));
+          }
+        } while (fmn_image_iterator_next(&dstiter)&&fmn_image_iterator_next(&srciter));
+      }
     } else {
       do {
         fmn_image_iterator_write(&dstiter,pixcvt(fmn_image_iterator_read(&srciter)));

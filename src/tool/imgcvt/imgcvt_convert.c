@@ -84,10 +84,9 @@ static int imgcvt_cb_y8_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userd
 static int imgcvt_cb_bgr332_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userdata) {
   struct fmn_image_iterator *iter=userdata;
   uint8_t pixel=(b&0xe0)|((g>>3)&0x1c)|(r>>6);
-  //TODO We have only so many colors, it would be great to be able to use natural black.
-  // Find some other alpha strategy for bgr332.
-  if (a<0x80) { gimgcvt->image.alpha=1; pixel=0; }
-  else if (!pixel) pixel=0x20;
+  // Let's use full green 0x1c as transparent.
+  if (a<0x80) { gimgcvt->image.alpha=1; pixel=0x1c; }
+  else if (pixel==0x1c) pixel=0x18;
   fmn_image_iterator_write(iter,pixel);
   if (!fmn_image_iterator_next(iter)) return 1;
   return 0;
