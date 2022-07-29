@@ -27,10 +27,20 @@ tiny_BUILDER:=$(tiny_IDEROOT)/arduino-builder
 
 web_WASI_SDK:=/home/andy/proj/thirdparty/wasi-sdk/wasi-sdk-16.0
 web_IMAGE_SET:=24c
+web_FBFMT:=rgba8888
 
-linux_IMAGE_SET:=24c
+# What you probably want:
+#linux_IMAGE_SET:=24c
+#linux_FBFMT:=rgba8888
+# For testing Thumby:
+linux_IMAGE_SET:=8b
+linux_FBFMT:=thumby
+# For testing Tiny:
+#linux_IMAGE_SET:=8c
+#linux_FBFMT:=bgr332
 
 macos_IMAGE_SET:=24c
+macos_FBFMT:=rgba8888
 
 run:linux-run
 

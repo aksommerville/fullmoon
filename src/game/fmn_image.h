@@ -37,7 +37,10 @@ struct fmn_image {
   int16_t w,h,stride;
   uint8_t fmt;
   uint8_t writeable;
+  uint8_t alpha; // If relevant per (fmt), must be nonzero to enable alpha. eg "rgba" vs "rgbx"
 };
+
+void fmn_image_clear(struct fmn_image *dst);
 
 void fmn_image_fill_rect(
   struct fmn_image *dst,

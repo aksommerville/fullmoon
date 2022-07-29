@@ -96,7 +96,7 @@ void fmn_pause_update() {
 void fmn_pause_render(struct fmn_image *fb) {
   if (!fbdirty) return;
   fbdirty=0;
-  memset(fb->v,0,FMN_FB_SIZE_BYTES);
+  fmn_image_clear(fb);
   
   fmn_blit(fb,FMN_NSCOORD(cursorp*18,5),&uibits,FMN_NSCOORD(cursorframe*18,94),FMN_NSCOORD(18,18),0);
   

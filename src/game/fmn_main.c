@@ -9,9 +9,13 @@
 /* Globals.
  */
 
-static uint8_t fb_storage[FMN_FB_SIZE_BYTES]={0};
+#if !FMN_PLATFORM_FRAMEBUFFER
+  static uint8_t fb_storage[FMN_FB_SIZE_BYTES]={0};
+#endif
 static struct fmn_image fb={
+#if !FMN_PLATFORM_FRAMEBUFFER
   .v=fb_storage,
+#endif
   .w=FMN_FBW,
   .h=FMN_FBH,
   .stride=FMN_FB_STRIDE,
@@ -46,6 +50,9 @@ void fmn_set_uimode(uint8_t mode) {
 
 void setup() {
   fmn_platform_init();
+  #if FMN_PLATFORM_FRAMEBUFFER
+    fmn_platform_init_framebuffer(&fb);
+  #endif
   fmn_set_uimode(FMN_UIMODE_TITLE);
 }
 

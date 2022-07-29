@@ -136,6 +136,7 @@ static int imgcvt_encode_c_to_encoder(struct encoder *dst,struct imgcvt *imgcvt)
   if (encode_fmt(dst,"  .fmt=%d,\n",imgcvt->image.fmt)<0) return -1;
   if (encode_fmt(dst,"  .stride=%d,\n",imgcvt->image.stride)<0) return -1;
   if (encode_fmt(dst,"  .writeable=0,\n")<0) return -1;
+  if (encode_fmt(dst,"  .alpha=%d,\n",imgcvt->image.alpha)<0) return -1;
   if (encode_fmt(dst,"};\n")<0) return -1;
   
   return 0;

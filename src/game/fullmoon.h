@@ -8,6 +8,13 @@
   extern "C" {
 #endif
 
+struct fmn_image;
+struct fmn_sprtype;
+struct fmn_sprdef;
+struct fmn_sprite;
+struct fmn_sprgrp;
+struct fmn_map;
+
 /***************************************************************
  * Game must implement.
  */
@@ -23,6 +30,14 @@ void fmn_platform_init();
 void fmn_platform_update();
 void fmn_platform_send_framebuffer(const void *fb);
 uint16_t fmn_platform_read_input();
+
+/* Populate (fb->v) and (fb->stride) with the platform's framebuffer.
+ * You must call this if FMN_PLATFORM_FRAMEBUFFER and otherwise must not.
+ * On the Tiny and Pico, we output video without scaling but with margins.
+ * You're not expected to worry about that, just use (fb).
+ * Other platforms, you must allocate (fb).
+ */
+void fmn_platform_init_framebuffer(struct fmn_image *fb);
 
 /***************************************************************
  * Shared symbols and services.
@@ -121,11 +136,6 @@ struct fmn_map {
 // tileprops
 #define FMN_TILE_SOLID      0x01
 #define FMN_TILE_HOLE       0x02
-
-struct fmn_sprtype;
-struct fmn_sprdef;
-struct fmn_sprite;
-struct fmn_sprgrp;
 
 #ifdef __cplusplus
   }

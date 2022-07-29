@@ -5,7 +5,7 @@ web_OUTDIR:=out/web
 
 web_OPT_ENABLE:=web
 
-web_CCOPT:=-nostdlib -c -MMD -Isrc -Wno-comment -Wno-parentheses -Wno-constant-conversion -DFMN_IMAGE_SET_$(web_IMAGE_SET)=1
+web_CCOPT:=-nostdlib -c -MMD -Isrc -Wno-comment -Wno-parentheses -Wno-constant-conversion -DFMN_IMAGE_SET_$(web_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(web_FBFMT)=1
 web_LDOPT:=-nostdlib -Xlinker --no-entry -Xlinker --import-undefined -Xlinker --export-all
 web_CC:=$(web_WASI_SDK)/bin/clang $(web_CCOPT)
 web_LD:=$(web_WASI_SDK)/bin/clang $(web_LDOPT)

@@ -11,6 +11,7 @@ static int imgcvt_cb_alpha(uint8_t y,uint8_t a,void *userdata) {
  
 static int imgcvt_guess_format(struct imgcvt *imgcvt) {
   int alpha=png_image_iterate_ya88(&imgcvt->png,imgcvt_cb_alpha,0);
+  imgcvt->image.alpha=alpha;
   switch (imgcvt->png.colortype) {
     case 0: imgcvt->format=alpha?FMN_IMGFMT_ya11:FMN_IMGFMT_thumby; break;
     case 2: imgcvt->format=FMN_IMGFMT_rgba8888; break;
@@ -25,6 +26,8 @@ static int imgcvt_guess_format(struct imgcvt *imgcvt) {
 /* Receive one RGBA pixel from the PNG image.
  */
  
+static struct imgcvt *gimgcvt;
+ 
 static int imgcvt_cb_thumby_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userdata) {
   struct fmn_image_iterator *iter=userdata;
   fmn_image_iterator_write(iter,((r+g+b)>=384)?1:0);
@@ -36,8 +39,8 @@ static int imgcvt_cb_ya11_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *use
   struct fmn_image_iterator *iter=userdata;
   // When converting to ya11, intermediate grays count as transparent.
   uint8_t pixel=(r+g+b)/3;
-  if (a<0x80) pixel=0;
-  else if ((pixel>=0x40)&&(pixel<0xc0)) pixel=0;
+  if (a<0x80) { pixel=0; gimgcvt->image.alpha=1; }
+  else if ((pixel>=0x40)&&(pixel<0xc0)) { pixel=0; gimgcvt->image.alpha=1; }
   else if (pixel<0x80) pixel=1;
   else pixel=3;
   fmn_image_iterator_write(iter,pixel);
@@ -49,7 +52,7 @@ static int imgcvt_cb_bgr565be_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void 
   struct fmn_image_iterator *iter=userdata;
   uint16_t pixel=((b<<8)&0xf800)|((g<<3)&0x07e0)|(r>>5);
   // Produce natural zeroes only if the pixel is actually transparent.
-  if (a<0x80) pixel=0;
+  if (a<0x80) { pixel=0; gimgcvt->image.alpha=1; }
   else if (!pixel) pixel=0x0800;
   fmn_image_iterator_write(iter,pixel);
   if (!fmn_image_iterator_next(iter)) return 1;
@@ -58,6 +61,7 @@ static int imgcvt_cb_bgr565be_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void 
  
 static int imgcvt_cb_rgba8888_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userdata) {
   struct fmn_image_iterator *iter=userdata;
+  if (!a) gimgcvt->image.alpha=1;
   fmn_image_iterator_write(iter,(r<<24)|(g<<16)|(b<<8)|a);
   if (!fmn_image_iterator_next(iter)) return 1;
   return 0;
@@ -82,7 +86,7 @@ static int imgcvt_cb_bgr332_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *u
   uint8_t pixel=(b&0xe0)|((g>>3)&0x1c)|(r>>6);
   //TODO We have only so many colors, it would be great to be able to use natural black.
   // Find some other alpha strategy for bgr332.
-  if (a<0x80) pixel=0;
+  if (a<0x80) { gimgcvt->image.alpha=1; pixel=0; }
   else if (!pixel) pixel=0x20;
   fmn_image_iterator_write(iter,pixel);
   if (!fmn_image_iterator_next(iter)) return 1;
@@ -91,6 +95,7 @@ static int imgcvt_cb_bgr332_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *u
 
 static int imgcvt_cb_argb4444be_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,void *userdata) {
   struct fmn_image_iterator *iter=userdata;
+  if (a<0x80) gimgcvt->image.alpha=1;
   fmn_image_iterator_write(iter,((a<<8)&0xf000)|((r<<4)&0x0f00)|(g&0x00f0)|(b>>4));
   if (!fmn_image_iterator_next(iter)) return 1;
   return 0;
@@ -100,6 +105,7 @@ static int imgcvt_cb_argb4444be_rgba(uint8_t r,uint8_t g,uint8_t b,uint8_t a,voi
  */
  
 int imgcvt_fmn_from_png(struct imgcvt *imgcvt) {
+  gimgcvt=imgcvt;
   
   int err;
   if (!imgcvt->format) {

@@ -335,8 +335,6 @@ uint16_t akpico_get_buttons() {
 }
 
 /* Send framebuffer.
- * For now at least, it's in Thumby format.
- * TODO Can we compose the main framebuffer in a build-time-selected format?
  */
  
 static uint8_t skip=0;
@@ -351,62 +349,15 @@ void akpico_send_framebuffer(const void *src) {
     skip=0;
     return;
   }
-
-  /* Natural size, centered. This works great but it is absurdly small.
-  color_t *dstrow=_fb+((240>>1)-(40>>1))*240+((240>>1)-(72>>1));
-  const uint8_t *srcrow=src;
-  uint8_t srcmask=0x01;
-  uint8_t yi=40;
-  for (;yi-->0;dstrow+=240) {
-    color_t *dstp=dstrow;
-    const uint8_t *srcp=srcrow;
-    uint8_t xi=72;
-    for (;xi-->0;dstp++,srcp++) {
-      *dstp=((*srcp)&srcmask)?0xffff:0x0000;
-    }
-    if (srcmask==0x80) {
-      srcmask=0x01;
-      srcrow+=72;
-    } else {
-      srcmask<<=1;
-    }
-  }
-  /**/
-  
-  /* Zoom 3x. Looks great!* *
-  color_t *dstrow=_fb+((240>>1)-(120>>1))*240+((240>>1)-(216>>1));
-  int cpc=72*3*sizeof(color_t);
-  const uint8_t *srcrow=src;
-  uint8_t srcmask=0x01;
-  uint8_t yi=40;
-  for (;yi-->0;dstrow+=240*3) {
-    color_t *dstp=dstrow;
-    const uint8_t *srcp=srcrow;
-    uint8_t xi=72;
-    for (;xi-->0;dstp+=3,srcp++) {
-      dstp[0]=dstp[1]=dstp[2]=((*srcp)&srcmask)?0xffff:0x0000;
-    }
-    memcpy(dstrow+240,dstrow,cpc);
-    memcpy(dstrow+480,dstrow,cpc);
-    if (srcmask==0x80) {
-      srcmask=0x01;
-      srcrow+=72;
-    } else {
-      srcmask<<=1;
-    }
-  }
-  /**/
-  
-  /* Or better yet, now we should have a framebuffer in the native format.
-   * It's not the correct size, and it's never going to be, but we can do a simple simple rowwise memcpy.
-   */
-  color_t *dstrow=_fb+((240>>1)-(FMN_FBH>>1))*240+((240>>1)-(FMN_FBW>>1));
-  uint16_t cpc=FMN_FBW<<1;
-  const uint16_t *srcrow=src;
-  uint8_t yi=FMN_FBH;
-  for (;yi-->0;dstrow+=240,srcrow+=FMN_FBW) memcpy(dstrow,srcrow,cpc);
-  /**/
   
   _wait_vsync();
   _flip();
+}
+
+/* Initialize framebuffer.
+ */
+ 
+void fmn_platform_init_framebuffer(struct fmn_image *fb) {
+  fb->v=(uint8_t*)(_fb+((240>>1)-(FMN_FBH>>1))*240+((240>>1)-(FMN_FBW>>1)));
+  fb->stride=480;
 }

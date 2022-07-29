@@ -28,14 +28,17 @@
     #define FMN_FBFMT FMN_IMGFMT_bgr565be
     #define FMN_FB_STRIDE (FMN_FBW*2)
     #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
+    #define FMN_PLATFORM_FRAMEBUFFER 1 /* tiny */
   #elif FMN_FRAMEBUFFER_argb4444be
     #define FMN_FBFMT FMN_IMGFMT_argb4444be
     #define FMN_FB_STRIDE (FMN_FBW*2)
     #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*2)
+    #define FMN_PLATFORM_FRAMEBUFFER 1 /* pico */
   #else /* rgba8888 */
     #define FMN_FBFMT FMN_IMGFMT_rgba8888
     #define FMN_FB_STRIDE (FMN_FBW*4)
     #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH*4)
+    #define FMN_PLATFORM_FRAMEBUFFER 0
   #endif
   
 #elif FMN_IMAGE_SET_8b
@@ -46,6 +49,7 @@
   #define FMN_FB_SIZE_BYTES ((FMN_FBW*FMN_FBH)>>3)
   #define FMN_TILESIZE 8
   #define FMN_GFXSCALE 1
+  #define FMN_PLATFORM_FRAMEBUFFER 0
   
 #else /* 8c */
   #define FMN_FBW 72
@@ -55,6 +59,7 @@
   #define FMN_FB_SIZE_BYTES (FMN_FBW*FMN_FBH)
   #define FMN_TILESIZE 8
   #define FMN_GFXSCALE 1
+  #define FMN_PLATFORM_FRAMEBUFFER 1 /* tiny */
 #endif
 
 /* Normalized screen coordinates.

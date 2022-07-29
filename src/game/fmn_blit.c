@@ -5,6 +5,8 @@
  * Very likely for generating the background image, in which case it's also very likely to be byte-aligned.
  */
  
+#if FMN_FBFMT==FMN_IMGFMT_thumby
+ 
 static void fmn_blit_thumby_NONE(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
   const struct fmn_image *src,int16_t srcx,int16_t srcy,
@@ -50,9 +52,13 @@ static void fmn_blit_thumby_NONE(
   }
 }
 
+#endif
+
 /* Blit a sprite from ya11 to a thumby framebuffer without xform.
  * Probably the likeliest scenario and most deserving of optimization.
  */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_thumby
  
 static void fmn_blit_thumby_ya11_NONE(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
@@ -94,9 +100,13 @@ static void fmn_blit_thumby_ya11_NONE(
   }
 }
 
+#endif
+
 /* Blit a sprite from ya11 to a thumby framebuffer with xform.
  * All transforms are reasonably likely. Zero, the likeliest by far, is handled separate.
  */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_thumby
  
 static void fmn_blit_thumby_ya11_ANY(
   struct fmn_image *dst,int16_t dstx,int16_t dsty,
@@ -205,6 +215,266 @@ static void fmn_blit_thumby_ya11_ANY(
   }
 }
 
+#endif
+
+/* Blit one rgba8888 to another with no xform.
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_rgba8888
+
+static void fmn_blit_rgba8888_NONE(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+(dstx<<2);
+  const uint8_t *srcrow=src->v+srcy*src->stride+(srcx<<2);
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+      uint8_t *dstp=dstrow;
+      const uint8_t *srcp=srcrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=4,srcp+=4) {
+        if (!srcp[3]) continue;
+        dstp[0]=srcp[0];
+        dstp[1]=srcp[1];
+        dstp[2]=srcp[2];
+        dstp[3]=0xff;
+      }
+    }
+  } else {
+    int16_t cpc=w<<2;
+    if ((cpc==dst->stride)&&(cpc==src->stride)) { // eg copying a whole framebuffer, a common thing
+      memcpy(dstrow,srcrow,cpc*h);
+    } else {
+      for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+        memcpy(dstrow,srcrow,cpc);
+      }
+    }
+  }
+}
+
+#endif
+
+/* Blit one rgba8888 to another with xform.
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_rgba8888
+
+static void fmn_blit_rgba8888_ANY(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h,
+  uint8_t xform
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+(dstx<<2);
+  struct fmn_image_iterator srciter={0};
+  if (xform&FMN_XFORM_SWAP) {
+    int16_t tmp=w;
+    w=h;
+    h=tmp;
+  }
+  if (!fmn_image_iterate(&srciter,src,srcx,srcy,w,h,xform)) return;
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=4) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        if (pixel) {
+          dstp[0]=pixel>>24;
+          dstp[1]=pixel>>16;
+          dstp[2]=pixel>>8;
+          dstp[3]=0xff;
+        }
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  } else {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=4) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        dstp[0]=pixel>>24;
+        dstp[1]=pixel>>16;
+        dstp[2]=pixel>>8;
+        dstp[3]=0xff;
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  }
+}
+
+#endif
+
+/* Blit one argb4444be to another with no xform. (or bgr565be)
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_argb4444be || FMN_FBFMT==FMN_IMGFMT_bgr565be
+
+static void fmn_blit_argb4444be_NONE(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+(dstx<<1);
+  const uint8_t *srcrow=src->v+srcy*src->stride+(srcx<<1);
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+      uint8_t *dstp=dstrow;
+      const uint8_t *srcp=srcrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=2,srcp+=2) {
+        if (!srcp[0]&&!srcp[1]) continue;
+        dstp[0]=srcp[0];
+        dstp[1]=srcp[1];
+      }
+    }
+  } else {
+    int16_t cpc=w<<1;
+    if ((cpc==dst->stride)&&(cpc==src->stride)) { // eg copying a whole framebuffer, a common thing
+      memcpy(dstrow,srcrow,cpc*h);
+    } else {
+      for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+        memcpy(dstrow,srcrow,cpc);
+      }
+    }
+  }
+}
+
+#endif
+
+/* Blit one argb4444be to another with xform. (or bgr565be)
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_argb4444be || FMN_FBFMT==FMN_IMGFMT_bgr565be
+
+static void fmn_blit_argb4444be_ANY(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h,
+  uint8_t xform
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+(dstx<<1);
+  struct fmn_image_iterator srciter={0};
+  if (xform&FMN_XFORM_SWAP) {
+    int16_t tmp=w;
+    w=h;
+    h=tmp;
+  }
+  if (!fmn_image_iterate(&srciter,src,srcx,srcy,w,h,xform)) return;
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=2) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        if (pixel) {
+          dstp[0]=pixel>>8;
+          dstp[1]=pixel;
+        }
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  } else {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=2) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        dstp[0]=pixel>>8;
+        dstp[1]=pixel;
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  }
+}
+
+#endif
+
+/* Blit one bgr332 to another with no xform. (or y8)
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_bgr332 || FMN_FBFMT==FMN_IMGFMT_y8
+
+static void fmn_blit_bgr332_NONE(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+dstx;
+  const uint8_t *srcrow=src->v+srcy*src->stride+srcx;
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+      uint8_t *dstp=dstrow;
+      const uint8_t *srcp=srcrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=1,srcp+=1) {
+        if (!srcp[0]) continue;
+        dstp[0]=srcp[0];
+      }
+    }
+  } else {
+    int16_t cpc=w;
+    if ((cpc==dst->stride)&&(cpc==src->stride)) { // eg copying a whole framebuffer, a common thing
+      memcpy(dstrow,srcrow,cpc*h);
+    } else {
+      for (;h-->0;dstrow+=dst->stride,srcrow+=src->stride) {
+        memcpy(dstrow,srcrow,cpc);
+      }
+    }
+  }
+}
+
+#endif
+
+/* Blit one bgr332 to another with xform. (or y8)
+ */
+ 
+#if FMN_FBFMT==FMN_IMGFMT_bgr332 || FMN_FBFMT==FMN_IMGFMT_y8
+
+static void fmn_blit_bgr332_ANY(
+  struct fmn_image *dst,int16_t dstx,int16_t dsty,
+  const struct fmn_image *src,int16_t srcx,int16_t srcy,
+  int16_t w,int16_t h,
+  uint8_t xform
+) {
+  uint8_t *dstrow=dst->v+dsty*dst->stride+dstx;
+  struct fmn_image_iterator srciter={0};
+  if (xform&FMN_XFORM_SWAP) {
+    int16_t tmp=w;
+    w=h;
+    h=tmp;
+  }
+  if (!fmn_image_iterate(&srciter,src,srcx,srcy,w,h,xform)) return;
+  if (src->alpha) {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=1) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        if (pixel) {
+          dstp[0]=pixel;
+        }
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  } else {
+    for (;h-->0;dstrow+=dst->stride) {
+      uint8_t *dstp=dstrow;
+      int16_t xi=w;
+      for (;xi-->0;dstp+=1) {
+        uint32_t pixel=fmn_image_iterator_read(&srciter);
+        dstp[0]=pixel;
+        if (!fmn_image_iterator_next(&srciter)) return;
+      }
+    }
+  }
+}
+
+#endif
+
 /* Blit, main entry point.
  */
  
@@ -304,15 +574,43 @@ void fmn_blit(
   }
   if ((w<1)||(h<1)) return;
   
-  // All likely format scenarios should have a bespoke blitter.
+  /* All likely format scenarios should have a bespoke blitter.
+   * These are conditional on the framebuffer format so we don't overload the executable with unnecessary blitters.
+   */
   switch ((xform<<16)|(dst->fmt<<8)|src->fmt) {
-    case (0<<16)|(FMN_IMGFMT_thumby<<8)|FMN_IMGFMT_thumby: fmn_blit_thumby_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
-    case (0<<16)|(FMN_IMGFMT_thumby<<8)|FMN_IMGFMT_ya11: fmn_blit_thumby_ya11_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+    #if FMN_FBFMT==FMN_IMGFMT_thumby
+      case (0<<16)|(FMN_IMGFMT_thumby<<8)|FMN_IMGFMT_thumby: fmn_blit_thumby_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+      case (0<<16)|(FMN_IMGFMT_thumby<<8)|FMN_IMGFMT_ya11: fmn_blit_thumby_ya11_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_rgba8888
+      case (0<<16)|(FMN_IMGFMT_rgba8888<<8)|FMN_IMGFMT_rgba8888: fmn_blit_rgba8888_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_argb4444be || FMN_FBFMT==FMN_IMGFMT_bgr565be
+      case (0<<16)|(FMN_IMGFMT_argb4444be<<8)|FMN_IMGFMT_argb4444be: fmn_blit_argb4444be_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+      case (0<<16)|(FMN_IMGFMT_bgr565be<<8)|FMN_IMGFMT_bgr565be: fmn_blit_argb4444be_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_bgr332 || FMN_FBFMT==FMN_IMGFMT_y8
+      case (0<<16)|(FMN_IMGFMT_bgr332<<8)|(FMN_IMGFMT_bgr332): fmn_blit_bgr332_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+      case (0<<16)|(FMN_IMGFMT_y8<<8)|(FMN_IMGFMT_y8): fmn_blit_bgr332_NONE(dst,dstx,dsty,src,srcx,srcy,w,h); return;
+    #endif
   }
-  if ((dst->fmt==FMN_IMGFMT_thumby)&&(src->fmt==FMN_IMGFMT_ya11)) {
-    fmn_blit_thumby_ya11_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform);
-    return;
+  switch ((dst->fmt<<8)|src->fmt) {
+    #if FMN_FBFMT==FMN_IMGFMT_thumby
+      case (FMN_IMGFMT_thumby<<8)|FMN_IMGFMT_ya11: fmn_blit_thumby_ya11_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_rgba8888
+      case (FMN_IMGFMT_rgba8888<<8)|FMN_IMGFMT_rgba8888: fmn_blit_rgba8888_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_argb4444be || FMN_FBFMT==FMN_IMGFMT_bgr565be
+      case (FMN_IMGFMT_argb4444be<<8)|FMN_IMGFMT_argb4444be: fmn_blit_argb4444be_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+      case (FMN_IMGFMT_bgr565be<<8)|FMN_IMGFMT_bgr565be: fmn_blit_argb4444be_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+    #endif
+    #if FMN_FBFMT==FMN_IMGFMT_bgr332 || FMN_FBFMT==FMN_IMGFMT_y8
+      case (FMN_IMGFMT_bgr332<<8)|(FMN_IMGFMT_bgr332): fmn_blit_bgr332_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+      case (FMN_IMGFMT_y8<<8)|(FMN_IMGFMT_y8): fmn_blit_bgr332_ANY(dst,dstx,dsty,src,srcx,srcy,w,h,xform); return;
+    #endif
   }
+  //TODO bgr332
   
   // In all other scenarios, we do it generically at terrible performance cost.
   struct fmn_image_iterator srciter={0},dstiter={0};
@@ -370,4 +668,32 @@ void fmn_image_fill_rect(
   do {
     fmn_image_iterator_write(&iter,pixel);
   } while (fmn_image_iterator_next(&iter));
+}
+
+/* Clear image.
+ */
+ 
+void fmn_image_clear(struct fmn_image *dst) {
+  if (!dst||!dst->writeable) return;
+  int16_t cpc;
+  int16_t yi=dst->h;
+  switch (dst->fmt) {
+    // oddballs:
+    case FMN_IMGFMT_thumby: yi=(dst->h+7)>>3; cpc=dst->w; break;
+    // 1-bit:
+    case FMN_IMGFMT_y1: cpc=(dst->w+7)>>3; break;
+    // 2-bit:
+    case FMN_IMGFMT_ya11: cpc=(dst->w+3)>>2; break;
+    // 8-bit:
+    case FMN_IMGFMT_y8:
+    case FMN_IMGFMT_bgr332: cpc=dst->w; break;
+    // 16-bit:
+    case FMN_IMGFMT_argb4444be:
+    case FMN_IMGFMT_bgr565be: cpc=dst->w<<1; break;
+    // 32-bit:
+    case FMN_IMGFMT_rgba8888: cpc=dst->w<<2; break;
+    default: return;
+  }
+  uint8_t *row=dst->v;
+  for (;yi-->0;row+=dst->stride) memset(row,0,cpc);
 }

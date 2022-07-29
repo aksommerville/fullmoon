@@ -7,7 +7,7 @@ macos_OPT_ENABLE:=intf macos
 
 macos_CCWARN:=-Werror -Wimplicit -Wno-parentheses -Wno-comment -Wno-deprecated-declarations
 macos_CCINC:=-I/usr/include/libdrm
-macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE)) -DFMN_IMAGE_SET_$(macos_IMAGE_SET)=1
+macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE)) -DFMN_IMAGE_SET_$(macos_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(macos_FBFMT)=1
 macos_CC:=gcc -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_OBJC:=gcc -xobjective-c -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_LD:=gcc

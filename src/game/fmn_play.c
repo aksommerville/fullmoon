@@ -155,8 +155,7 @@ void fmn_play_render(struct fmn_image *fb) {
     bgbitsdirty=0;
   }
   
-  // bgbits and fb must be exactly the same size and format.
-  memcpy(fb->v,bgbits.v,sizeof(bgbits_storage));
+  fmn_blit(fb,0,0,&bgbits,0,0,FMN_FBW,FMN_FBH,0);
   
   // Sprites.
   fmn_sprites_render(fb);
