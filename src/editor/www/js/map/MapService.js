@@ -19,6 +19,8 @@
  *  { event:"sizeChanged" }
  *  { event:"hoverPosition", x, y } // cell the cursor hovers on
  *  { event:"region", region:string }
+ *  { event:"tileSize", tileSize: >=1 }
+ *  { event:"renderFeatures", features:array } // "cellLines","screenLines"
  */
  
 import { FullmoonMap } from "./FullmoonMap.js";
@@ -50,6 +52,8 @@ export class MapService {
     this.poiDragIndex = -1;
     this.hoverX = -1;
     this.hoverY = -1;
+    this.tileSize = 32;
+    this.renderFeatures = ["cellLines", "screenLines"];
     this.subscribers = [];
   }
   
@@ -161,6 +165,27 @@ export class MapService {
     this.broadcast({ event: "region", region: name });
     this.broadcast({ event: "dirty" });
     this.broadcast({ event: "finishEdit" });
+  }
+  
+  setTileSize(tileSize) {
+    if (typeof(tileSize) !== "number") return;
+    if (!tileSize || tileSize<1) return;
+    this.tileSize = tileSize;
+    this.broadcast({ event: "tileSize", tileSize });
+  }
+  
+  setRenderFeatures(features) {
+    features = [...features].sort();
+    let same = true;
+    if (features.length === this.renderFeatures.length) {
+      for (let i=features.length; i-->0;) if (features[i] !== this.renderFeatures[i]) {
+        same = false;
+        break;
+      }
+    } else same = false;
+    if (same) return;
+    this.renderFeatures = features;
+    this.broadcast({ event: "renderFeatures", features });
   }
   
   /* Resize.

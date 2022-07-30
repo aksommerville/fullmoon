@@ -19,7 +19,7 @@ export class MapEditor {
     this.mapService = mapService;
     
     this.map = null;
-    this.pixelsPerTile = 32; // output tile size (ie zoom)
+    this.pixelsPerTile = this.mapService.tileSize; // output tile size (ie zoom)
     this.srcTileWidth = 8; // tile size in sheet. should always be 8, but we'll read from the image
     this.srcTileheight = 8; // ''
     this.tilesheet = null;
@@ -65,13 +65,17 @@ export class MapEditor {
     this.mapService.reset(map);
     this.mapSubscription = this.mapService.subscribe(e => this.onMapEvent(e));
     this.map = map;
+    this.setSizerSize();
+    this.onTilesheetChanged();
+    this.render();
+  }
+  
+  setSizerSize() {
     const fullWidthPixels = this.map.w * this.pixelsPerTile;
     const fullHeightPixels = this.map.h * this.pixelsPerTile;
     const sizer = this.element.querySelector(".sizer");
     sizer.style.width = `${fullWidthPixels}px`;
     sizer.style.height = `${fullHeightPixels}px`;
-    this.onTilesheetChanged();
-    this.render();
   }
   
   onResize(events) {
@@ -126,41 +130,45 @@ export class MapEditor {
     // Render POI
     for (const poi of this.map.pois) {
       let dstx = left + poi.x * this.pixelsPerTile;
-      let dsty = top + poi.y * this.pixelsPerTile;
+      dsty = top + poi.y * this.pixelsPerTile;
       const srcx = (poi.q[0] & 15) * 16;
       const srcy = (poi.q[0] >> 4) * 16;
       ctx.drawImage(this.poiIcons, srcx, srcy, 16, 16, dstx, dsty, 16, 16);
     }
     
     // Cell boundaries
-    ctx.beginPath();
-    let dstx = cola * this.pixelsPerTile + left;
-    for (let col = cola; col <= colz; col++, dstx += this.pixelsPerTile) {
-      ctx.moveTo(dstx, top);
-      ctx.lineTo(dstx, bottom);
+    if (this.mapService.renderFeatures.includes("cellLines")) {
+      ctx.beginPath();
+      let dstx = cola * this.pixelsPerTile + left;
+      for (let col = cola; col <= colz; col++, dstx += this.pixelsPerTile) {
+        ctx.moveTo(dstx, top);
+        ctx.lineTo(dstx, bottom);
+      }
+      dsty = rowa * this.pixelsPerTile + top;
+      for (let row = rowa; row <= rowz; row++, dsty += this.pixelsPerTile) {
+        ctx.moveTo(left, dsty);
+        ctx.lineTo(right, dsty);
+      }
+      ctx.strokeStyle = "#0ff";
+      ctx.stroke();
     }
-    dsty = rowa * this.pixelsPerTile + top;
-    for (let row = rowa; row <= rowz; row++, dsty += this.pixelsPerTile) {
-      ctx.moveTo(left, dsty);
-      ctx.lineTo(right, dsty);
-    }
-    ctx.strokeStyle = "#0ff";
-    ctx.stroke();
     
     // Screen boundaries. There's few enough of these, don't bother finding the view box.
-    ctx.beginPath();
-    dstx = left;
-    for (; dstx < right; dstx += 9 * this.pixelsPerTile) {
-      ctx.moveTo(dstx, top);
-      ctx.lineTo(dstx, bottom);
+    if (this.mapService.renderFeatures.includes("screenLines")) {
+      ctx.beginPath();
+      let dstx = left;
+      for (; dstx < right; dstx += 9 * this.pixelsPerTile) {
+        ctx.moveTo(dstx, top);
+        ctx.lineTo(dstx, bottom);
+      }
+      dsty = top;
+      for (; dsty < bottom; dsty += 5 * this.pixelsPerTile) {
+        ctx.moveTo(left, dsty);
+        ctx.lineTo(right, dsty);
+      }
+      ctx.strokeStyle = "#f80";
+      ctx.stroke();
     }
-    dsty = top;
-    for (; dsty < bottom; dsty += 5 * this.pixelsPerTile) {
-      ctx.moveTo(left, dsty);
-      ctx.lineTo(right, dsty);
-    }
-    ctx.strokeStyle = "#ff0";
-    ctx.stroke();
   }
   
   onMouseDown(event) {
@@ -260,6 +268,16 @@ export class MapEditor {
     this.onFinishEdit();
   }
   
+  onTileSize(tileSize) {
+    this.pixelsPerTile = tileSize;
+    this.setSizerSize();
+    this.render();
+  }
+  
+  onRenderFeaturesChanged(features) {
+    this.render();
+  }
+  
   onMapEvent(event) {
     switch (event.event) {
       case "dirty": this.onDirty(); break;
@@ -268,6 +286,8 @@ export class MapEditor {
       case "promptForEditPoi": this.onEditPoi(event); break;
       case "tilesheetChanged": this.onTilesheetChanged(); break;
       case "sizeChanged": this.onSizeChanged(); break;
+      case "tileSize": this.onTileSize(event.tileSize); break;
+      case "renderFeatures": this.onRenderFeaturesChanged(event.features); break;
     }
   }
   

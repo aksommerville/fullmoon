@@ -199,6 +199,31 @@ body {
   background-color: #f00;
 }
 
+.MapExtras {
+  display: flex;
+  flex-direction: row;
+}
+
+.MapExtras > .positionTattle {
+  font-family: "monospace";
+}
+
+.MapExtras input.featureToggle {
+  display: none;
+}
+
+.MapExtras label.featureToggle {
+  border: 1px solid #000;
+  margin: 0 0.3em;
+  padding: 0 0.3em;
+  background-color: #aaa;
+  color: #000;
+}
+
+.MapExtras input:checked + label.featureToggle {
+  background-color: #ff0;
+}
+
 .TilesheetEditor {
   display: flex;
   flex-direction: column;

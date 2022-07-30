@@ -19,12 +19,12 @@ static uint8_t fmn_panicmap[FMN_SCREENW_TILES*FMN_SCREENH_TILES]={0};
  
 const struct fmn_map *map_region_heads[8]={
   &cheatertrap, // reserved
-  &outermap,
-  &cave001,
-  &cheatertrap, // available
-  &cheatertrap, // available
-  &cheatertrap, // available
-  &cheatertrap, // available
+  &home,        // "home"
+  &cheatertrap, // "forest" TODO
+  &cheatertrap, // "caves" TODO
+  &cheatertrap, // "desert" TODO
+  &cheatertrap, // "swamp" TODO
+  &cheatertrap, // "castle" TODO
   &cheatertrap, // cheatertrap, for real
 };
 
@@ -35,7 +35,7 @@ void fmn_map_reset() {
   fmn_map=0;
   fmn_vx=fmn_vy=0;
   fmn_proximity_clear();
-  fmn_map_load_default(&outermap);
+  fmn_map_load_default(&home);
 }
 
 void fmn_map_reset_region(uint8_t region) {

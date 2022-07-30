@@ -28,7 +28,7 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
-- - [ ] MapEditor: zoom
+- - [x] MapEditor: zoom
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
@@ -59,3 +59,4 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Pippin?
 - [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.
 - - It should involve convolution somehow, so changing one letter forces the others to change (even if just 1 bit of plaintext).
+- [ ] Design-rule validation for passwords, eg can't have the wand if you don't have the feather
