@@ -50,7 +50,7 @@ int main(int argc,char **argv) {
     .iconw=appicon.w,
     .iconh=appicon.h,
     .title="Full Moon",
-    .audio_rate=44100,//TODO configurable
+    .audio_rate=22050,//TODO configurable
     .chanc=1,//TODO configurable
     
     .close=fmn_genioc_cb_close,

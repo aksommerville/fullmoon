@@ -17,8 +17,14 @@ void minisyni_init(uint16_t rate,uint8_t chanc);
 /* Generate (c) samples beginning at (v).
  * Always *samples* regardless of channel count. Must be a multiple of (chanc).
  */
-int minisyni_update(int16_t *v,int32_t c);
+void minisyni_update(int16_t *v,int32_t c);
 
 //TODO actually do stuff
+
+//XXX possibly temporary.
+// You must eventually 'note_off' each 'note_on' with the same (chid,noteid).
+// I'm currently ignoring (velocity).
+void minisyni_note_on(uint8_t chid,uint8_t noteid,uint8_t velocity);
+void minisyni_note_off(uint8_t chid,uint8_t noteid,uint8_t velocity);
 
 #endif

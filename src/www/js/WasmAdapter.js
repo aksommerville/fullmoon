@@ -75,6 +75,7 @@ export class WasmAdapter {
         fmn_platform_read_input: () => this._input,
         fmn_platform_send_framebuffer: (p) => this._receiveFramebuffer(p),
         abort: (...args) => {},
+        sinf: (n) => Math.sin(n),
       },
     };
   }

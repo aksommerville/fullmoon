@@ -167,13 +167,19 @@ static void tiny_audio_init() {
  
 #if FMN_AUDIO_ENABLE
 
-#define FMN_AUDIO_BUFFER_SIZE 512
+#define FMN_AUDIO_BUFFER_SIZE 128
 
 static int16_t fmn_audio_buffer[FMN_AUDIO_BUFFER_SIZE]={0};
 static int16_t fmn_audio_bufferp=0;
 static uint8_t fmn_audio_buffer_front=0,fmn_audio_buffer_back=0;
 
 static int16_t audio_next() {
+  int16_t v=0;
+  #if FMN_USE_minisyni
+    minisyni_update(&v,1);
+  #endif
+  return v;
+  /*
   if (fmn_audio_bufferp<FMN_AUDIO_BUFFER_SIZE>>1) {
     if (!fmn_audio_buffer_back) {
       #if FMN_USE_minisyni
@@ -202,6 +208,7 @@ static int16_t audio_next() {
     fmn_audio_buffer_front=0;
   }
   return sample;
+  */
 }
 
 #else

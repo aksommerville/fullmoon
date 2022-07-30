@@ -1,35 +1,140 @@
 #include "opt/minisyni/ms_internal.h"
 
+#define MS_P_SHIFT (32-9)
+
 struct minisyni minisyni={0};
+
+#if FMN_USE_web
+  // Hard to pass pointers across the Wasm boundary.
+  // Much simpler if we can just allocate the buffer here.
+  int16_t storage_for_wasi[512];
+#endif
+
+static uint32_t minisyni_ratev[128]={
+  2125742,2252146,2386065,2527948,2678268,2837526,3006254,3185015,3374406,3575058,3787642,4012867,4251485,
+  4504291,4772130,5055896,5356535,5675051,6012507,6370030,6748811,7150117,7575285,8025735,8502970,9008582,
+  9544261,10111792,10713070,11350103,12025015,12740059,13497623,14300233,15150569,16051469,17005939,18017165,
+  19088521,20223584,21426141,22700205,24050030,25480119,26995246,28600467,30301139,32102938,34011878,36034330,
+  38177043,40447168,42852281,45400411,48100060,50960238,53990491,57200933,60602276,64205876,68023757,72068660,
+  76354085,80894335,85704563,90800821,96200119,101920476,107980983,114401866,121204555,128411753,136047513,
+  144137319,152708170,161788671,171409126,181601643,192400238,203840952,215961966,228803732,242409110,256823506,
+  272095026,288274639,305416341,323577341,342818251,363203285,384800477,407681904,431923931,457607465,484818220,
+  513647012,544190053,576549277,610832681,647154683,685636503,726406571,769600953,815363807,863847862,915214929,
+  969636441,1027294024,1088380105,1153098554,1221665363,1294309365,1371273005,1452813141,1539201906,1630727614,
+  1727695724,1830429858,1939272882,2054588048,2176760211,2306197109,2443330725,2588618730,2742546010,2905626283,
+  3078403812,3261455229,
+};
+static uint16_t minisyni_ratev_base=22050;
+
+static int16_t TMP_wave[512];
+#include <math.h>
 
 /* Init.
  */
  
 void minisyni_init(uint16_t rate,uint8_t chanc) {
+
   minisyni.rate=rate;
   minisyni.chanc=chanc;
+  minisyni.default_ttl=rate/4;
   
-  minisyni.tmppd=(uint32_t)(((float)0xffffffff*440.0f)/(float)rate);
-  minisyni.tmplevel=1000;
+  if (rate!=minisyni_ratev_base) {
+    uint32_t *v=minisyni_ratev;
+    uint8_t i=0x80;
+    for (;i-->0;v++) *v=((*v)*rate)/minisyni_ratev_base;
+    minisyni_ratev_base=rate;
+  }
+  
+  {
+    int16_t *v=TMP_wave;
+    int i=512;
+    //for (;i-->0;v++) *v=(int16_t)(sinf((i*M_PI*2.0f)/512.0f)*10000.0f);
+    for (;i-->0;v++) *v=(i*10000)/512-5000;
+  }
+}
+
+/* Update one voice. Add to buffer.
+ */
+ 
+static void ms_voice_update(int16_t *v,int32_t c,struct ms_voice *voice) {
+  for (;c-->0;v++) {
+    if (voice->ttl) {
+      voice->ttl--;
+      if (!voice->ttl) {
+        voice->src=0;
+        return;
+      }
+      (*v)+=(voice->src[voice->p>>MS_P_SHIFT]*voice->ttl)/minisyni.default_ttl;
+    } else {
+      (*v)+=voice->src[voice->p>>MS_P_SHIFT];
+    }
+    voice->p+=voice->pd;
+  }
 }
 
 /* Update.
  */
- 
-int16_t storage_for_wasi[512];
-int32_t tmppdd=100;
 
-int minisyni_update(int16_t *v,int32_t c) {
-  if (c<1) return c;
+void minisyni_update(int16_t *v,int32_t c) {
+  if (c<1) return;
   memset(v,0,c<<1);
   
-  int32_t i=c;
-  for (;i-->0;v++) {
-    *v=minisyni.tmplevel*((minisyni.tmpp&0x80000000)?-1:1);
-    minisyni.tmpp+=minisyni.tmppd;
-    minisyni.tmppd+=tmppdd;
-    if ((minisyni.tmppd>400)&&(tmppdd>0)) tmppdd=-tmppdd;
-    else if ((minisyni.tmppd<100)&&(tmppdd<0)) tmppdd=-tmppdd;
+  struct ms_voice *voice=minisyni.voicev;
+  uint8_t i=minisyni.voicec;
+  for (;i-->0;voice++) {
+    if (!voice->src) continue;
+    ms_voice_update(v,c,voice);
   }
-  return minisyni.tmplevel;
+}
+
+/* Rate from MIDI note.
+ */
+ 
+static uint32_t ms_normrate_from_midi_note(uint8_t noteid) {
+  if (noteid>0x7f) noteid=0x7f;
+  return minisyni_ratev[noteid];
+}
+
+/* Note on.
+ */
+ 
+void minisyni_note_on(uint8_t chid,uint8_t noteid,uint8_t velocity) {
+  struct ms_voice *voice=minisyni.voicev;
+  uint8_t i=minisyni.voicec;
+  for (;i-->0;voice++) {
+    if (voice->src) continue;
+    
+    voice->chid=chid;
+    voice->noteid=noteid;
+    voice->src=TMP_wave;
+    voice->p=0;
+    voice->pd=ms_normrate_from_midi_note(noteid);
+    voice->ttl=0;
+    return;
+  }
+  if (minisyni.voicec<MS_VOICE_LIMIT) {
+    struct ms_voice *voice=minisyni.voicev+minisyni.voicec++;
+    voice->chid=chid;
+    voice->noteid=noteid;
+    voice->src=TMP_wave;
+    voice->p=0;
+    voice->pd=ms_normrate_from_midi_note(noteid);
+    voice->ttl=0;
+  }
+}
+
+/* Note off.
+ */
+ 
+void minisyni_note_off(uint8_t chid,uint8_t noteid,uint8_t velocity) {
+  struct ms_voice *voice=minisyni.voicev;
+  uint8_t i=minisyni.voicec;
+  for (;i-->0;voice++) {
+    if (voice->chid!=chid) continue;
+    if (voice->noteid!=noteid) continue;
+    //voice->src=0;//TODO entering a release stage would be much nicer
+    voice->chid=0xff;
+    voice->noteid=0xff;
+    voice->ttl=minisyni.default_ttl;
+  }
 }

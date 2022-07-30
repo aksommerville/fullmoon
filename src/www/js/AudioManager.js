@@ -10,7 +10,7 @@ export class AudioManager {
     window.setTimeout(() => {
       console.log(`create AudioContext`);
       this.context = new AudioContext({
-        sampleRate: 44100,
+        sampleRate: 22050,
         latencyHint: "interactive",
       });
       this.wasmAdapter.whenReady(() => {
