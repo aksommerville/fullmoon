@@ -7,6 +7,7 @@ export class FullmoonMap {
     this.w = 0;
     this.h = 0;
     this.tilesheet = ""; // name
+    this.region = ""; // name
     this.pois = []; // {x,y,q[4],qp}
     this.cells = [];
     if (serial) this._decode(serial);
@@ -47,6 +48,7 @@ export class FullmoonMap {
     let dst = "";
     dst += `tilesheet=${this.tilesheet}\n`;
     dst += `size=${this.w} ${this.h}\n`;
+    dst += `region=${this.region}\n`;
     for (const poi of this.pois) {
       dst += `poi=${poi.x} ${poi.y} ${FullmoonMap.POI_NAMES[poi.q[0]] || poi.q[0]} ${poi.q[1]} ${poi.q[2]} ${poi.q[3]} ${poi.qp}\n`;
     }
@@ -84,6 +86,7 @@ export class FullmoonMap {
             const [w, h] = v.split(/\s+/).map(n => +n);
             this.resize(w, h);
           } break;
+        case "region": this.region = v; break;
         case "poi": this._decodePoi(v, lineno); break;
         default: throw new Error(`${lineno}: Unknown map header key '${k}'`);
       }

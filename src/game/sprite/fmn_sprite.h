@@ -22,6 +22,7 @@ void fmn_sprites_render(struct fmn_image *fb);
 #define FMN_SPRITE_PV_COUNT 8
 
 #define FMN_SPRITE_FLAG_SOLID     0x0001 /* hero can't walk thru */
+#define FMN_SPRITE_FLAG_DEATHROW  0x0002
 
 #define FMN_FOR_EACH_SPRITE_FLAG \
   _(SOLID)
@@ -44,9 +45,16 @@ struct fmn_sprite {
 extern struct fmn_sprite *fmn_spritev[FMN_SPRITE_LIMIT];
 extern uint16_t fmn_spritec; // READONLY
 
-/* This will clean up the sprite and remove it from the global list.
+/* This will clean up the sprite and remove it from the global list immediately.
  */
 void fmn_sprite_del(struct fmn_sprite *sprite);
+
+/* Prefer over fmn_sprite_del: Marks the sprite for deletion at the end of the update cycle.
+ */
+void fmn_sprite_del_later(struct fmn_sprite *sprite);
+
+// Only the governor should call this.
+void fmn_sprites_execute_deathrow();
 
 /* Create a new sprite centered at (xmm,ymm) and add it to the global list.
  */
@@ -93,6 +101,7 @@ void fmn_sprite_hitbox_all(int16_t *rx,int16_t *ry,int16_t *w,int16_t *h,struct 
 extern const struct fmn_sprtype fmn_sprtype_dummy;
 extern const struct fmn_sprtype fmn_sprtype_heroproxy;
 extern const struct fmn_sprtype fmn_sprtype_bat;
+extern const struct fmn_sprtype fmn_sprtype_treasure;
 
 /* Sprite resource.
  *****************************************************************/

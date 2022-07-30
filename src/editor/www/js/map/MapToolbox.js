@@ -34,6 +34,7 @@ export class MapToolbox {
     this.map = map;
     this.element.querySelector("button.tilesheet").innerText = `Tilesheet: ${map.tilesheet}`;
     this.element.querySelector("button.resize").innerText = `Size: ${map.w},${map.h}`;
+    this.element.querySelector("button.region").innerText = `Region: ${map.region}`;
   }
   
   buildUi() {
@@ -56,6 +57,7 @@ export class MapToolbox {
     
     this.dom.spawn(this.element, "BUTTON", "Tilesheet:", ["tilesheet"], { "on-click": () => this.onClickTilesheet() });
     this.dom.spawn(this.element, "BUTTON", "Size:", ["resize"], { "on-click": () => this.onClickSize() });
+    this.dom.spawn(this.element, "BUTTON", "Region:", ["region"], { "on-click": () => this.onClickRegion() });
   }
   
   onClickTilesheet() {
@@ -72,6 +74,14 @@ export class MapToolbox {
     if (!newSize) return;
     const [w, h] = newSize.split(',').map(n => +n.trim());
     this.mapService.resize(w, h);
+  }
+  
+  onClickRegion() {
+    if (!this.map) return;
+    const newRegion = this.window.prompt("Region name or 0..7:", this.map.region);
+    if (!newRegion || (newRegion === this.map.region)) return;
+    this.mapService.setRegion(newRegion);
+    this.element.querySelector("button.region").innerText = `Region: ${newRegion}`;
   }
   
   onToolClick(event) {

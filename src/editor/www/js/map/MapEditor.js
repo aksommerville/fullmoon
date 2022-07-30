@@ -239,7 +239,7 @@ export class MapEditor {
       console.error(`Failed to load tilesheet '${this.map.tilesheet}'`, error);
     });
     this.tilesheetImage = null;
-    this.resourceService.getImage(`/res/image/${this.map.tilesheet}.png`).then((image) => {
+    this.resourceService.getImage(`/res/image/${this.map.tilesheet}-8b.png`).then((image) => {
       this.tilesheetImage = image;
       this.srcTileWidth = this.tilesheetImage.naturalWidth >> 4;
       this.srcTileHeight = this.tilesheetImage.naturalHeight >> 4;

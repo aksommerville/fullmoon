@@ -22,6 +22,7 @@ static struct fmn_image bgbits={
 static uint8_t bgbitsdirty=1;
 
 static uint16_t raintime=0;
+static uint16_t statebits=0;
  
 /* Begin.
  * Mind that this only means "ui mode changed"; not necessarily "start a fresh game".
@@ -79,6 +80,7 @@ void fmn_play_update() {
   fmn_proximity_update(x,y);
   
   fmn_sprites_update();
+  fmn_sprites_execute_deathrow();
   
   if (raintime>1) raintime--;
   else if (raintime==1) {
@@ -171,13 +173,18 @@ void fmn_play_render(struct fmn_image *fb) {
  
 void fmn_game_reset() {
   raintime=0;
+  statebits=0;
   fmn_map_reset();
   fmn_hero_reset();
 }
 
 void fmn_game_reset_with_password(uint32_t pw) {
+
+  if (pw&0xffff0000) pw=0;
+  statebits=pw;
+
   raintime=0;
-  fmn_map_reset();
+  fmn_map_reset_region((pw&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT);
   fmn_hero_reset();
 }
 
@@ -185,7 +192,12 @@ void fmn_game_reset_with_password(uint32_t pw) {
  */
 
 uint32_t fmn_game_generate_password() {
-  return 0;//TODO
+  return (statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
+}
+
+void fmn_game_set_state(uint16_t mask,uint16_t value) {
+  if (value&~mask) return; // invalid
+  statebits=(statebits&~mask)|value;
 }
 
 /* Navigate.

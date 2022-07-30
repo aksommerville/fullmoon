@@ -28,7 +28,7 @@ export class TilesheetEditor {
   setup(tilesheet) {
     this.tilesheet = tilesheet;
     this.image = null;
-    const imagePath = this.tilesheet.path.replace(/_props.txt$/, ".png");
+    const imagePath = this.tilesheet.path.replace(/_props.txt$/, "-8b.png");
     this.resourceService.getImage(imagePath).then((image) => {
       this.image = image;
       this.render();

@@ -125,6 +125,24 @@ static int mapcvt_decode_poi(struct fmn_map_poi *poi,struct mapcvt *mapcvt,const
   return 0;
 }
 
+/* Evaluate region name.
+ */
+ 
+static int mapcvt_eval_region(uint8_t *dst,const char *src,int srcc) {
+  int n;
+  if ((int_eval(&n,src,srcc)>=2)&&(n>=0)&&(n<8)) {
+    *dst=n;
+    return 0;
+  }
+  
+  if ((srcc==4)&&!memcmp(src,"home",4)) { *dst=1; return 0; }
+  if ((srcc==4)&&!memcmp(src,"cave",4)) { *dst=2; return 0; }
+  if ((srcc==11)&&!memcmp(src,"cheatertrap",11)) { *dst=7; return 0; }
+  //TODO symbolic region names
+  
+  return -1;
+}
+
 /* Decode header line.
  */
  
@@ -153,6 +171,20 @@ static int mapcvt_fmn_text_header_line(struct mapcvt *mapcvt,const char *line,in
     if (!(mapcvt->tilesheetname=malloc(linec-linep+1))) return -1;
     memcpy(mapcvt->tilesheetname,line+linep,linec-linep);
     mapcvt->tilesheetname[linec-linep]=0;
+    return 0;
+  }
+  
+  if ((kc==6)&&!memcmp(k,"region",6)) {
+    if (mapcvt->map.region) {
+      // region zero is technically legal but i plan to not use it
+      fprintf(stderr,"%s:%d: Duplicate 'region'\n",mapcvt->srcpath,lineno);
+      return -2;
+    }
+    int err=mapcvt_eval_region(&mapcvt->map.region,line+linep,linec-linep);
+    if (err<0) {
+      if (err!=-2) fprintf(stderr,"%s:%d: Failed to evaluate '%.*s' as a region.\n",mapcvt->srcpath,lineno,linec-linep,line+linep);
+      return -2;
+    }
     return 0;
   }
   

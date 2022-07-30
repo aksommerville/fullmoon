@@ -59,27 +59,11 @@ void setup() {
 /* Update.
  */
 
-#include "opt/minisyni/minisyni.h"
- 
 void loop() {
   fmn_platform_update();
   
   uint16_t input=fmn_platform_read_input();
   if (input!=pvinput) {
-  
-    #if FMN_USE_minisyni || FMN_FBFMT==FMN_IMGFMT_bgr332
-    //XXX TEMP playing with minisyni
-    #define BTN(tag,noteid) \
-      if ((input&FMN_BUTTON_##tag)&&!(pvinput&FMN_BUTTON_##tag)) minisyni_note_on(0,noteid,0x40); \
-      else if (!(input&FMN_BUTTON_##tag)&&(pvinput&FMN_BUTTON_##tag)) minisyni_note_off(0,noteid,0x40);
-    BTN(LEFT, 0x30)
-    BTN(UP,   0x33)
-    BTN(DOWN, 0x37)
-    BTN(RIGHT,0x3c)
-    BTN(B,    0x3f)
-    BTN(A,    0x43)
-    #undef BTN
-    #endif
   
     switch (uimode) {
       case FMN_UIMODE_TITLE: fmn_title_input(input,pvinput); break;

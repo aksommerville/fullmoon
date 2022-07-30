@@ -18,6 +18,7 @@
  *  { event:"tilesheetChanged" } // signal for MapEditor to reload the sheet
  *  { event:"sizeChanged" }
  *  { event:"hoverPosition", x, y } // cell the cursor hovers on
+ *  { event:"region", region:string }
  */
  
 import { FullmoonMap } from "./FullmoonMap.js";
@@ -152,6 +153,14 @@ export class MapService {
     this.hoverX = x;
     this.hoverY = y;
     this.broadcast({ event: "hoverPosition", x, y });
+  }
+  
+  setRegion(name) {
+    if (!this.map || (this.map.region === name)) return;
+    this.map.region = name;
+    this.broadcast({ event: "region", region: name });
+    this.broadcast({ event: "dirty" });
+    this.broadcast({ event: "finishEdit" });
   }
   
   /* Resize.

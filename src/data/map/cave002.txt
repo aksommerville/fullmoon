@@ -1,6 +1,11 @@
 tilesheet=bgtiles
 size=18 20
+region=home
 poi=6 2 DOOR 11 8 0 outermap
+poi=11 2 SPRITE 1 0 0 treasure
+poi=12 2 SPRITE 2 0 0 treasure
+poi=14 2 SPRITE 4 0 0 treasure
+poi=15 2 SPRITE 8 0 0 treasure
 BEGIN_BODY
 5d4e4e4e4e4e4e4e5e5e4e4e4e4e4e4e4e5f
 6c1b191a1c1c1b1c6d6f1919191b1b1b196c

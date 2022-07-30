@@ -72,6 +72,18 @@ void fmn_game_reset();
 void fmn_game_reset_with_password(uint32_t pw);
 uint32_t fmn_game_generate_password();
 
+void fmn_game_set_state(uint16_t mask,uint16_t value);
+
+// "password" = "state", for decoded passwords.
+#define FMN_STATE_BROOM          0x0001 /* items... */
+#define FMN_STATE_FEATHER        0x0002
+#define FMN_STATE_WAND           0x0004
+#define FMN_STATE_UMBRELLA       0x0008
+#define FMN_STATE_LOCATION_MASK  0x0070 /* starting map... */
+#define FMN_STATE_LOCATION_SHIFT      4
+#define FMN_STATE_CASTLE_OPEN    0x0080 /* gameplay flags... */
+#define FMN_STATE_WOLF_DEAD      0x0100
+
 #define FMN_PASSWORD_LENGTH 5
 uint32_t fmn_password_encode(uint32_t pw);
 uint32_t fmn_password_decode(uint32_t display);
@@ -110,6 +122,7 @@ static inline void fmn_blit_tile(
 struct fmn_map {
   uint8_t *v;
   uint8_t w,h; // Multiples of (FMN_SCREENW_TILES,FMN_SCREENH_TILES)
+  uint8_t region; // 0..7, which map would we start at if we die at this one?
   
   const struct fmn_image *tilesheet;
   const uint8_t *tileprops; // 256 bytes, one for each tile

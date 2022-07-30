@@ -36,9 +36,9 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Game logic.
 - - [ ] monsters
 - - [ ] environmental puzzles
-- - [ ] password/state
-- - [ ] Flags to enable items -- you don't start with all 4.
-- - [ ] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
+- - [x] password/state
+- - [x] Flags to enable items -- you don't start with all 4.
+- - [x] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - - YES. Not for Thumby or Pico, but it's worth having for Tiny, Web, and the PCs.
@@ -62,3 +62,4 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Pippin?
 - [x] Update face dir when releasing umbrella
 - [x] Enable true black in bgr332 with alpha, find some strategy. eg pick an ugly color to treat as transparent.
+- [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.

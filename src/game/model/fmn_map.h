@@ -13,6 +13,7 @@ uint8_t *fmn_map_get_view(uint8_t *stride);
 
 // Return to the game's starting point.
 void fmn_map_reset();
+void fmn_map_reset_region(uint8_t region);
 
 /* Shift to a neighbor screen.
  * (dx,dy) should be one of ((-1,0),(1,0),(0,-1),(0,1)) but we'll try to do whatever you ask for.
@@ -67,5 +68,7 @@ int8_t fmn_map_for_each_poi(
   int8_t (*cb)(const struct fmn_map_poi *poi,void *userdata),
   void *userdata
 );
+
+uint8_t fmn_map_get_region();
 
 #endif

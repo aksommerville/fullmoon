@@ -14,6 +14,20 @@ static int16_t fmn_vx=0;
 static int16_t fmn_vy=0;
 static uint8_t fmn_panicmap[FMN_SCREENW_TILES*FMN_SCREENH_TILES]={0};
 
+/* Region heads.
+ */
+ 
+const struct fmn_map *map_region_heads[8]={
+  &cheatertrap, // reserved
+  &outermap,
+  &cave001,
+  &cheatertrap, // available
+  &cheatertrap, // available
+  &cheatertrap, // available
+  &cheatertrap, // available
+  &cheatertrap, // cheatertrap, for real
+};
+
 /* Reset.
  */
  
@@ -22,6 +36,13 @@ void fmn_map_reset() {
   fmn_vx=fmn_vy=0;
   fmn_proximity_clear();
   fmn_map_load_default(&outermap);
+}
+
+void fmn_map_reset_region(uint8_t region) {
+  fmn_map=0;
+  fmn_vx=fmn_vy=0;
+  fmn_proximity_clear();
+  fmn_map_load_default(map_region_heads[region&7]);
 }
 
 /* Get current view.
@@ -530,5 +551,13 @@ int8_t fmn_map_for_each_poi(
     int8_t err=cb(poi,userdata);
     if (err) return err;
   }
+  return 0;
+}
+
+/* Get region.
+ */
+
+uint8_t fmn_map_get_region() {
+  if (fmn_map) return fmn_map->region;
   return 0;
 }

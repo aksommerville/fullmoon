@@ -1,0 +1,10 @@
+tilesheet=bgtiles
+size=9 5
+region=cheatertrap
+poi=4 2 START 0 0 0 
+BEGIN_BODY
+5d5e5e4e4e4e5e5e5f
+6d6e6f0f0f0f6d6e6f
+6d6e6f0f0f0f6d6e6f
+6d6e6f0f0f0f6d6e6f
+7d7e7e4e4e4e7e7e7f

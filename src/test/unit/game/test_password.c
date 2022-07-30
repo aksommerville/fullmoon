@@ -40,10 +40,40 @@ static int test_passwords_exhaustively() {
   return 0;
 }
 
+/* Generate a password. Not a test, just a helper for manual testing.
+ */
+ 
+static int generate_password() {
+
+  // CCOHL: Straight zeroes.
+  // BVLUH: All items, location 0.
+  // BCOBH: Broom+umbrella, location 0.
+
+  uint32_t state=
+    FMN_STATE_BROOM|
+    //FMN_STATE_FEATHER|
+    //FMN_STATE_WAND|
+    FMN_STATE_UMBRELLA|
+    (7<<FMN_STATE_LOCATION_SHIFT)|
+    //FMN_STATE_CASTLE_OPEN|
+    //FMN_STATE_WOLF_DEAD|
+  0;
+  
+  char password[5];
+  uint32_t display=fmn_password_encode(state);
+  uint8_t i=0; for (;i<5;i++) password[i]=(display>>(i*5))&0x1f;
+  
+  const char *alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ134679";
+  for (i=0;i<5;i++) password[i]=alphabet[password[i]];
+  fprintf(stderr,"Password for state 0x%04x: %.5s\n",state,password);
+  return 0;
+}
+
 /* TOC.
  */
 
 int main(int argc,char **argv) {
   XXX_FMN_UTEST(test_passwords_exhaustively) // can take like 10 s to run
+  FMN_UTEST(generate_password)
   return 0;
 }

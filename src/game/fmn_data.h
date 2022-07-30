@@ -7,5 +7,9 @@ extern const struct fmn_image mainsprites;
 extern const struct fmn_image uibits;
 
 extern const struct fmn_map outermap;
+extern const struct fmn_map cave001;
+extern const struct fmn_map cheatertrap;
+
+extern const struct fmn_map *map_region_heads[8];
 
 #endif

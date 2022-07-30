@@ -19,6 +19,11 @@ tilesheet=NAME
 size=W H
   REQUIRED. Size of map, must be multiples of (9,5) in (9,5)..(252,255).
   
+region=0..7|NAME
+  REQUIRED. "region" is the map you would return to, if you die or save in this one.
+  The 8 region trailheads are hard-coded.
+  TODO region names. So far: "home" "cave" "cheatertrap"
+  
 poi=X Y Q0 Q1 Q2 Q3 QP
   Add a Point Of Interest generically.
   (X,Y) are tile coordinates.

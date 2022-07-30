@@ -136,6 +136,7 @@ static int mapcvt_encode_c_to_encoder(struct encoder *dst,struct mapcvt *mapcvt)
   if (encode_fmt(dst,"  .v=(void*)%.*s_STORAGE,\n",namec,name)<0) return -1;
   if (encode_fmt(dst,"  .w=%d,\n",mapcvt->map.w)<0) return -1;
   if (encode_fmt(dst,"  .h=%d,\n",mapcvt->map.h)<0) return -1;
+  if (encode_fmt(dst,"  .region=%d,\n",mapcvt->map.region)<0) return -1;
   if (encode_fmt(dst,"  .tilesheet=&%s,\n",mapcvt->tilesheetname)<0) return -1;
   if (encode_fmt(dst,"  .tileprops=%s_props,\n",mapcvt->tilesheetname)<0) return -1;
   if (encode_fmt(dst,"  .poic=%d,\n",mapcvt->map.poic)<0) return -1;

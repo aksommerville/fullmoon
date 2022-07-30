@@ -33,6 +33,7 @@ void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm);
 void fmn_hero_get_outer_bounds(int16_t *xmm,int16_t *ymm,int16_t *w,int16_t *h);
 void fmn_hero_get_screen_position(int16_t *xpx,int16_t *ypx);
 uint8_t fmn_hero_set_action(uint8_t action); // => zero if rejected
+uint8_t fmn_hero_get_action();
 void fmn_hero_force_position(int16_t xmm,int16_t ymm);
 
 #endif

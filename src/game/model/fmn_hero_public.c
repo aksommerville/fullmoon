@@ -249,6 +249,10 @@ uint8_t fmn_hero_set_action(uint8_t action) {
   return 1;
 }
 
+uint8_t fmn_hero_get_action() {
+  return fmn_hero.action;
+}
+
 /* Set inputs.
  */
  
@@ -424,7 +428,7 @@ static void fmn_hero_render_arm(struct fmn_image *dst,int16_t dstx,int16_t dsty)
   // General arm. North and west it's on the right. South and east on the left.
   if ((fmn_hero.facedir==FMN_DIR_N)||(fmn_hero.facedir==FMN_DIR_W)) {
     uint8_t tileid=0x03+fmn_hero.action;
-    if (fmn_hero.facedir==FMN_DIR_N) tileid+=4;
+    if (fmn_hero.facedir==FMN_DIR_N) tileid+=5;
     fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_GFXSCALE,&mainsprites,tileid+0x10,FMN_XFORM_XREV);
     fmn_blit_tile(dst,dstx+6*FMN_GFXSCALE,dsty-FMN_TILESIZE-FMN_GFXSCALE,&mainsprites,tileid,FMN_XFORM_XREV);
   } else {
