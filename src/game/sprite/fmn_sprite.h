@@ -102,6 +102,7 @@ extern const struct fmn_sprtype fmn_sprtype_dummy;
 extern const struct fmn_sprtype fmn_sprtype_heroproxy;
 extern const struct fmn_sprtype fmn_sprtype_bat;
 extern const struct fmn_sprtype fmn_sprtype_treasure;
+extern const struct fmn_sprtype fmn_sprtype_hazard;
 
 /* Sprite resource.
  *****************************************************************/

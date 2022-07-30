@@ -33,7 +33,7 @@ void fmn_hero_reset() {
   fmn_hero.dy=0;
   fmn_hero.button=0;
   fmn_hero.walkspeed=0;
-  fmn_hero.action=fmn_pause_get_action();
+  fmn_hero.action=fmn_pause_get_verified_action();
   fmn_hero.facedir=FMN_DIR_S;
   fmn_hero.actionframe=0;
   fmn_hero.actionanimtime=0;
@@ -521,4 +521,12 @@ void fmn_hero_force_position(int16_t xmm,int16_t ymm) {
   fmn_hero.y=ymm;
   fmn_hero.cellx=(xmm+(FMN_MM_PER_TILE>>1))/FMN_MM_PER_TILE; if (xmm<0) fmn_hero.cellx--;
   fmn_hero.celly=(ymm+(FMN_MM_PER_TILE>>1))/FMN_MM_PER_TILE; if (ymm<0) fmn_hero.celly--;
+}
+
+/* Injure.
+ */
+ 
+void fmn_hero_injure(struct fmn_sprite *assailant) {
+  // For now any injury is instantly fatal. TODO HP?
+  fmn_set_uimode(FMN_UIMODE_GAMEOVER);
 }

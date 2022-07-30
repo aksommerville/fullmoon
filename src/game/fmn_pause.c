@@ -87,6 +87,11 @@ uint8_t fmn_pause_get_action() {
   return FMN_ACTION_NONE;
 }
 
+uint8_t fmn_pause_get_verified_action() {
+  itemflags=fmn_game_generate_password()&(FMN_STATE_BROOM|FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_UMBRELLA);
+  return fmn_pause_get_action();
+}
+
 /* Move selection.
  */
  

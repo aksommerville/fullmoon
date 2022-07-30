@@ -36,9 +36,7 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Game logic.
 - - [ ] monsters
 - - [ ] environmental puzzles
-- - [x] password/state
-- - [x] Flags to enable items -- you don't start with all 4.
-- - [x] Start point in global state (eg 3 bits, with 8 hard coded starting maps)
+- - [x] death
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - - YES. Not for Thumby or Pico, but it's worth having for Tiny, Web, and the PCs.
@@ -53,13 +51,11 @@ Targets must individually declare the rules for generating data sources, even da
 - - - [ ] Update for hi-res framebuffer
 - - [ ] Windows -- just drivers
 - - [x] WebAssembly, highly desirable
-- - - [x] Update for hi-res framebuffer
 - - - [ ] Clean up web wrapper
 - - - [ ] It currently exports every function. Can we limit that?
 - - - [ ] Using ScriptProcessorNode for audio despite deprecation. How does AudioWorklet work?
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [ ] 68k Mac?
 - - [ ] Pippin?
-- [x] Update face dir when releasing umbrella
-- [x] Enable true black in bgr332 with alpha, find some strategy. eg pick an ugly color to treat as transparent.
 - [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.
+- - It should involve convolution somehow, so changing one letter forces the others to change (even if just 1 bit of plaintext).

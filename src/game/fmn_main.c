@@ -4,6 +4,7 @@
 #include "game/fmn_play.h"
 #include "game/fmn_pause.h"
 #include "game/fmn_password.h"
+#include "game/fmn_gameover.h"
 #include <string.h>
 
 /* Globals.
@@ -36,12 +37,14 @@ void fmn_set_uimode(uint8_t mode) {
     case FMN_UIMODE_PLAY: fmn_play_end(); break;
     case FMN_UIMODE_PAUSE: fmn_pause_end(); break;
     case FMN_UIMODE_PASSWORD: fmn_password_end(); break;
+    case FMN_UIMODE_GAMEOVER: fmn_gameover_end(); break;
   }
   switch (uimode=mode) {
     case FMN_UIMODE_TITLE: fmn_title_begin(); break;
     case FMN_UIMODE_PLAY: fmn_play_begin(); break;
     case FMN_UIMODE_PAUSE: fmn_pause_begin(); break;
     case FMN_UIMODE_PASSWORD: fmn_password_begin(); break;
+    case FMN_UIMODE_GAMEOVER: fmn_gameover_begin(); break;
   }
 }
 
@@ -70,6 +73,7 @@ void loop() {
       case FMN_UIMODE_PLAY: fmn_play_input(input,pvinput); break;
       case FMN_UIMODE_PAUSE: fmn_pause_input(input,pvinput); break;
       case FMN_UIMODE_PASSWORD: fmn_password_input(input,pvinput); break;
+      case FMN_UIMODE_GAMEOVER: fmn_gameover_input(input,pvinput); break;
     }
     pvinput=input;
   }
@@ -79,6 +83,7 @@ void loop() {
     case FMN_UIMODE_PLAY: fmn_play_update(); fmn_play_render(&fb); break;
     case FMN_UIMODE_PAUSE: fmn_pause_update(); fmn_pause_render(&fb); break;
     case FMN_UIMODE_PASSWORD: fmn_password_update(); fmn_password_render(&fb); break;
+    case FMN_UIMODE_GAMEOVER: fmn_gameover_update(); fmn_gameover_render(&fb); break;
   }
   
   fmn_platform_send_framebuffer(fb.v);
