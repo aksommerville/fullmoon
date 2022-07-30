@@ -1,4 +1,4 @@
-type dummy
+type pushbox
 image mainsprites
 tileid 0x80
 xform 0

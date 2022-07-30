@@ -78,6 +78,7 @@ struct fmn_sprtype {
   void (*del)(struct fmn_sprite *sprite);
   int8_t (*init)(struct fmn_sprite *sprite,const struct fmn_sprdef *def);
   void (*update)(struct fmn_sprite *sprite);
+  void (*collide)(struct fmn_sprite *sprite,struct fmn_sprite *other);
   
   // Required.
   // Note that scroll is in mm -- not tiles, not pixels.
@@ -103,6 +104,7 @@ extern const struct fmn_sprtype fmn_sprtype_heroproxy;
 extern const struct fmn_sprtype fmn_sprtype_bat;
 extern const struct fmn_sprtype fmn_sprtype_treasure;
 extern const struct fmn_sprtype fmn_sprtype_hazard;
+extern const struct fmn_sprtype fmn_sprtype_pushbox;
 
 /* Sprite resource.
  *****************************************************************/

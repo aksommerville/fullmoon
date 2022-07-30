@@ -60,3 +60,4 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.
 - - It should involve convolution somehow, so changing one letter forces the others to change (even if just 1 bit of plaintext).
 - [ ] Design-rule validation for passwords, eg can't have the wand if you don't have the feather
+- [ ] Some kind of fanfare, acknowledgement when you pick up a treasure.

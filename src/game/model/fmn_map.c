@@ -303,7 +303,7 @@ static uint8_t fmn_map_check_collision_1(
       int16_t escx=(escl<=escr)?-escl:escr;
       int16_t escy=(esct<=escb)?-esct:escb;
       
-      // First cell collision, and we have two candidate resolutions: escx and escy.
+      // First collision, and we have two candidate resolutions: escx and escy.
       // Try each of those. If they are legal or correct on the other axis, great. Otherwise report unresolvable.
       int16_t xadjx=0,xadjy=0,yadjx=0,yadjy=0;
       uint8_t xcoll=fmn_map_check_collision_1(&xadjx,&xadjy,x+escx,y,w,h,panic,collmask,spriteflags);

@@ -1,0 +1,11 @@
+tilesheet=bgtiles
+size=9 5
+region=home
+poi=4 5 DOOR 39 37 0 home
+poi=1 1 DOOR 43 3 0 tunnel
+BEGIN_BODY
+b6d6d6d6d6d6d6d6b5
+b629151618151717b5
+b615161715181716b5
+b617171516181716b5
+b6c6c6c716c5c6c6b5
