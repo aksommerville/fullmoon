@@ -85,8 +85,6 @@ static void fmn_map_set_scroll(int16_t herox,int16_t heroy,uint8_t fire_events) 
   if (nvy<0) nvy=0; else if (nvy>ylimit) nvy=ylimit;
   if ((nvx==fmn_vx)&&(nvy==fmn_vy)) return;
   
-  fprintf(stderr,"%s scroll changed to %d,%d in %p\n",__func__,nvx,nvy,fmn_map);
-  
   if (fire_events) fmn_map_exit(0);
   fmn_vx=nvx;
   fmn_vy=nvy;
@@ -187,6 +185,20 @@ void fmn_map_load_soon(struct fmn_map *map,uint8_t x,uint8_t y) {
   fmn_map_defery=y;
 }
 
+/* Warp within map.
+ */
+
+void fmn_map_warp(uint8_t x,uint8_t y) {
+  if (!fmn_map) return;
+  if (x>=fmn_map->w) return;
+  if (y>=fmn_map->h) return;
+  
+  int16_t herox=x*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
+  int16_t heroy=y*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
+  fmn_hero_force_position(herox,heroy);
+  fmn_map_set_scroll(herox,heroy,1);
+}
+
 /* Get current view.
  */
  
@@ -268,162 +280,16 @@ void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm) {
   }
 }
 
-/* Tile properties.
+/* Apply DOOR, TREADLE, and INTERIOR_DOOR.
  */
  
-static uint8_t fmn_map_tile_is_solid(uint8_t tile,uint8_t mask) {
-  if (!fmn_map) return 0;
-  if (!fmn_map->tileprops) return 0;
-  return (fmn_map->tileprops[tile]&mask)?1:0;
-}
-
-/* Check collisions.
- */
-#if 0 // XXX 
-static uint8_t fmn_map_check_collision_1(
-  int16_t *adjx,int16_t *adjy,
-  int16_t x,int16_t y,int16_t w,int16_t h,
-  uint8_t panic,
-  uint8_t collmask,uint16_t spriteflags
-) {
-//TODO move this into sprite
-  if (!panic--) { if (adjx) *adjx=0; if (adjy) *adjy=0; return 1; }
-  if ((w<1)||(h<1)) return 0;
-  if (!fmn_map) return 0; // the fallback map has no solid cells (and no spawn points, so there shouldn't be sprite collisions either)
-  
-  int16_t cola=x/FMN_MM_PER_TILE; if (x<0) cola--;
-  int16_t rowa=y/FMN_MM_PER_TILE; if (y<0) rowa--;
-  int16_t colz=(x+w-1)/FMN_MM_PER_TILE; if (x+w-1<0) colz--;
-  int16_t rowz=(y+h-1)/FMN_MM_PER_TILE; if (y+h-1<0) rowz--;
-  if (cola<0) cola=0;
-  if (rowa<0) rowa=0;
-  if (colz>=fmn_map->w) colz=fmn_map->w-1;
-  if (rowz>=fmn_map->h) rowz=fmn_map->h-1;
-  if (cola>colz) return 0;
-  if (rowa>rowz) return 0;
-  
-  /* Check against the grid.
-   * If this finds a collision, we will ignore sprite collisions.
-   * Hopefully, an existing sprite collision will be re-detected later.
-   */
-  const uint8_t *srcrow=fmn_map->v+rowa*fmn_map->w+cola;
-  int16_t row=rowa;
-  for (;row<=rowz;row++,srcrow+=fmn_map->w) {
-    const uint8_t *srcp=srcrow;
-    int16_t col=cola;
-    for (;col<=colz;col++,srcp++) {
-      if (!fmn_map_tile_is_solid(*srcp,collmask)) continue;
-      if (!adjx||!adjy) return 1;
-      
-      int16_t hardl=col*FMN_MM_PER_TILE;
-      int16_t hardt=row*FMN_MM_PER_TILE;
-      int16_t hardr=hardl+FMN_MM_PER_TILE;
-      int16_t hardb=hardt+FMN_MM_PER_TILE;
-        
-      int16_t escl=x+w-hardl;
-      int16_t escr=hardr-x;
-      int16_t esct=y+h-hardt;
-      int16_t escb=hardb-y;
-      int16_t escx=(escl<=escr)?-escl:escr;
-      int16_t escy=(esct<=escb)?-esct:escb;
-      
-      // First cell collision, and we have two candidate resolutions: escx and escy.
-      // Try each of those. If they are legal or correct on the other axis, great. Otherwise report unresolvable.
-      int16_t xadjx=0,xadjy=0,yadjx=0,yadjy=0;
-      uint8_t xcoll=fmn_map_check_collision_1(&xadjx,&xadjy,x+escx,y,w,h,panic,collmask,spriteflags);
-      uint8_t ycoll=fmn_map_check_collision_1(&yadjx,&yadjy,x,y+escy,w,h,panic,collmask,spriteflags);
-      // Both collided? Unresolvable.
-      if (xcoll&&ycoll) { *adjx=*adjy=0; return 1; }
-      // One collided? Use the other.
-      if (xcoll&&!ycoll) { *adjx=0; *adjy=escy; return 1; }
-      if (!xcoll&&ycoll) { *adjx=escx; *adjy=0; return 1; }
-      // Both valid. Use whichever has the shortest escapement.
-      int16_t ax=(escx<0)?-escx:escx;
-      int16_t ay=(escy<0)?-escy:escy;
-      if (ax<=ay) { *adjx=escx; *adjy=0; return 1; }
-      *adjx=0;
-      *adjy=escy;
-      return 1;
-    }
-  }
-  
-  /* Check against sprites, if we're doing that.
-   */
-  if (spriteflags) {
-    struct fmn_sprite **p=fmn_spritev;
-    uint16_t i=fmn_spritec;
-    for (;i-->0;p++) {
-      struct fmn_sprite *sprite=*p;
-      if (!(sprite->flags&spriteflags)) continue;
-      
-      // First rule out sprites based on their outer bounds, that's cheap.
-      if (sprite->x>=x+w) continue;
-      if (sprite->y>=y+h) continue;
-      if (sprite->x+sprite->w<=x) continue;
-      if (sprite->y+sprite->h<=y) continue;
-      
-      // Fetch its proper physical bounds for a closer look.
-      int16_t px,py,pw,ph;
-      sprite->type->hitbox(&px,&py,&pw,&ph,sprite);
-      if ((pw<1)||(ph<1)) continue;
-      px+=sprite->x;
-      py+=sprite->y;
-      if (px>=x+w) continue;
-      if (py>=y+h) continue;
-      if (px+pw<=x) continue;
-      if (py+ph<=y) continue;
-      
-      // We have a collision. Determine escapement. It's the exact same thing we did above for grid cells.
-      int16_t escl=x+w-px;
-      int16_t escr=px+pw-x;
-      int16_t esct=y+h-py;
-      int16_t escb=py+ph-y;
-      int16_t escx=(escl<=escr)?-escl:escr;
-      int16_t escy=(esct<=escb)?-esct:escb;
-      
-      // First collision, and we have two candidate resolutions: escx and escy.
-      // Try each of those. If they are legal or correct on the other axis, great. Otherwise report unresolvable.
-      int16_t xadjx=0,xadjy=0,yadjx=0,yadjy=0;
-      uint8_t xcoll=fmn_map_check_collision_1(&xadjx,&xadjy,x+escx,y,w,h,panic,collmask,spriteflags);
-      uint8_t ycoll=fmn_map_check_collision_1(&yadjx,&yadjy,x,y+escy,w,h,panic,collmask,spriteflags);
-      // Both collided? Unresolvable.
-      if (xcoll&&ycoll) { *adjx=*adjy=0; return 1; }
-      // One collided? Use the other.
-      if (xcoll&&!ycoll) { *adjx=0; *adjy=escy; return 1; }
-      if (!xcoll&&ycoll) { *adjx=escx; *adjy=0; return 1; }
-      // Both valid. Use whichever has the shortest escapement.
-      int16_t ax=(escx<0)?-escx:escx;
-      int16_t ay=(escy<0)?-escy:escy;
-      if (ax<=ay) { *adjx=escx; *adjy=0; return 1; }
-      *adjx=0;
-      *adjy=escy;
-      return 1;
-    }
-  }
-  
-  return 0;
-}
-
-uint8_t fmn_map_check_collision(
-  int16_t *adjx,int16_t *adjy,
-  int16_t x,int16_t y,int16_t w,int16_t h,
-  uint8_t collmask,uint16_t spriteflags
-) {
-  if (!collmask) return 0;
-  return fmn_map_check_collision_1(adjx,adjy,x,y,w,h,3,collmask,spriteflags);
-}
-#endif
-
-/* Apply DOOR and TREADLE.
- */
- 
-uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y) {
-  if (!fmn_map) return 0;
-  const struct fmn_map_poi *poi=fmn_map->poiv;
-  uint16_t i=fmn_map->poic;
-  for (;i-->0;poi++) {
-    if (poi->x!=x) continue;
-    if (poi->y!=y) continue;
+void fmn_map_enter_cell(uint8_t x,uint8_t y) {
+  if (!fmn_map) return;
+  uint16_t p=fmn_map_poi_search(fmn_map,x,y);
+  const struct fmn_map_poi *poi=fmn_map->poiv+p;
+  for (;p<fmn_map->poic;p++,poi++) {
+    if (poi->x!=x) return;
+    if (poi->y!=y) return;
     switch (poi->q[0]) {
       case FMN_POI_TREADLE: {
           void (*fn)(uint8_t,uint8_t,uint8_t,uint8_t)=poi->qp;
@@ -431,10 +297,13 @@ uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y) {
         } break;
       case FMN_POI_DOOR: {
           fmn_map_load_soon(poi->qp,poi->q[1],poi->q[2]);
-        } return 1;
+        } return;
+      case FMN_POI_INTERIOR_DOOR: {
+          fmn_map_warp(poi->q[1],poi->q[2]);
+        } return;
     }
   }
-  return 0;
+  return;
 }
 
 /* Terminate TREADLE.
@@ -442,11 +311,11 @@ uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y) {
  
 void fmn_map_exit_cell(uint8_t x,uint8_t y) {
   if (!fmn_map) return;
-  const struct fmn_map_poi *poi=fmn_map->poiv;
-  uint16_t i=fmn_map->poic;
-  for (;i-->0;poi++) {
-    if (poi->x!=x) continue;
-    if (poi->y!=y) continue;
+  uint16_t p=fmn_map_poi_search(fmn_map,x,y);
+  const struct fmn_map_poi *poi=fmn_map->poiv+p;
+  for (;p<fmn_map->poic;p++,poi++) {
+    if (poi->x!=x) return;
+    if (poi->y!=y) return;
     switch (poi->q[0]) {
       case FMN_POI_TREADLE: {
           void (*fn)(uint8_t,uint8_t,uint8_t,uint8_t)=poi->qp;
@@ -521,7 +390,7 @@ void fmn_map_find_start_position(uint8_t *xtile,uint8_t *ytile) {
  * If any POI exist at this exact location, we return the first match (lowest index).
  */
  
-static uint16_t fmn_map_poi_search(const struct fmn_map *map,uint8_t x,uint8_t y) {
+uint16_t fmn_map_poi_search(const struct fmn_map *map,uint8_t x,uint8_t y) {
   uint16_t lo=0,hi=map->poic;
   while (lo<hi) {
     uint16_t ck=(lo+hi)>>1;

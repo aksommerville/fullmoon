@@ -48,6 +48,8 @@ poi Q0 (Q1,Q2,Q3,QP)
     (offset) is signed, where does the map line up relative to this one, in tiles.
     It is expected but not mandatory that the other map contain an Edge Door pointing back here.
     Hero can walk offscreen anywhere. We should arrange for there always to be an Door or Edge Door where that's possible.
+  0x07 Interior Door. (dstx,dsty,none,none)
+    Link to some point on the same map. Travelling through the door does not reload sprites or anything.
   
 --- BODY ---
 

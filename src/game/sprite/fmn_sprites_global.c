@@ -22,7 +22,6 @@ static int8_t fmn_sprites_load_1(const struct fmn_map_poi *poi,void *userdata) {
 }
  
 void fmn_sprites_load() {
-  fprintf(stderr,"%s...\n",__func__);
   fmn_map_for_each_poi(0,0,0xff,0xff,fmn_sprites_load_1,0);
   
   uint8_t herotx,heroty;
@@ -30,7 +29,6 @@ void fmn_sprites_load() {
   int16_t herox=herotx*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
   int16_t heroy=heroty*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
   struct fmn_sprite *hero=fmn_sprite_new(&fmn_sprtype_hero,0,herox,heroy,0,0,0);
-  fprintf(stderr,"...%s\n",__func__);
 }
 
 /* Update.
@@ -43,8 +41,6 @@ void fmn_sprites_update() {
     struct fmn_sprite *sprite=*p;
     if (!sprite->type->update) continue;
     sprite->type->update(sprite);
-    // Now that hero is a sprite, its update might trigger a map change, which would change the set of sprites behind our back.
-    // What to do?
   }
 }
 

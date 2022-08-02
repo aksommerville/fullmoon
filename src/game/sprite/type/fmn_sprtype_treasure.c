@@ -142,5 +142,4 @@ const struct fmn_sprtype fmn_sprtype_treasure={
   .init=_fmn_treasure_init,
   .update=_fmn_treasure_update,
   .render=_fmn_treasure_render,
-  .hitbox=fmn_sprite_hitbox_none,
 };

@@ -25,6 +25,9 @@ void fmn_map_update(int16_t herox,int16_t heroy);
 // Store this map and hero position (in tiles) to be committed at the next update.
 void fmn_map_load_soon(struct fmn_map *map,uint8_t x,uint8_t y);
 
+// Move the hero to the given cell if valid (ie interior doors).
+void fmn_map_warp(uint8_t x,uint8_t y);
+
 void fmn_map_get_init_position(uint8_t *x,uint8_t *y);
 void fmn_map_get_scroll(uint8_t *x,uint8_t *y);
 void fmn_map_get_scroll_mm(int16_t *xmm,int16_t *ymm);
@@ -33,7 +36,7 @@ void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
 
 /* Update DOOR and TREADLE POIs.
  */
-uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y);
+void fmn_map_enter_cell(uint8_t x,uint8_t y);
 void fmn_map_exit_cell(uint8_t x,uint8_t y);
 
 void fmn_map_call_visibility_pois(uint8_t state);
@@ -48,6 +51,8 @@ int8_t fmn_map_for_each_poi(
   int8_t (*cb)(const struct fmn_map_poi *poi,void *userdata),
   void *userdata
 );
+
+uint16_t fmn_map_poi_search(const struct fmn_map *map,uint8_t x,uint8_t y);
 
 uint8_t fmn_map_get_region();
 const struct fmn_map *fmn_map_get();

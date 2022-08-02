@@ -149,7 +149,8 @@ struct fmn_map {
 #define FMN_POI_VISIBILITY     0x04 /* (arg,arg,arg,function) screen trigger */
 #define FMN_POI_PROXIMITY      0x05 /* (arg,arg,arg,function) proximity updater */
 #define FMN_POI_EDGE_DOOR      0x06 /* (offsetmsb,offsetlsb,_,map) */
-// When changing this list, please update src/tool/mapcvt/mapcvt_convert.c:mapcvt_eval_poi_q0() and src/editor/www/js/service/FullmoonMap.js:POI_NAMES.
+#define FMN_POI_INTERIOR_DOOR  0x07 /* (dstx,dsty) */
+// When changing this list, please update src/tool/mapcvt/mapcvt_convert.c:mapcvt_eval_poi_q0() and src/editor/www/js/map/FullmoonMap.js:POI_NAMES.
 
 // tileprops
 #define FMN_TILE_SOLID      0x01

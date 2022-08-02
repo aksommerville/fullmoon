@@ -8,6 +8,9 @@ void fmn_hero_reset() {
   fmn_hero.facedir=FMN_DIR_S;
   fmn_hero.xfacedir=FMN_DIR_E;
   fmn_hero.spellrepudiation=0;
+  fmn_hero.feathertarget=0;
+  fmn_hero.featherspellc=0;
+  fmn_hero.spellc=0;
   //TODO
 }
 
@@ -73,8 +76,8 @@ void fmn_hero_adjust_position(int16_t dxmm,int16_t dymm) {
 
 void fmn_hero_force_position(int16_t xmm,int16_t ymm) {
   if (fmn_hero.sprite) {
-    fmn_hero.sprite->x=xmm-(fmn_hero.sprite->x>>1);
-    fmn_hero.sprite->y=ymm-(fmn_hero.sprite->y>>1);
+    fmn_hero.sprite->x=xmm-(fmn_hero.sprite->w>>1);
+    fmn_hero.sprite->y=ymm-(fmn_hero.sprite->h>>1);
   } else {
     fmn_hero.holdposx=xmm;
     fmn_hero.holdposy=ymm;

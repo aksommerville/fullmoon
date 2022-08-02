@@ -13,5 +13,4 @@ const struct fmn_sprtype fmn_sprtype_dummy={
   .name="dummy",
   .init=_fmn_dummy_init,
   .render=fmn_sprite_render_default,
-  .hitbox=fmn_sprite_hitbox_all,
 };

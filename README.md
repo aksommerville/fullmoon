@@ -28,7 +28,6 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
-- - [x] MapEditor: zoom
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
@@ -36,7 +35,6 @@ Targets must individually declare the rules for generating data sources, even da
 - [ ] Game logic.
 - - [ ] monsters
 - - [ ] environmental puzzles
-- - [x] death
 - - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
 - [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
 - - YES. Not for Thumby or Pico, but it's worth having for Tiny, Web, and the PCs.
@@ -62,6 +60,6 @@ Targets must individually declare the rules for generating data sources, even da
 - - While we're at it: Expand to 6 letters. 16 bits of plaintext and 14 bits of checksum.
 - [ ] Design-rule validation for passwords, eg can't have the wand if you don't have the feather
 - [ ] Some kind of fanfare, acknowledgement when you pick up a treasure.
-- [x] Linux: appicon is mixed up. Is it encoding to the fb format or something?
-- [x] Encoding with the wand is changing our facedir
-- [ ] Interior doors
+- [x] Interior doors
+- [x] Sprite: pushbox
+- [ ] Sprite: firewall

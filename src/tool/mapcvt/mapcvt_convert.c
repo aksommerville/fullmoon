@@ -12,6 +12,7 @@ static int mapcvt_eval_poi_q0(uint8_t *dst,const char *src,int srcc) {
   _(VISIBILITY)
   _(PROXIMITY)
   _(EDGE_DOOR)
+  _(INTERIOR_DOOR)
   #undef _
   return -1;
 }

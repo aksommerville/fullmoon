@@ -5,7 +5,6 @@
 #ifndef FMN_HERO_H
 #define FMN_HERO_H
 
-//TODO review what's still needed, after reimplementing as a sprite
 void fmn_hero_reset();
 void fmn_hero_set_input(int8_t dx,int8_t dy,uint8_t button);
 void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm);

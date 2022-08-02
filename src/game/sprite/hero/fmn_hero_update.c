@@ -31,6 +31,7 @@ static void fmn_hero_update_motion() {
   // Motion stops cold when you use the wand.
   if (fmn_hero.action_in_progress==FMN_ACTION_WAND) {
     fmn_hero.walkspeed=0;
+    fmn_hero.pushc=0;
     return;
   }
 
@@ -57,6 +58,14 @@ static void fmn_hero_update_motion() {
     }
     dx=fmn_hero.sprite->x-pvx;
     dy=fmn_hero.sprite->y-pvy;
+    if (!dx&&!dy) {
+      if (fmn_hero.pushc<0xffff) fmn_hero.pushc++;
+      if (fmn_hero.pushc==FMN_HERO_PUSH_DELAY) fmn_hero_check_push();
+    } else {
+      fmn_hero.pushc=0;
+    }
+  } else {
+    fmn_hero.pushc=0;
   }
   
   // Advance walkspeed toward its target.
@@ -77,5 +86,4 @@ static void fmn_hero_update_motion() {
 void fmn_hero_update(struct fmn_sprite *sprite) {
   fmn_hero_update_motion();
   if (fmn_hero.action_in_progress) fmn_hero_update_action();
-  //TODO other update stuff?
 }

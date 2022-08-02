@@ -18,16 +18,88 @@ static void fmn_hero_broom_update() {
 /* Feather.
  */
  
+static struct fmn_sprite *fmn_hero_feather_find_target() {
+  if (!fmn_hero.sprite) return 0;
+  int16_t x=fmn_hero.sprite->x+(fmn_hero.sprite->w>>1);
+  int16_t y=fmn_hero.sprite->y+(fmn_hero.sprite->h>>1);
+  switch (fmn_hero.facedir) {
+    case FMN_DIR_N: y-=(fmn_hero.sprite->h*5)/3; break;
+    case FMN_DIR_S: y+=(fmn_hero.sprite->h*4)/3; break;
+    case FMN_DIR_W: x-=(fmn_hero.sprite->w*4)/3; break;
+    case FMN_DIR_E: x+=(fmn_hero.sprite->w*4)/3; break;
+  }
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    struct fmn_sprite *target=*p;
+    if (!target->type->featherspell) continue;
+    if (target->x>x) continue;
+    if (target->y>y) continue;
+    if (target->x+target->w<=x) continue;
+    if (target->y+target->h<=y) continue;
+    return target;
+  }
+  return 0;
+}
+
+static void fmn_hero_feather_check(uint8_t force) {
+
+  struct fmn_sprite *target=fmn_hero_feather_find_target();
+  if (!target) {
+    // If we leave the target, nix (featherdir) so we can return to it and encode another command.
+    fmn_hero.featherdir=0;
+    return;
+  }
+  
+  uint8_t dir;
+  switch (fmn_hero.facedir) {
+    case FMN_DIR_N: dir=FMN_DIR_S; break;
+    case FMN_DIR_S: dir=FMN_DIR_N; break;
+    case FMN_DIR_W: dir=FMN_DIR_E; break;
+    case FMN_DIR_E: dir=FMN_DIR_W; break;
+    default: return;
+  }
+  
+  // Without (force), ignore duplicate commands.
+  if (!force) {
+    if ((target==fmn_hero.feathertarget)&&(dir==fmn_hero.featherdir)) return;
+  }
+  fmn_hero.featherdir=dir;
+  if (target!=fmn_hero.feathertarget) {
+    fmn_hero.feathertarget=target;
+    fmn_hero.featherspellc=0;
+  }
+  
+  // Add to the queue, possibly evicting a command from its head.
+  if (fmn_hero.featherspellc>=sizeof(fmn_hero.featherspellv)) {
+    fmn_hero.featherspellc=sizeof(fmn_hero.featherspellv)-1;
+    memmove(fmn_hero.featherspellv,fmn_hero.featherspellv+1,fmn_hero.featherspellc);
+  }
+  fmn_hero.featherspellv[fmn_hero.featherspellc++]=dir;
+  if (target->type->featherspell(target,fmn_hero.featherspellv,fmn_hero.featherspellc)) {
+    fmn_hero.featherspellc=0;
+  }
+}
+ 
 static void fmn_hero_feather_begin() {
   fmn_hero.action_in_progress=FMN_ACTION_FEATHER;
+  if (fmn_hero.framec>=fmn_hero.featherofftime+FMN_HERO_FEATHER_FORGET_TIME) {
+    fmn_hero.feathertarget=0;
+    fmn_hero.featherspellc=0;
+    fmn_hero.featherdir=0;
+  }
+  fmn_hero_feather_check(1);
 }
 
 static void fmn_hero_feather_end() {
   fmn_hero.action_in_progress=0;
+  fmn_hero.featherofftime=fmn_hero.framec;
 }
 
 static void fmn_hero_feather_update() {
-  //TODO Encode a feather command.
+  if (fmn_hero.indx||fmn_hero.indy) {
+    fmn_hero_feather_check(0);
+  }
 }
 
 /* Wand.
@@ -173,5 +245,38 @@ void fmn_hero_update_action() {
     case FMN_ACTION_FEATHER: fmn_hero_feather_update(); break;
     case FMN_ACTION_WAND: fmn_hero_wand_update(); break;
     case FMN_ACTION_UMBRELLA: fmn_hero_umbrella_update(); break;
+  }
+}
+
+/* Pushing things.
+ * This triggers just once per "push session", when she has been trying but failing to move for 30 frames.
+ */
+ 
+void fmn_hero_check_push() {
+  
+  /* Cardinal directions only.
+   * If she's blocked on a diagonal, there must be two other parties involved, and this is a one-at-a-time proposition.
+   * The direction comes from (indx,indy) not (facedir) -- she might have the umbrella deployed or something, we care only about the motion.
+   */
+  if (fmn_hero.indx&&fmn_hero.indy) return;
+  if (!fmn_hero.indx&&!fmn_hero.indy) return;
+  int16_t ckx=fmn_hero.sprite->x+(fmn_hero.sprite->w>>1)+fmn_hero.sprite->w*fmn_hero.indx;
+  int16_t cky=fmn_hero.sprite->y+(fmn_hero.sprite->h>>1)+fmn_hero.sprite->h*fmn_hero.indy;
+  
+  /* Stop after we find one.
+   * Pushables must be solid and we're checking just one point, so there can only be one.
+   */
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    struct fmn_sprite *pumpkin=*p;
+    if (!pumpkin->type->push) continue;
+    if (!(pumpkin->flags&FMN_SPRITE_FLAG_SOLID)) continue;
+    if (pumpkin->x>ckx) continue;
+    if (pumpkin->y>cky) continue;
+    if (pumpkin->x+pumpkin->w<=ckx) continue;
+    if (pumpkin->y+pumpkin->h<=cky) continue;
+    pumpkin->type->push(pumpkin,fmn_hero.indx,fmn_hero.indy);
+    return;
   }
 }

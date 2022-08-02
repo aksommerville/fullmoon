@@ -149,4 +149,5 @@ FullmoonMap.POI_NAMES = [
   "VISIBILITY",
   "PROXIMITY",
   "EDGE_DOOR",
+  "INTERIOR_DOOR",
 ];

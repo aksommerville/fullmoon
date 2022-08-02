@@ -46,5 +46,4 @@ const struct fmn_sprtype fmn_sprtype_hazard={
   .init=_fmn_hazard_init,
   .update=_fmn_hazard_update,
   .render=fmn_sprite_render_default,
-  .hitbox=fmn_sprite_hitbox_all,
 };
