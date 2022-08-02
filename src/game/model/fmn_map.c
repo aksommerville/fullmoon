@@ -1,10 +1,13 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
 #include "game/fmn_play.h"
-#include "game/model/fmn_hero.h"
 #include "game/model/fmn_proximity.h"
 #include "game/sprite/fmn_sprite.h"
+#include "game/sprite/hero/fmn_hero.h"
 #include "game/model/fmn_map.h"
+
+// (herox,heroy) negative to find a START POI.
+static void fmn_map_load(const struct fmn_map *map,int16_t herox,int16_t heroy);
 
 /* Globals.
  */
@@ -13,6 +16,10 @@ static const struct fmn_map *fmn_map=0;
 static int16_t fmn_vx=0;
 static int16_t fmn_vy=0;
 static uint8_t fmn_panicmap[FMN_SCREENW_TILES*FMN_SCREENH_TILES]={0};
+
+static const struct fmn_map *fmn_map_deferred=0;
+static uint8_t fmn_map_deferx=0;
+static uint8_t fmn_map_defery=0;
 
 /* Region heads.
  */
@@ -35,14 +42,149 @@ void fmn_map_reset() {
   fmn_map=0;
   fmn_vx=fmn_vy=0;
   fmn_proximity_clear();
-  fmn_map_load_default(&home);
+  fmn_map_load(&home,-1,-1);
 }
 
 void fmn_map_reset_region(uint8_t region) {
   fmn_map=0;
   fmn_vx=fmn_vy=0;
   fmn_proximity_clear();
-  fmn_map_load_default(map_region_heads[region&7]);
+  fmn_map_load(map_region_heads[region&7],-1,-1);
+}
+
+/* Actions associated with entering or exiting a view.
+ * (full) if the map changed, otherwise only the scroll within a map changed.
+ */
+ 
+static void fmn_map_exit(uint8_t full) {
+  fmn_map_call_visibility_pois(0);
+  fmn_proximity_clear();
+  if (full) fmn_sprites_clear();
+}
+
+static void fmn_map_enter(uint8_t full) {
+  if (full) fmn_sprites_load();
+  fmn_map_add_proximity_pois();
+  fmn_map_call_visibility_pois(1);
+  fmn_bgbits_dirty();
+}
+
+/* Set scroll position.
+ * This does not trigger edge doors.
+ */
+ 
+static void fmn_map_set_scroll(int16_t herox,int16_t heroy,uint8_t fire_events) {
+  int16_t xlimit=0,ylimit=0;
+  if (fmn_map) {
+    xlimit=fmn_map->w-FMN_SCREENW_TILES;
+    ylimit=fmn_map->h-FMN_SCREENH_TILES;
+  }
+  int16_t nvx=(herox/FMN_SCREENW_MM)*FMN_SCREENW_TILES;
+  int16_t nvy=(heroy/FMN_SCREENH_MM)*FMN_SCREENH_TILES;
+  if (nvx<0) nvx=0; else if (nvx>xlimit) nvx=xlimit;
+  if (nvy<0) nvy=0; else if (nvy>ylimit) nvy=ylimit;
+  if ((nvx==fmn_vx)&&(nvy==fmn_vy)) return;
+  
+  fprintf(stderr,"%s scroll changed to %d,%d in %p\n",__func__,nvx,nvy,fmn_map);
+  
+  if (fire_events) fmn_map_exit(0);
+  fmn_vx=nvx;
+  fmn_vy=nvy;
+  if (fire_events) fmn_map_enter(0);
+}
+
+/* Find an edge door and pass through it, or do nothing and return zero.
+ */
+ 
+struct fmn_map_edge_door_context {
+  int8_t dx;
+  int8_t dy;
+  int16_t herox;
+  int16_t heroy;
+  const struct fmn_map *map;
+};
+ 
+static int8_t fmn_map_cb_find_edge_door(const struct fmn_map_poi *poi,void *userdata) {
+  if (poi->q[0]!=FMN_POI_EDGE_DOOR) return 0;
+  struct fmn_map_edge_door_context *ctx=userdata;
+  
+  if (ctx->dx) {
+    int16_t worldy=(poi->q[1]<<8)|poi->q[2];
+    const struct fmn_map *map=poi->qp;
+    worldy*=FMN_MM_PER_TILE;
+    if (ctx->heroy<worldy) return 0;
+    if (ctx->heroy>=worldy+map->h*FMN_MM_PER_TILE) return 0;
+    ctx->heroy-=worldy;
+    if (ctx->dx<0) ctx->herox+=map->w*FMN_MM_PER_TILE;
+    else ctx->herox-=fmn_map->w*FMN_MM_PER_TILE;
+    ctx->map=map;
+    return 1;
+  }
+  
+  if (ctx->dy) {
+    int16_t worldx=(poi->q[1]<<8)|poi->q[2];
+    const struct fmn_map *map=poi->qp;
+    worldx*=FMN_MM_PER_TILE;
+    if (ctx->herox<worldx) return 0;
+    if (ctx->herox>=worldx+map->w*FMN_MM_PER_TILE) return 0;
+    ctx->herox-=worldx;
+    if (ctx->dy<0) ctx->heroy+=map->h*FMN_MM_PER_TILE;
+    else ctx->heroy-=fmn_map->h*FMN_MM_PER_TILE;
+    ctx->map=map;
+    return 1;
+  }
+  
+  return 0;
+}
+ 
+static uint8_t fmn_map_use_edge_door(int8_t dx,int8_t dy,int16_t herox,int16_t heroy) {
+  
+  uint8_t poix,poiy;
+       if ((dx<0)&&!dy) { poix=0; poiy=fmn_map->h-1; }
+  else if ((dx>0)&&!dy) { poix=fmn_map->w-1; poiy=0; }
+  else if (!dx&&(dy<0)) { poix=0; poiy=0; }
+  else if (!dx&&(dy>0)) { poix=fmn_map->w-1; poiy=fmn_map->h-1; }
+  else return 0;
+  
+  struct fmn_map_edge_door_context ctx={dx,dy,herox,heroy};
+  if (!fmn_map_for_each_poi(poix,poiy,1,1,fmn_map_cb_find_edge_door,&ctx)) return 0;
+  
+  fmn_map_load(ctx.map,ctx.herox,ctx.heroy);
+  return 1;
+}
+
+/* Update.
+ */
+ 
+void fmn_map_update(int16_t herox,int16_t heroy) {
+
+  // Commit any deferred transition.
+  if (fmn_map_deferred) {
+    if (fmn_map_deferred!=fmn_map) {
+      fmn_map_load(
+        fmn_map_deferred,
+        fmn_map_deferx*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1),
+        fmn_map_defery*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1)
+      );
+      fmn_hero_get_world_position_center(&herox,&heroy);
+    }
+    fmn_map_deferred=0;
+  }
+  
+  // Examine hero position. Trigger an edge door or update scroll.
+  if (fmn_map) {
+    if ((herox<0)&&fmn_map_use_edge_door(-1,0,herox,heroy)) return;
+    if ((heroy<0)&&fmn_map_use_edge_door(0,-1,herox,heroy)) return;
+    if ((herox>=fmn_map->w*FMN_MM_PER_TILE)&&fmn_map_use_edge_door(1,0,herox,heroy)) return;
+    if ((heroy>=fmn_map->h*FMN_MM_PER_TILE)&&fmn_map_use_edge_door(0,1,herox,heroy)) return;
+  }
+  fmn_map_set_scroll(herox,heroy,1);
+}
+
+void fmn_map_load_soon(struct fmn_map *map,uint8_t x,uint8_t y) {
+  fmn_map_deferred=map;
+  fmn_map_deferx=x;
+  fmn_map_defery=y;
 }
 
 /* Get current view.
@@ -57,87 +199,22 @@ uint8_t *fmn_map_get_view(uint8_t *stride) {
   return fmn_panicmap;
 }
 
-/* Shift view.
+/* Load map.
  */
  
-uint8_t fmn_map_navigate(int8_t dx,int8_t dy) {
-  if (!fmn_map) return 0;
-  
-  int16_t nvx=fmn_vx+dx*FMN_SCREENW_TILES;
-  int16_t nvy=fmn_vy+dy*FMN_SCREENH_TILES;
-  if ((nvx==fmn_vx)&&(nvy==fmn_vy)) return 0;
-  int16_t hdx=0,hdy=0;
-  const struct fmn_map *nextmap=fmn_map;
-       if (nvx<0) { if (nextmap=fmn_map_find_edge_door_left(fmn_map,nvy,&hdx,&hdy)) { nvx=nextmap->w-FMN_SCREENW_TILES; nvy=fmn_vy+(hdy/FMN_MM_PER_TILE); }}
-  else if (nvy<0) { if (nextmap=fmn_map_find_edge_door_up(fmn_map,nvx,&hdx,&hdy)) { nvx=fmn_vx+hdx/FMN_MM_PER_TILE; nvy=nextmap->h-FMN_SCREENH_TILES; }}
-  else if (nvx>fmn_map->w-FMN_SCREENW_TILES) { if (nextmap=fmn_map_find_edge_door_right(fmn_map,nvy,&hdx,&hdy)) { nvx=0; nvy=fmn_vy+hdy/FMN_MM_PER_TILE; }}
-  else if (nvy>fmn_map->h-FMN_SCREENH_TILES) { if (nextmap=fmn_map_find_edge_door_down(fmn_map,nvx,&hdx,&hdy)) { nvx=fmn_vx+hdx/FMN_MM_PER_TILE; nvy=0; }}
-  if (!nextmap) return 0; // let her walk off the edge if there isn't a door
-  uint8_t switched=(fmn_map!=nextmap);
-  
-  fmn_map_call_visibility_pois(0);
-  fmn_proximity_clear();
-  
-  fmn_vx=nvx;
-  fmn_vy=nvy;
-  
-  if (switched) {
-    fmn_sprites_clear();
-    fmn_map=nextmap;
-    int16_t hx,hy;
-    fmn_hero_get_world_position(&hx,&hy);
-    fmn_hero_force_position(hx+hdx,hy+hdy);
-    fmn_sprites_load();
-  }
-  
-  fmn_map_add_proximity_pois();
-  fmn_map_call_visibility_pois(1);
-  
-  return 1;
-}
-
-/* Load new map.
- */
- 
-uint8_t fmn_map_load_default(const struct fmn_map *map) {
-  if (!map) return 0;
-  uint8_t x=map->w>>1,y=map->h>>1;
-  const struct fmn_map_poi *poi=map->poiv;
-  uint16_t i=map->poic;
-  for (;i-->0;poi++) {
-    if (poi->q[0]!=FMN_POI_START) continue;
-    x=poi->x;
-    y=poi->y;
-    break;
-  }
-  return fmn_map_load_position(map,x,y);
-}
-
-uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y) {
-  if (!map) return 0;
-  int16_t vx=(x/FMN_SCREENW_TILES)*FMN_SCREENW_TILES;
-  int16_t vy=(y/FMN_SCREENH_TILES)*FMN_SCREENH_TILES;
-  if (vx>map->w-FMN_SCREENW_TILES) return 0;
-  if (vy>map->h-FMN_SCREENH_TILES) return 0;
-  
-  fmn_map_call_visibility_pois(0);
-  fmn_proximity_clear();
-  fmn_sprites_clear();
-  
+static void fmn_map_load(const struct fmn_map *map,int16_t herox,int16_t heroy) {
+  fmn_map_exit(1);
   fmn_map=map;
-  fmn_vx=vx;
-  fmn_vy=vy;
-
-  fmn_hero_force_position(
-    x*FMN_MM_PER_TILE,
-    y*FMN_MM_PER_TILE
-  );
-  fmn_sprites_load();
-  fmn_map_add_proximity_pois();
-  fmn_map_call_visibility_pois(1);
-  fmn_bgbits_dirty();
-  
-  return 1;
+  if ((herox<0)||(heroy<0)) {
+    uint8_t cellx,celly;
+    fmn_map_get_init_position(&cellx,&celly);
+    herox=cellx*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
+    heroy=celly*FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
+  }
+  fmn_hero_force_position(herox,heroy);
+  fmn_vx=-1; // force fmn_map_set_scroll() to detect a change
+  fmn_map_set_scroll(herox,heroy,0);
+  fmn_map_enter(1);
 }
 
 /* Trivial accessors.
@@ -202,13 +279,14 @@ static uint8_t fmn_map_tile_is_solid(uint8_t tile,uint8_t mask) {
 
 /* Check collisions.
  */
- 
+#if 0 // XXX 
 static uint8_t fmn_map_check_collision_1(
   int16_t *adjx,int16_t *adjy,
   int16_t x,int16_t y,int16_t w,int16_t h,
   uint8_t panic,
   uint8_t collmask,uint16_t spriteflags
 ) {
+//TODO move this into sprite
   if (!panic--) { if (adjx) *adjx=0; if (adjy) *adjy=0; return 1; }
   if ((w<1)||(h<1)) return 0;
   if (!fmn_map) return 0; // the fallback map has no solid cells (and no spawn points, so there shouldn't be sprite collisions either)
@@ -334,6 +412,7 @@ uint8_t fmn_map_check_collision(
   if (!collmask) return 0;
   return fmn_map_check_collision_1(adjx,adjy,x,y,w,h,3,collmask,spriteflags);
 }
+#endif
 
 /* Apply DOOR and TREADLE.
  */
@@ -351,8 +430,8 @@ uint8_t fmn_map_enter_cell(uint8_t x,uint8_t y) {
           fn(1,poi->q[1],poi->q[2],poi->q[3]);
         } break;
       case FMN_POI_DOOR: {
-          return fmn_map_load_position(poi->qp,poi->q[1],poi->q[2]);
-        } break;
+          fmn_map_load_soon(poi->qp,poi->q[1],poi->q[2]);
+        } return 1;
     }
   }
   return 0;
@@ -417,100 +496,25 @@ void fmn_map_add_proximity_pois() {
   }
 }
 
-/* Find edge doors.
+/* Find the start position, or make something up.
  */
  
-struct fmn_map_edge_door_context {
-  const struct fmn_map *from;
-  int16_t vx,vy;
-  int16_t *dx,*dy;
-  struct fmn_map *to;
-};
-
-static void fmn_map_find_edge_door(
-  struct fmn_map_edge_door_context *ctx,
-  uint8_t poix,uint8_t poiy,
-  uint8_t (*cb)(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi)
-) {
-  const struct fmn_map_poi *poi=ctx->from->poiv;
-  uint16_t i=ctx->from->poic;
-  for (;i-->0;poi++) {
-    if (poi->q[0]!=FMN_POI_EDGE_DOOR) continue;
-    if (poi->x!=poix) continue;
-    if (poi->y!=poiy) continue;
-    if (cb(ctx,poi)) {
-      ctx->to=poi->qp;
+void fmn_map_find_start_position(uint8_t *xtile,uint8_t *ytile) {
+  if (fmn_map) {
+    const struct fmn_map_poi *poi=fmn_map->poiv;
+    uint16_t i=fmn_map->poic;
+    for (;i-->0;poi++) {
+      if (poi->q[0]!=FMN_POI_START) continue;
+      *xtile=poi->x;
+      *ytile=poi->y;
       return;
     }
+    *xtile=fmn_map->w>>1;
+    *ytile=fmn_map->h>>1;
+  } else {
+    *xtile=FMN_SCREENW_TILES>>1;
+    *ytile=FMN_SCREENH_TILES>>1;
   }
-}
-
-static uint8_t fmn_map_match_edge_door_left(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
-  int16_t d=(poi->q[1]<<8)|poi->q[2];
-  int16_t vy=ctx->vy-d;
-  if (vy<0) return 0;
-  const struct fmn_map *to=poi->qp;
-  if (vy>=to->h) return 0;
-  *(ctx->dx)=to->w*FMN_MM_PER_TILE;
-  *(ctx->dy)=-d*FMN_MM_PER_TILE;
-  return 1;
-}
-
-static uint8_t fmn_map_match_edge_door_right(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
-  int16_t d=(poi->q[1]<<8)|poi->q[2];
-  int16_t vy=ctx->vy-d;
-  if (vy<0) return 0;
-  const struct fmn_map *to=poi->qp;
-  if (vy>=to->h) return 0;
-  *(ctx->dx)=-ctx->from->w*FMN_MM_PER_TILE;
-  *(ctx->dy)=-d*FMN_MM_PER_TILE;
-  return 1;
-}
-
-static uint8_t fmn_map_match_edge_door_up(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
-  int16_t d=(poi->q[1]<<8)|poi->q[2];
-  int16_t vx=ctx->vx-d;
-  if (vx<0) return 0;
-  const struct fmn_map *to=poi->qp;
-  if (vx>=to->w) return 0;
-  *(ctx->dx)=-d*FMN_MM_PER_TILE;
-  *(ctx->dy)=to->h*FMN_MM_PER_TILE;
-  return 1;
-}
-
-static uint8_t fmn_map_match_edge_door_down(struct fmn_map_edge_door_context *ctx,const struct fmn_map_poi *poi) {
-  int16_t d=(poi->q[1]<<8)|poi->q[2];
-  int16_t vx=ctx->vx-d;
-  if (vx<0) return 0;
-  const struct fmn_map *to=poi->qp;
-  if (vx>=to->w) return 0;
-  *(ctx->dx)=-d*FMN_MM_PER_TILE;
-  *(ctx->dy)=-ctx->from->h*FMN_MM_PER_TILE;
-  return 1;
-}
- 
-struct fmn_map *fmn_map_find_edge_door_left(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm) {
-  struct fmn_map_edge_door_context ctx={from,0,vytiles,dxmm,dymm};
-  fmn_map_find_edge_door(&ctx,0,from->h-1,fmn_map_match_edge_door_left);
-  return ctx.to;
-}
-
-struct fmn_map *fmn_map_find_edge_door_right(const struct fmn_map *from,int16_t vytiles,int16_t *dxmm,int16_t *dymm) {
-  struct fmn_map_edge_door_context ctx={from,0,vytiles,dxmm,dymm};
-  fmn_map_find_edge_door(&ctx,from->w-1,0,fmn_map_match_edge_door_right);
-  return ctx.to;
-}
-
-struct fmn_map *fmn_map_find_edge_door_up(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm) {
-  struct fmn_map_edge_door_context ctx={from,vxtiles,0,dxmm,dymm};
-  fmn_map_find_edge_door(&ctx,0,0,fmn_map_match_edge_door_up);
-  return ctx.to;
-}
-
-struct fmn_map *fmn_map_find_edge_door_down(const struct fmn_map *from,int16_t vxtiles,int16_t *dxmm,int16_t *dymm) {
-  struct fmn_map_edge_door_context ctx={from,vxtiles,0,dxmm,dymm};
-  fmn_map_find_edge_door(&ctx,from->w-1,from->h-1,fmn_map_match_edge_door_down);
-  return ctx.to;
 }
 
 /* Search POI by location. Always returns a valid position in map->poiv, possibly the very end.
@@ -560,4 +564,8 @@ int8_t fmn_map_for_each_poi(
 uint8_t fmn_map_get_region() {
   if (fmn_map) return fmn_map->region;
   return 0;
+}
+
+const struct fmn_map *fmn_map_get() {
+  return fmn_map;
 }

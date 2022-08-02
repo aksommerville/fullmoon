@@ -1,7 +1,7 @@
 #include "game/fullmoon.h"
 #include "game/fmn_pause.h"
 #include "game/fmn_data.h"
-#include "game/model/fmn_hero.h"
+#include "game/sprite/hero/fmn_hero.h"
 #include <string.h>
 
 /* Globals.
@@ -12,7 +12,6 @@ static uint8_t cursorp=0;
 static uint8_t cursorframe=0;
 static uint8_t cursortime=0;
 static uint8_t password[5];
-static uint8_t lastokcursorp=0;
 static uint16_t itemflags=0;
 
 /* Begin.
@@ -66,12 +65,6 @@ void fmn_pause_begin() {
  */
  
 void fmn_pause_end() {
-  /*XXX i forget what this is for. do we need it? it's ok to choose an absent action
-  if (lastcursorp!=cursorp) {
-    fmn_hero_set_action(lastokaction);
-    cursorp=lastokaction-1;
-  }
-  /**/
 }
 
 /* Get selection as action.
@@ -103,9 +96,7 @@ static void fmn_pause_move(int8_t dx,int8_t dy) {
     if (cursorp<3) cursorp++;
     else cursorp=0;
   } else return;
-  if (fmn_hero_set_action(fmn_pause_get_action())) {
-    lastokcursorp=cursorp;
-  }
+  fmn_hero_set_action(fmn_pause_get_action());
 }
 
 /* Input.

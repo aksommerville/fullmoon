@@ -68,6 +68,19 @@ struct fmn_sprite *fmn_sprite_new(
 // Only fmn_sprite_new() should call this.
 struct fmn_sprite *fmn_sprite_alloc();
 
+/* Check grid and other sprites, is this sprite colliding with anything?
+ * If (resolve), we will move sprites to eliminate the collision and fire callbacks as needed.
+ * Otherwise, we only populate (adjx,adjy) with the esapement and return true or false.
+ * If we return nonzero but set (adj) zero, it means the sprite is in an unescapable collision.
+ */
+uint8_t fmn_sprite_collide(
+  int16_t *adjx,int16_t *adjy,
+  struct fmn_sprite *sprite,
+  uint8_t cellprops,
+  uint8_t spriteflags,
+  uint8_t resolve
+);
+
 /* Sprite type.
  ******************************************************************/
  
@@ -100,7 +113,7 @@ void fmn_sprite_hitbox_none(int16_t *rx,int16_t *ry,int16_t *w,int16_t *h,struct
 void fmn_sprite_hitbox_all(int16_t *rx,int16_t *ry,int16_t *w,int16_t *h,struct fmn_sprite *sprite);
 
 extern const struct fmn_sprtype fmn_sprtype_dummy;
-extern const struct fmn_sprtype fmn_sprtype_heroproxy;
+extern const struct fmn_sprtype fmn_sprtype_hero;
 extern const struct fmn_sprtype fmn_sprtype_bat;
 extern const struct fmn_sprtype fmn_sprtype_treasure;
 extern const struct fmn_sprtype fmn_sprtype_hazard;

@@ -1,10 +1,10 @@
 #include "game/fullmoon.h"
 #include "game/fmn_play.h"
 #include "game/fmn_data.h"
-#include "game/model/fmn_hero.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"
 #include "game/sprite/fmn_sprite.h"
+#include "game/sprite/hero/fmn_hero.h"
 #include <string.h>
 
 /* Globals.
@@ -73,13 +73,13 @@ static void fmn_finish_rain() {
  
 void fmn_play_update() {
 
-  fmn_hero_update();
-  
+  fmn_sprites_update();
+
   int16_t x,y;
-  fmn_hero_get_world_position(&x,&y);
+  fmn_hero_get_world_position_center(&x,&y);
+  fmn_map_update(x,y);
   fmn_proximity_update(x,y);
   
-  fmn_sprites_update();
   fmn_sprites_execute_deathrow();
   
   if (raintime>1) raintime--;
@@ -174,6 +174,7 @@ void fmn_play_render(struct fmn_image *fb) {
 void fmn_game_reset() {
   raintime=0;
   statebits=0;
+  statebits=0x000f;//XXX
   fmn_map_reset();
   fmn_hero_reset();
 }
@@ -195,32 +196,13 @@ uint32_t fmn_game_generate_password() {
   return (statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
 }
 
+uint16_t fmn_game_get_state() {
+  return statebits;
+}
+
 void fmn_game_set_state(uint16_t mask,uint16_t value) {
   if (value&~mask) return; // invalid
   statebits=(statebits&~mask)|value;
-}
-
-/* Navigate.
- */
-
-uint8_t fmn_game_navigate(int8_t dx,int8_t dy) {
-  if (!fmn_map_navigate(dx,dy)) return 0;
-  //TODO change sprites
-  bgbitsdirty=1;
-  return 1;
-}
-
-uint8_t fmn_game_focus_mm(int16_t xmm,int16_t ymm) {
-  int8_t x=xmm/FMN_MM_PER_TILE;
-  int8_t y=ymm/FMN_MM_PER_TILE;
-  uint8_t vx,vy;
-  fmn_map_get_scroll(&vx,&vy);
-  // We'll only change one thing at a time.
-  if (x<vx) return fmn_game_navigate(-1,0);
-  if (y<vy) return fmn_game_navigate(0,-1);
-  if (x>=vx+FMN_SCREENW_TILES) return fmn_game_navigate(1,0);
-  if (y>=vy+FMN_SCREENH_TILES) return fmn_game_navigate(0,1);
-  return 0;
 }
 
 /* Spells.

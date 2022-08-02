@@ -15,41 +15,21 @@ uint8_t *fmn_map_get_view(uint8_t *stride);
 void fmn_map_reset();
 void fmn_map_reset_region(uint8_t region);
 
-/* Shift to a neighbor screen.
- * (dx,dy) should be one of ((-1,0),(1,0),(0,-1),(0,1)) but we'll try to do whatever you ask for.
- * (0,0) will always "fail", tho arguably it does what you ask for.
- * This may shift to another map, if edge doors are in play. TODO how to notify, eg for rebuilding sprite list?
- * Returns nonzero on success, otherwise the current view remains.
+/* Check hero position.
+ * May change the current map or current scroll.
+ * If so, we trigger proximity and visibility POI as warranted.
+ * And we may rebuild the sprite set.
  */
-uint8_t fmn_map_navigate(int8_t dx,int8_t dy);
+void fmn_map_update(int16_t herox,int16_t heroy);
 
-/* Load a new map (reloads, even if already loaded).
- * 'default' puts focus at the map's declared init position.
- * 'position' lets you stipulate focus in global tiles.
- */
-uint8_t fmn_map_load_default(const struct fmn_map *map);
-uint8_t fmn_map_load_position(const struct fmn_map *map,uint8_t x,uint8_t y);
+// Store this map and hero position (in tiles) to be committed at the next update.
+void fmn_map_load_soon(struct fmn_map *map,uint8_t x,uint8_t y);
 
 void fmn_map_get_init_position(uint8_t *x,uint8_t *y);
 void fmn_map_get_scroll(uint8_t *x,uint8_t *y);
 void fmn_map_get_scroll_mm(int16_t *xmm,int16_t *ymm);
 void fmn_map_get_size(uint8_t *w,uint8_t *h);
 void fmn_map_get_size_mm(int16_t *wmm,int16_t *hmm);
-
-/* Check if a given box collides with any static geometry.
- * If (spriteflags) nonzero, also check against sprites with that flag set.
- * If so: Return nonzero, and fill (adjx,adjy) with displacement to the nearest legal position, or (0,0) if we can't find one.
- * Or no collision: Return zero.
- * We're not exhaustive about this. If the box collides with two solid cells, we only correct against one of them.
- * I'm thinking that's OK because you'll find the second one next frame.
- * All coordinates in global mm.
- * (collmask) is a combination of FMN_TILE_*, which ones count as a collision.
- */
-uint8_t fmn_map_check_collision(
-  int16_t *adjx,int16_t *adjy,
-  int16_t x,int16_t y,int16_t w,int16_t h,
-  uint8_t collmask,uint16_t spriteflags
-);
 
 /* Update DOOR and TREADLE POIs.
  */
@@ -70,5 +50,6 @@ int8_t fmn_map_for_each_poi(
 );
 
 uint8_t fmn_map_get_region();
+const struct fmn_map *fmn_map_get();
 
 #endif

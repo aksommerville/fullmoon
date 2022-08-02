@@ -71,6 +71,7 @@ struct fmn_sprite *fmn_sprite_alloc() {
     fmn_sprite_storage[fmn_sprite_storage_next].type
   ) fmn_sprite_storage_next++;
   fmn_spritev[fmn_spritec++]=sprite;
+  memset(sprite,0,sizeof(struct fmn_sprite));
   return sprite;
 }
 

@@ -1,6 +1,6 @@
 #include "game/fullmoon.h"
-#include "game/model/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
+#include "game/sprite/hero/fmn_hero.h"
 
 //TODO I'd prefer (animtilec,animframelength) to be in the sprdef. For now, we can only hard-code or specify in POI.
 #define animtilec sprite->bv[0]

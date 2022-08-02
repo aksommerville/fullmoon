@@ -73,6 +73,7 @@ void fmn_game_reset();
 void fmn_game_reset_with_password(uint32_t pw);
 uint32_t fmn_game_generate_password();
 
+uint16_t fmn_game_get_state();
 void fmn_game_set_state(uint16_t mask,uint16_t value);
 
 // "password" = "state", for decoded passwords.
@@ -114,7 +115,10 @@ static inline void fmn_blit_tile(
 #define FMN_DIR_S   0x02
 #define FMN_DIR_SE  0x01
 
-#define FMN_SPELL_LENGTH_LIMIT 10
+/* A spell is a sequence of FMN_DIR_(N,S,E,W).
+ * Does the thing and returns nonzero, if it's a known spell.
+ */
+uint8_t fmn_game_cast_spell(const uint8_t *src,uint8_t srcc);
 
 /* Maps.
  * In general, the game outside fmn_map.c doesn't need to know this definition.

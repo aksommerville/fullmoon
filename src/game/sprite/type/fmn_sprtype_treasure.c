@@ -1,6 +1,6 @@
 #include "game/fullmoon.h"
-#include "game/model/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
+#include "game/sprite/hero/fmn_hero.h"
 
 /* tileid is one of (0,0x90,0x94,0x98,0x9a).
  * tileid zero means invalid.
@@ -47,6 +47,22 @@ static int8_t _fmn_treasure_init(struct fmn_sprite *sprite,const struct fmn_sprd
   return 0;
 }
 
+// If there is only one action available, and this is it, return the action ID. Else zero.
+static uint8_t fmn_treasure_action_if_only(uint16_t mask) {
+  if ((fmn_game_get_state()&(
+    FMN_STATE_BROOM|
+    FMN_STATE_FEATHER|
+    FMN_STATE_WAND|
+    FMN_STATE_UMBRELLA
+  ))==mask) switch (mask) {
+    case FMN_STATE_BROOM: return FMN_ACTION_BROOM;
+    case FMN_STATE_FEATHER: return FMN_ACTION_FEATHER;
+    case FMN_STATE_WAND: return FMN_ACTION_WAND;
+    case FMN_STATE_UMBRELLA: return FMN_ACTION_UMBRELLA;
+  }
+  return 0;
+}
+
 static void _fmn_treasure_update(struct fmn_sprite *sprite) {
   if (!sprite->tileid) {
     fmn_sprite_del_later(sprite);
@@ -59,7 +75,10 @@ static void _fmn_treasure_update(struct fmn_sprite *sprite) {
   int16_t herox,heroy;
   fmn_hero_get_world_position_center(&herox,&heroy);
   if ((herox>=sprite->x)&&(heroy>=sprite->y)&&(herox<sprite->x+sprite->w)&&(heroy<sprite->y+sprite->h)) {
+    //TODO fanfare
     fmn_game_set_state(treasure_mask,treasure_mask);
+    uint8_t action=fmn_treasure_action_if_only(treasure_mask);
+    if (action) fmn_hero_set_action(action);
     fmn_sprite_del_later(sprite);
   }
 }
