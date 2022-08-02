@@ -11,6 +11,11 @@ void fmn_hero_update_facedir() {
   if (fmn_hero.action_in_progress==FMN_ACTION_UMBRELLA) {
     return;
   }
+  
+  // If we are actively encoding with the wand, do not change.
+  if (fmn_hero.action_in_progress==FMN_ACTION_WAND) {
+    return;
+  }
 
   // Change to agree with input state.
   // Prefer showing a horizontal face; they are prettier.

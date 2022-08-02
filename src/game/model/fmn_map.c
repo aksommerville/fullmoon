@@ -1,6 +1,6 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
-#include "game/fmn_play.h"
+#include "game/ui/fmn_play.h"
 #include "game/model/fmn_proximity.h"
 #include "game/sprite/fmn_sprite.h"
 #include "game/sprite/hero/fmn_hero.h"

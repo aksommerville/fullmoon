@@ -1,10 +1,10 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
-#include "game/fmn_title.h"
-#include "game/fmn_play.h"
-#include "game/fmn_pause.h"
-#include "game/fmn_password.h"
-#include "game/fmn_gameover.h"
+#include "game/ui/fmn_title.h"
+#include "game/ui/fmn_play.h"
+#include "game/ui/fmn_pause.h"
+#include "game/ui/fmn_password.h"
+#include "game/ui/fmn_gameover.h"
 #include <string.h>
 
 /* Globals.

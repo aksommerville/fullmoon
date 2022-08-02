@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "game/fmn_gameover.h"
+#include "game/ui/fmn_gameover.h"
 #include "game/fmn_data.h"
 
 #define FMN_GAMEOVER_BLACKOUT_TIME 60

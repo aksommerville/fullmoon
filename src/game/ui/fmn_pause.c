@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "game/fmn_pause.h"
+#include "game/ui/fmn_pause.h"
 #include "game/fmn_data.h"
 #include "game/sprite/hero/fmn_hero.h"
 #include <string.h>

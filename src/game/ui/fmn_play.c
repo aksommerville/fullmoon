@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "game/fmn_play.h"
+#include "game/ui/fmn_play.h"
 #include "game/fmn_data.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"

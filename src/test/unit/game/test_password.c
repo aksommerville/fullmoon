@@ -1,5 +1,5 @@
 #include "test/fmn_test.h"
-#include "game/fmn_password.c"
+#include "game/ui/fmn_password.c"
 #include "game/fullmoon.h"
 #include <stdlib.h>
 

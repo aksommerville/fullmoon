@@ -59,7 +59,9 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Pippin?
 - [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.
 - - It should involve convolution somehow, so changing one letter forces the others to change (even if just 1 bit of plaintext).
+- - While we're at it: Expand to 6 letters. 16 bits of plaintext and 14 bits of checksum.
 - [ ] Design-rule validation for passwords, eg can't have the wand if you don't have the feather
 - [ ] Some kind of fanfare, acknowledgement when you pick up a treasure.
-- [ ] Linux: appicon is mixed up. Is it encoding to the fb format or something?
-- [ ] Encoding with the wand is changing our facedir
+- [x] Linux: appicon is mixed up. Is it encoding to the fb format or something?
+- [x] Encoding with the wand is changing our facedir
+- [ ] Interior doors

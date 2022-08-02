@@ -1,5 +1,5 @@
 #include "game/fullmoon.h"
-#include "game/fmn_title.h"
+#include "game/ui/fmn_title.h"
 #include "game/fmn_data.h"
 
 #define FMN_TITLE_SELECTION_NEW 0
