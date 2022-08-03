@@ -27,6 +27,8 @@ static uint16_t pvinput=0;
 
 static uint8_t uimode=0;
 
+volatile uint8_t fmn_gstate[256]={0};
+
 /* Change UI mode (or noop if already there).
  */
  

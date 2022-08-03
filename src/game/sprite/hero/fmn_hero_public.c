@@ -4,7 +4,6 @@
  */
 
 void fmn_hero_reset() {
-  fprintf(stderr,"%s\n",__func__);
   fmn_hero.facedir=FMN_DIR_S;
   fmn_hero.xfacedir=FMN_DIR_E;
   fmn_hero.spellrepudiation=0;
@@ -98,6 +97,5 @@ uint8_t fmn_hero_get_action() {
  */
 
 void fmn_hero_injure(struct fmn_sprite *assailant) {
-  fprintf(stderr,"%s %p\n",__func__,assailant);
-  //TODO
+  fmn_set_uimode(FMN_UIMODE_GAMEOVER);
 }

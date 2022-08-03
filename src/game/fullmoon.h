@@ -156,6 +156,14 @@ struct fmn_map {
 #define FMN_TILE_SOLID      0x01
 #define FMN_TILE_HOLE       0x02
 
+/* General state accessible to maps and sprites.
+ ************************************************************/
+ 
+extern volatile uint8_t fmn_gstate[256];
+
+// These are more for documentation than actual use, so I can see which have been spoken for.
+#define FMN_GSTATE_forest_treadle 0
+
 #ifdef __cplusplus
   }
 #endif

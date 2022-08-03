@@ -1,0 +1,6 @@
+type blockade
+image mainsprites
+tileid 0xa4
+xform 0
+flags SOLID
+layer 0

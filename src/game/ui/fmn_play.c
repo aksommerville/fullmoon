@@ -174,7 +174,7 @@ void fmn_play_render(struct fmn_image *fb) {
 void fmn_game_reset() {
   raintime=0;
   statebits=0;
-  statebits=0x000f;//XXX
+  //statebits=0x000f;//XXX
   fmn_map_reset();
   fmn_hero_reset();
 }

@@ -1,0 +1,6 @@
+type treadle
+image mainsprites
+tileid 0xa2
+xform 0
+flags 0
+layer -100

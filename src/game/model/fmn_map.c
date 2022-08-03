@@ -27,7 +27,7 @@ static uint8_t fmn_map_defery=0;
 const struct fmn_map *map_region_heads[8]={
   &cheatertrap, // reserved
   &home,        // "home"
-  &cheatertrap, // "forest" TODO
+  &forest,      // "forest"
   &cheatertrap, // "caves" TODO
   &cheatertrap, // "desert" TODO
   &cheatertrap, // "swamp" TODO

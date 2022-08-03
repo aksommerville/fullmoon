@@ -112,6 +112,8 @@ extern const struct fmn_sprtype fmn_sprtype_bat;
 extern const struct fmn_sprtype fmn_sprtype_treasure;
 extern const struct fmn_sprtype fmn_sprtype_hazard;
 extern const struct fmn_sprtype fmn_sprtype_pushbox;
+extern const struct fmn_sprtype fmn_sprtype_treadle;
+extern const struct fmn_sprtype fmn_sprtype_blockade;
 
 /* Sprite resource.
  *****************************************************************/
