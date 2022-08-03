@@ -24,7 +24,30 @@ Targets must individually declare the rules for generating data sources, even da
 
 ## TODO
 
-- [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
+- [ ] Finish all dev for Thumby
+- - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
+- - [x] Sprite: stompbox
+- - [x] Sprite: firewall
+- - [ ] Sprite: raccoon
+- - [ ] Sprite: octopus statue -- disappearable
+- - [ ] Sprite: mermaid statue -- moveable
+- - [ ] Sprite: lobster statue -- moveable
+- - [ ] Sprite: fish statue -- summonable
+- - [ ] Sprite: bat. what does it do?
+- - [ ] Sprite: fire nozzle
+- - [ ] Sprite: werewolf
+- - [ ] Sprite: table saw
+- - [ ] lots more sprites
+- - [ ] Rain should extinguish fires
+- - [ ] Spell of Opening
+- - [ ] Spell of Animation
+- - [ ] Spell of Trailhead Teleportation
+- - [ ] Spell of Home Teleportation
+- - [ ] Spell of Slow Motion
+- - [ ] Spell of Invisibility
+- - [ ] Revisit passwords
+- - [ ] Design-rule validation for passwords
+- - [ ] fanfare on picking up treasure
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
@@ -32,34 +55,35 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Tilesheet, cache group lists etc
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
 - - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
-- [ ] Game logic.
-- - [ ] monsters
-- - [ ] environmental puzzles
-- - [ ] I haven't been exploiting POI sort, eg looking for treadles we linear-search the whole list.
-- [ ] Audio: Are we doing audio at all? The Thumby is pretty limited.
-- - YES. Not for Thumby or Pico, but it's worth having for Tiny, Web, and the PCs.
+- [ ] Design
+- - [ ] Fill forest with puzzles
+- - [ ] Dead space in home NE, what should go there?
+- - [ ] Houses in home, what are they for?
+- - [ ] caves
+- - [ ] swamp
+- - [ ] desert
+- - [ ] castle
+- [ ] Audio
+- - [ ] Low quality synth suitable for Tiny
+- - [ ] Higher quality synth for PCs?
+- - [ ] WebAudio
 - - [ ] Consider a limited set of sound effects for Thumby and Pico.
-- [ ] PulseAudio driver.
-- [ ] Build for other targets
-- - [ ] MacOS
-- - - [ ] Review deprecated WM functions: -Wno-deprecated-declarations
-- - - [ ] machid
-- - - [ ] macaudio
-- - - [ ] Can we drop OpenGL? It's deprecated, and really not necessary, if we can get a plain old window framebuffer. (see x11 or drmfb)
-- - - [ ] Update for hi-res framebuffer
-- - [ ] Windows -- just drivers
-- - [x] WebAssembly, highly desirable
-- - - [ ] Clean up web wrapper
-- - - [ ] It currently exports every function. Can we limit that?
-- - - [ ] Using ScriptProcessorNode for audio despite deprecation. How does AudioWorklet work?
+- - [ ] write music
+- [ ] Other platforms
+- - [ ] tiny: 8c graphics -- finish 8b first
+- - [ ] tiny: content for SD card. splash and readme
+- - [ ] 24c graphics -- finish 8c first
+- - [ ] linux: PulseAudio
+- - [ ] machid
+- - [ ] macaudio
+- - [ ] macos: Can we drop OpenGL
+- - [ ] macos: review deprecated WM functions
+- - [ ] macos: Update for hi-res
+- - [ ] mswin
+- - [ ] web: Clean up wrapper
+- - [ ] web: Reduce exported symbols
+- - [ ] web: Can we replace ScriptProcessorNode with AudioWorklet? Or scrap that whole design and write the synth in WebAudio?
 - - [ ] TTY video, and.... something? for input. just for fun
 - - [ ] 68k Mac?
 - - [ ] Pippin?
-- [ ] Review passwords. Seems like only one letter is changing with each treasure i pick up.
-- - It should involve convolution somehow, so changing one letter forces the others to change (even if just 1 bit of plaintext).
-- - While we're at it: Expand to 6 letters. 16 bits of plaintext and 14 bits of checksum.
-- [ ] Design-rule validation for passwords, eg can't have the wand if you don't have the feather
-- [ ] Some kind of fanfare, acknowledgement when you pick up a treasure.
-- [x] Interior doors
-- [x] Sprite: pushbox
-- [ ] Sprite: firewall
+- - [ ] Best way to run on mobile devices, native or web?

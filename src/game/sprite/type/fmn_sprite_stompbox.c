@@ -2,35 +2,26 @@
 #include "game/sprite/fmn_sprite.h"
 #include "game/sprite/hero/fmn_hero.h"
 
+// stompbox is the same thing as treadle, but its state is sticky. Stepping on it toggles it.
+
 #define statep sprite->bv[0]
 #define offvalue sprite->bv[1]
 #define onvalue sprite->bv[2]
 #define basetileid sprite->bv[3]
+#define pvstepped sprite->bv[4]
 
-static int8_t _fmn_treadle_init(struct fmn_sprite *sprite,const struct fmn_sprdef *def) {
+static int8_t _fmn_stompbox_init(struct fmn_sprite *sprite,const struct fmn_sprdef *def) {
   sprite->w=FMN_MM_PER_TILE;
   sprite->h=FMN_MM_PER_TILE;
   sprite->x-=sprite->w>>1;
   sprite->y-=sprite->h>>1;
   basetileid=sprite->tileid;
-  fmn_gstate[statep]=offvalue;
+  if (fmn_gstate[statep]==onvalue) sprite->tileid++;
   return 0;
 }
 
-static uint8_t treadle_bestepped(struct fmn_sprite *sprite) {
-
-  /* This would be nice and neat, but we also need to bestep by other solid sprites (eg pushbox)
-  int16_t herox,heroy;
-  fmn_hero_get_world_position_center(&herox,&heroy);
-  if (herox<sprite->x) return 0;
-  if (heroy<sprite->y) return 0;
-  if (herox>=sprite->x+sprite->w) return 0;
-  if (heroy>=sprite->y+sprite->h) return 0;
-  return 1;
-  /**/
-  
+static uint8_t stompbox_bestepped(struct fmn_sprite *sprite) {
   //TODO Consider throttling this check if it gets too expensive. eg every 10th frame
-  
   int16_t right=sprite->x+sprite->w;
   int16_t bottom=sprite->y+sprite->h;
   struct fmn_sprite **p=fmn_spritev;
@@ -49,19 +40,25 @@ static uint8_t treadle_bestepped(struct fmn_sprite *sprite) {
   return 0;
 }
 
-static void _fmn_treadle_update(struct fmn_sprite *sprite) {
-  if (treadle_bestepped(sprite)) {
-    sprite->tileid=basetileid+1;
-    fmn_gstate[statep]=onvalue;
+static void _fmn_stompbox_update(struct fmn_sprite *sprite) {
+  if (stompbox_bestepped(sprite)) {
+    if (pvstepped) return;
+    pvstepped=1;
+    if (fmn_gstate[statep]==onvalue) {
+      sprite->tileid=basetileid;
+      fmn_gstate[statep]=offvalue;
+    } else {
+      sprite->tileid=basetileid+1;
+      fmn_gstate[statep]=onvalue;
+    }
   } else {
-    sprite->tileid=basetileid;
-    fmn_gstate[statep]=offvalue;
+    pvstepped=0;
   }
 }
 
-const struct fmn_sprtype fmn_sprtype_treadle={
-  .name="treadle",
-  .init=_fmn_treadle_init,
-  .update=_fmn_treadle_update,
+const struct fmn_sprtype fmn_sprtype_stompbox={
+  .name="stompbox",
+  .init=_fmn_stompbox_init,
+  .update=_fmn_stompbox_update,
   .render=fmn_sprite_render_default,
 };

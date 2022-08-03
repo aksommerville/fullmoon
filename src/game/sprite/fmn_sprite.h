@@ -114,6 +114,8 @@ extern const struct fmn_sprtype fmn_sprtype_hazard;
 extern const struct fmn_sprtype fmn_sprtype_pushbox;
 extern const struct fmn_sprtype fmn_sprtype_treadle;
 extern const struct fmn_sprtype fmn_sprtype_blockade;
+extern const struct fmn_sprtype fmn_sprtype_stompbox;
+extern const struct fmn_sprtype fmn_sprtype_firewall;
 
 /* Sprite resource.
  *****************************************************************/

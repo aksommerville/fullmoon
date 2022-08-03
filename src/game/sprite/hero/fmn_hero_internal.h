@@ -24,6 +24,7 @@ extern struct fmn_hero {
   
   int8_t indx,indy;
   uint8_t inbutton;
+  uint8_t last_motion_dir; // N,S,W,E, what was the last axis motion observed? (horz wins rare ties) Zero initially.
   
   int16_t walkspeed;
   int16_t cellx,celly; // Use int16_t because they can go OOB.

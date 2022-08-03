@@ -19,12 +19,20 @@ void fmn_hero_reset() {
 void fmn_hero_set_input(int8_t dx,int8_t dy,uint8_t button) {
   if (!fmn_hero.sprite) return;
   uint8_t motionchanged=0;
-  if (dx!=fmn_hero.indx) {
-    fmn_hero.indx=dx;
+  if (dy!=fmn_hero.indy) {
+    switch (dy) {
+      case -1: fmn_hero.last_motion_dir=FMN_DIR_N; break;
+      case 1: fmn_hero.last_motion_dir=FMN_DIR_S; break;
+    }
+    fmn_hero.indy=dy;
     motionchanged=1;
   }
-  if (dy!=fmn_hero.indy) {
-    fmn_hero.indy=dy;
+  if (dx!=fmn_hero.indx) {
+    switch (dx) {
+      case -1: fmn_hero.last_motion_dir=FMN_DIR_W; break;
+      case 1: fmn_hero.last_motion_dir=FMN_DIR_E; break;
+    }
+    fmn_hero.indx=dx;
     motionchanged=1;
   }
   if (motionchanged) {
@@ -91,6 +99,10 @@ void fmn_hero_set_action(uint8_t action) {
 
 uint8_t fmn_hero_get_action() {
   return fmn_hero.action;
+}
+
+uint8_t fmn_hero_get_facedir() {
+  return fmn_hero.facedir;
 }
 
 /* Injure.

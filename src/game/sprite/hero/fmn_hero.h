@@ -12,6 +12,7 @@ void fmn_hero_set_action(uint8_t action);
 uint8_t fmn_hero_get_action();
 void fmn_hero_injure(struct fmn_sprite *assailant);
 struct fmn_sprite *fmn_hero_get_sprite();
+uint8_t fmn_hero_get_facedir();
 
 /* For doors and such, change the position but don't treat it as diegetic movement.
  * We update our own cell-tracking state such that we will *not* reporting having stepped on this cell.

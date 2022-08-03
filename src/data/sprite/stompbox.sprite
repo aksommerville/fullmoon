@@ -1,0 +1,6 @@
+type stompbox
+image mainsprites
+tileid 0xa6
+xform 0
+flags 0
+layer -100

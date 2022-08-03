@@ -19,6 +19,7 @@ void fmn_hero_update_facedir() {
 
   // Change to agree with input state.
   // Prefer showing a horizontal face; they are prettier.
+  #if 0 // ...actually I want to always face the direction of most recent motion, to aid with triggering the firewall.
   if (fmn_hero.indx<0) {
     fmn_hero.facedir=FMN_DIR_W;
     fmn_hero.xfacedir=FMN_DIR_W;
@@ -30,6 +31,33 @@ void fmn_hero_update_facedir() {
   } else if (fmn_hero.indy>0) {
     fmn_hero.facedir=FMN_DIR_S;
   }
+  #else
+  switch (fmn_hero.last_motion_dir) {
+    case FMN_DIR_S: {
+        if (fmn_hero.indy>0) fmn_hero.facedir=FMN_DIR_S;
+        else if (fmn_hero.indx<0) fmn_hero.facedir=FMN_DIR_W;
+        else if (fmn_hero.indx>0) fmn_hero.facedir=FMN_DIR_E;
+      } break;
+    case FMN_DIR_N: {
+        if (fmn_hero.indy<0) fmn_hero.facedir=FMN_DIR_N;
+        else if (fmn_hero.indx<0) fmn_hero.facedir=FMN_DIR_W;
+        else if (fmn_hero.indx>0) fmn_hero.facedir=FMN_DIR_E;
+      } break;
+    case FMN_DIR_W: {
+        if (fmn_hero.indx<0) fmn_hero.facedir=FMN_DIR_W;
+        else if (fmn_hero.indy<0) fmn_hero.facedir=FMN_DIR_N;
+        else if (fmn_hero.indy>0) fmn_hero.facedir=FMN_DIR_S;
+      } break;
+    case FMN_DIR_E: {
+        if (fmn_hero.indx>0) fmn_hero.facedir=FMN_DIR_E;
+        else if (fmn_hero.indy<0) fmn_hero.facedir=FMN_DIR_N;
+        else if (fmn_hero.indy>0) fmn_hero.facedir=FMN_DIR_S;
+      } break;
+  }
+  if (fmn_hero.facedir&(FMN_DIR_W|FMN_DIR_E)) {
+    fmn_hero.xfacedir=fmn_hero.facedir&(FMN_DIR_W|FMN_DIR_E);
+  }
+  #endif
 }
 
 /* Some conveniences for rendering.

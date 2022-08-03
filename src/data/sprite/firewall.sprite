@@ -1,0 +1,6 @@
+type firewall
+image mainsprites
+tileid 0xa8
+xform 0
+flags 0
+layer 10
