@@ -28,7 +28,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
 - - [x] Sprite: stompbox
 - - [x] Sprite: firewall
-- - [ ] Sprite: raccoon
+- - [x] Sprite: raccoon
 - - [ ] Sprite: octopus statue -- disappearable
 - - [ ] Sprite: mermaid statue -- moveable
 - - [ ] Sprite: lobster statue -- moveable
@@ -39,6 +39,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Sprite: table saw
 - - [ ] lots more sprites
 - - [ ] Rain should extinguish fires
+- - [ ] Can we prevent rain from working indoors?
 - - [ ] Spell of Opening
 - - [ ] Spell of Animation
 - - [ ] Spell of Trailhead Teleportation
@@ -48,6 +49,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Revisit passwords
 - - [ ] Design-rule validation for passwords
 - - [ ] fanfare on picking up treasure
+- - [ ] Delay before switching to gameover mode? Mega-man "bwoo-woo-woo" effect?
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
