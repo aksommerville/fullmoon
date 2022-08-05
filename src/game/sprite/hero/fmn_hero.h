@@ -8,6 +8,7 @@
 void fmn_hero_reset();
 void fmn_hero_set_input(int8_t dx,int8_t dy,uint8_t button);
 void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm);
+void fmn_hero_get_world_bounds(int16_t *xmm,int16_t *ymm,int16_t *wmm,int16_t *hmm);
 void fmn_hero_set_action(uint8_t action);
 uint8_t fmn_hero_get_action();
 void fmn_hero_injure(struct fmn_sprite *assailant);

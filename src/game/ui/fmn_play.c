@@ -23,6 +23,8 @@ static uint8_t bgbitsdirty=1;
 
 static uint16_t raintime=0;
 static uint16_t statebits=0;
+
+uint32_t fmn_play_frame_count=0;
  
 /* Begin.
  * Mind that this only means "ui mode changed"; not necessarily "start a fresh game".
@@ -72,6 +74,7 @@ static void fmn_finish_rain() {
  */
  
 void fmn_play_update() {
+  fmn_play_frame_count++;
 
   fmn_sprites_update();
 
@@ -172,6 +175,7 @@ void fmn_play_render(struct fmn_image *fb) {
  */
  
 void fmn_game_reset() {
+  fmn_play_frame_count=0;
   raintime=0;
   statebits=0;
   //statebits=0x000f;//XXX
@@ -180,6 +184,7 @@ void fmn_game_reset() {
 }
 
 void fmn_game_reset_with_password(uint32_t pw) {
+  fmn_play_frame_count=0;
 
   if (pw&0xffff0000) pw=0;
   statebits=pw;

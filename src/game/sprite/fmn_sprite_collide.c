@@ -372,3 +372,186 @@ uint8_t fmn_sprite_collide(
   if (adjy) *adjy=0;
   return 1;
 }
+
+/* Speculative collision detection.
+ */
+
+// From scratch. At least sprite's bounds, and at most 255 mm away.
+static void fmn_sprite_measure_map_freedom(
+  int16_t *x,int16_t *y,int16_t *w,int16_t *h,
+  const struct fmn_sprite *sprite,
+  uint8_t cellprops,
+  uint8_t ax,uint8_t ay // (1,0) or (0,1), which axis are we measuring?
+) {
+  if (ax) { // horizontal ribbon
+    *x=sprite->x-0xff;
+    *w=sprite->w+0xff*2;
+    *y=sprite->y;
+    *h=sprite->h;
+  } else { // vertical ribbon
+    *x=sprite->x;
+    *w=sprite->w;
+    *y=sprite->y-0xff;
+    *h=sprite->h+0xff*2;
+  }
+  if (!cellprops) return;
+  const struct fmn_map *map=fmn_map_get();
+  if (!map||!map->tileprops) return;
+  int16_t col=(sprite->x+(sprite->w>>1))/FMN_MM_PER_TILE;
+  int16_t row=(sprite->y+(sprite->h>>1))/FMN_MM_PER_TILE;
+  const int16_t maxtilec=(255+FMN_MM_PER_TILE-1)/FMN_MM_PER_TILE;
+  if (ax) {
+    if ((row<0)||(row>=map->h)) return;
+    const uint8_t *cellrow=map->v+map->w*row;
+    int16_t leftc=0,rightc=0;
+    while (leftc<maxtilec) {
+      if (col-leftc-1<0) { leftc=maxtilec; break; }
+      if (col-leftc-1<map->w) {
+        if (map->tileprops[cellrow[col-leftc-1]]&cellprops) break;
+      }
+      leftc++;
+    }
+    while (rightc<maxtilec) {
+      if (col+rightc+1>=map->w) { rightc=maxtilec; break; }
+      if (col+rightc+1>=0) {
+        if (map->tileprops[cellrow[col+rightc+1]]&cellprops) break;
+      }
+      rightc++;
+    }
+    int16_t leftx=(col-leftc)*FMN_MM_PER_TILE;
+    int16_t rightx=(col+rightc+1)*FMN_MM_PER_TILE;
+    if (sprite->x-leftx>255) leftx=sprite->x-255;
+    else if (leftx>sprite->x) leftx=sprite->x;
+    if (rightx-sprite->w-sprite->x>255) rightx=sprite->x+sprite->w+255;
+    else if (rightx<sprite->x+sprite->w) rightx=sprite->x+sprite->w;
+    *x=leftx;
+    *w=rightx-leftx;
+  } else {
+    if ((col<0)||(col>=map->w)) return;
+    const uint8_t *cellrow=map->v+map->w*row+col; // beware, can be oob
+    int16_t upc=0,downc=0;
+    while (upc<maxtilec) {
+      if (row-upc-1<0) { upc=maxtilec; break; }
+      cellrow-=map->w;
+      if (row-upc-1<map->h) {
+        if (map->tileprops[*cellrow]&cellprops) break;
+      }
+      upc++;
+    }
+    cellrow=map->v+map->w*row+col;
+    while (downc<maxtilec) {
+      if (row+downc+1>=map->h) { downc=maxtilec; break; }
+      cellrow+=map->w;
+      if (row+downc+1>=0) {
+        if (map->tileprops[*cellrow]&cellprops) break;
+      }
+      downc++;
+    }
+    int16_t upy=(row-upc)*FMN_MM_PER_TILE;
+    int16_t downy=(row+downc+1)*FMN_MM_PER_TILE;
+    if (sprite->y-upy>255) upy=sprite->y-255;
+    else if (upy>sprite->y) upy=sprite->y;
+    if (downy-sprite->h-sprite->y>255) downy=sprite->y+sprite->h+255;
+    else if (downy<sprite->y+sprite->h) downy=sprite->y+sprite->h;
+    *y=upy;
+    *h=downy-upy;
+  }
+}
+
+// Reducing an existing rect. Never shrinks below the sprite's bounds.
+static void fmn_sprite_refine_sprite_freedom(
+  int16_t *x,int16_t *y,int16_t *w,int16_t *h,
+  const struct fmn_sprite *sprite,
+  uint8_t flags,
+  uint8_t ax,uint8_t ay // (1,0) or (0,1), which axis are we measuring?
+) {
+  if (!flags) return;
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    const struct fmn_sprite *other=*p;
+    if (!(other->flags&flags)) continue;
+    if (other==sprite) continue;
+    if (other->x>=(*x)+(*w)) continue;
+    if (other->y>=(*y)+(*h)) continue;
+    if (other->x+other->w<=*x) continue;
+    if (other->y+other->h<=*y) continue;
+    if (ax) {
+      if (other->x>sprite->x) { // reduce right
+        if (other->x<sprite->x+sprite->w) {
+          *w=sprite->x+sprite->w-*x;
+        } else {
+          *w=other->x-*x;
+        }
+      } else { // reduce left
+        if (other->x+other->w>sprite->x) {
+          *w=(*x)+(*w)-sprite->x;
+          *x=sprite->x;
+        } else {
+          *w=(*x)+(*w)-other->w-other->x;
+          *x=other->x+other->w;
+        }
+      }
+    } else {
+      if (other->y>sprite->y) { // reduce down
+        if (other->y<sprite->y+sprite->h) {
+          *h=sprite->y+sprite->h-*y;
+        } else {
+          *h=other->y-*y;
+        }
+      } else { // reduce up
+        if (other->y+other->h>sprite->y) {
+          *h=(*y)+(*h)-sprite->y;
+          *y=sprite->y;
+        } else {
+          *h=(*y)+(*h)-other->h-other->y;
+          *y=other->y+other->h;
+        }
+      }
+    }
+  }
+}
+ 
+void fmn_sprite_measure_cardinal_freedom(
+  uint8_t *lrtb,
+  const struct fmn_sprite *sprite,
+  uint8_t cellprops,
+  uint8_t spriteflags
+) {
+  if (!sprite) return;
+  int16_t hx,hy,hw,hh,vx,vy,vw,vh;
+  fmn_sprite_measure_map_freedom(&hx,&hy,&hw,&hh,sprite,cellprops,1,0);
+  fmn_sprite_refine_sprite_freedom(&hx,&hy,&hw,&hh,sprite,spriteflags,1,0);
+  fmn_sprite_measure_map_freedom(&vx,&vy,&vw,&vh,sprite,cellprops,0,1);
+  fmn_sprite_refine_sprite_freedom(&vx,&vy,&vw,&vh,sprite,spriteflags,0,1);
+  lrtb[0]=sprite->x-hx;
+  lrtb[1]=hx+hw-sprite->w-sprite->x;
+  lrtb[2]=sprite->y-vy;
+  lrtb[3]=vy+vh-sprite->h-sprite->y;
+}
+
+/* Limit freedom to the sprite's screenful.
+ */
+ 
+void fmn_sprite_limit_freedom_to_screen(
+  const struct fmn_sprite *sprite,
+  uint8_t *lrtb
+) {
+  if (!sprite) return;
+  int16_t midx=sprite->x+(sprite->w>>1);
+  int16_t midy=sprite->y+(sprite->h>>1);
+  int16_t screenx=(midx/FMN_SCREENW_MM)*FMN_SCREENW_MM;
+  int16_t screeny=(midy/FMN_SCREENH_MM)*FMN_SCREENH_MM;
+  
+  if (sprite->x<screenx) lrtb[0]=0;
+  else if (lrtb[0]>sprite->x-screenx) lrtb[0]=sprite->x-screenx;
+  if (sprite->y<screeny) lrtb[2]=0;
+  else if (lrtb[2]>sprite->y-screeny) lrtb[2]=sprite->y-screeny;
+  
+  int16_t right=screenx+FMN_SCREENW_MM-sprite->w-sprite->x;
+  if (right<=0) lrtb[1]=0;
+  else if (right<lrtb[1]) lrtb[1]=right;
+  int16_t down=screeny+FMN_SCREENH_MM-sprite->h-sprite->y;
+  if (down<=0) lrtb[3]=0;
+  else if (down<lrtb[3]) lrtb[3]=down;
+}

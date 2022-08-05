@@ -81,6 +81,22 @@ uint8_t fmn_sprite_collide(
   uint8_t resolve
 );
 
+/* "Speculative collision detection."
+ * How far in mm can this sprite move in each of the cardinal directions?
+ * I've deliberately chosen uint8_t as the result type, to make it clear we're not looking very far.
+ * Optionally, you can refine this result to clamp to the screenful the sprite's center falls on.
+ */
+void fmn_sprite_measure_cardinal_freedom(
+  uint8_t *lrtb,
+  const struct fmn_sprite *sprite,
+  uint8_t cellprops,
+  uint8_t spriteflags
+);
+void fmn_sprite_limit_freedom_to_screen(
+  const struct fmn_sprite *sprite,
+  uint8_t *lrtb
+);
+
 /* Sprite type.
  ******************************************************************/
  
@@ -116,6 +132,8 @@ extern const struct fmn_sprtype fmn_sprtype_treadle;
 extern const struct fmn_sprtype fmn_sprtype_blockade;
 extern const struct fmn_sprtype fmn_sprtype_stompbox;
 extern const struct fmn_sprtype fmn_sprtype_firewall;
+extern const struct fmn_sprtype fmn_sprtype_raccoon;
+extern const struct fmn_sprtype fmn_sprtype_missile;
 
 /* Sprite resource.
  *****************************************************************/

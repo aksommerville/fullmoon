@@ -1,0 +1,6 @@
+type raccoon
+image mainsprites
+tileid 0xac
+xform 0
+layer 0
+flags SOLID

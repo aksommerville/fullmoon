@@ -67,6 +67,20 @@ void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm) {
   }
 }
 
+void fmn_hero_get_world_bounds(int16_t *xmm,int16_t *ymm,int16_t *wmm,int16_t *hmm) {
+  if (fmn_hero.sprite) {
+    *xmm=fmn_hero.sprite->x;
+    *ymm=fmn_hero.sprite->y;
+    *wmm=fmn_hero.sprite->w;
+    *hmm=fmn_hero.sprite->h;
+  } else {
+    *xmm=fmn_hero.holdposx;
+    *ymm=fmn_hero.holdposy;
+    *wmm=FMN_MM_PER_TILE;
+    *hmm=FMN_MM_PER_TILE;
+  }
+}
+
 void fmn_hero_adjust_position(int16_t dxmm,int16_t dymm) {
   if (fmn_hero.sprite) {
     fmn_hero.sprite->x+=dxmm;
