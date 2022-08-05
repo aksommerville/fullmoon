@@ -73,6 +73,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Consider a limited set of sound effects for Thumby and Pico.
 - - [ ] write music
 - [ ] Other platforms
+- - [ ] pico: firewall does something, flickering and middle tiles out of place... the hell?
 - - [ ] tiny: 8c graphics -- finish 8b first
 - - [ ] tiny: content for SD card. splash and readme
 - - [ ] 24c graphics -- finish 8c first

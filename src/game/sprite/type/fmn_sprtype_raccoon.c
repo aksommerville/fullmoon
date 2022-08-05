@@ -230,8 +230,8 @@ static void fmn_raccoon_menace_end(struct fmn_sprite *sprite) {
     float dy=heroy-MISSILE->y;
     float distance=(int16_t)sqrtf(dx*dx+dy*dy);
     if (distance<1.0f) distance=1.0f;
-    MISSILE->sv[1]=lround((dx*FMN_RACCOON_TOSS_SPEED)/distance);
-    MISSILE->sv[2]=lround((dy*FMN_RACCOON_TOSS_SPEED)/distance);
+    MISSILE->sv[1]=(int16_t)((dx*FMN_RACCOON_TOSS_SPEED)/distance);
+    MISSILE->sv[2]=(int16_t)((dy*FMN_RACCOON_TOSS_SPEED)/distance);
   }
 }
 
@@ -246,8 +246,8 @@ static uint8_t fmn_raccoon_can_throw(struct fmn_sprite *sprite) {
 }
 
 static void fmn_raccoon_generate_missile(struct fmn_sprite *sprite) {
-  int16_t mx=sprite->x;
-  int16_t my=sprite->y;
+  int16_t mx=sprite->x+FMN_GFXSCALE;
+  int16_t my=sprite->y+FMN_GFXSCALE;
   if (sprite->xform&FMN_XFORM_XREV) mx+=FMN_MM_PER_TILE;
   if (!(missile=fmn_sprite_new(&fmn_sprtype_missile,0,mx,my,0,0,0))) return;
   MISSILE->image=sprite->image;
