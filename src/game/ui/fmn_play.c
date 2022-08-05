@@ -168,6 +168,21 @@ void fmn_play_render(struct fmn_image *fb) {
   // Rain.
   if (raintime) render_rain(fb);
   
+  //XXX Highlight the hero's bounds.
+  if (0) {
+    if (fmn_play_frame_count&1) {
+      int16_t scrollx,scrolly;
+      fmn_map_get_scroll_mm(&scrollx,&scrolly);
+      int16_t dstx,dsty,dstw,dsth;
+      fmn_hero_get_world_bounds(&dstx,&dsty,&dstw,&dsth);
+      int16_t right=((dstx+dstw-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
+      int16_t bottom=((dsty+dsth-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;
+      dstx=((dstx-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
+      dsty=((dsty-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;
+      fmn_image_fill_rect(fb,dstx,dsty,right-dstx,bottom-dsty,(fmn_play_frame_count&2)?1:0);
+    }
+  }
+  
   //TODO additional overlay?
 }
 

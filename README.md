@@ -29,6 +29,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [x] Sprite: stompbox
 - - [x] Sprite: firewall
 - - [x] Sprite: raccoon
+- - [x] Umbrella must deflect missiles
 - - [ ] Sprite: octopus statue -- disappearable
 - - [ ] Sprite: mermaid statue -- moveable
 - - [ ] Sprite: lobster statue -- moveable

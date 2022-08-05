@@ -15,8 +15,15 @@
 #define FMN_HERO_FLY_SPEED 9
 #define FMN_HERO_SPELL_REPUDIATION_TIME 60
 #define FMN_HERO_UMBRELLA_TIME 20
+#define FMN_HERO_UMBRELLA_DEPTH (FMN_MM_PER_TILE>>1)
 #define FMN_HERO_PUSH_DELAY 30 /* After walking into a wall so many frames, look once for pushable things. */
 #define FMN_HERO_FEATHER_FORGET_TIME 300
+
+// What we report at fmn_hero_get_world_bounds(), compared to sprite->(x,y,w,h).
+#define FMN_HERO_BOUNDS_LEFT ((FMN_MM_PER_TILE*-2)/8)
+#define FMN_HERO_BOUNDS_RIGHT ((FMN_MM_PER_TILE*2)/8)
+#define FMN_HERO_BOUNDS_UP ((FMN_MM_PER_TILE*-4)/8)
+#define FMN_HERO_BOUNDS_DOWN 0
 
 extern struct fmn_hero {
 

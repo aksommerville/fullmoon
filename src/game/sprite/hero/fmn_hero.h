@@ -15,6 +15,14 @@ void fmn_hero_injure(struct fmn_sprite *assailant);
 struct fmn_sprite *fmn_hero_get_sprite();
 uint8_t fmn_hero_get_facedir();
 
+/* Umbrella (or possibly some future item I haven't thought of yet).
+ * If deployed, returns the direction of deployment and depth.
+ * (x_or_y) returns with the absolute position of the shield's interior edge. The other three edges match the hero's own bounds.
+ * Any missile approaching that edge should deflect.
+ * Returns zero if not deployed.
+ */
+uint8_t fmn_hero_get_deflector(int16_t *x_or_y);
+
 /* For doors and such, change the position but don't treat it as diegetic movement.
  * We update our own cell-tracking state such that we will *not* reporting having stepped on this cell.
  */

@@ -163,6 +163,7 @@ extern volatile uint8_t fmn_gstate[256];
 
 // These are more for documentation than actual use, so I can see which have been spoken for.
 #define FMN_GSTATE_forest_treadle 0
+#define FMN_GSTATE_forest_early_treadle 1
 
 #ifdef __cplusplus
   }

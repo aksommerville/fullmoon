@@ -69,15 +69,22 @@ void fmn_hero_get_world_position_center(int16_t *xmm,int16_t *ymm) {
 
 void fmn_hero_get_world_bounds(int16_t *xmm,int16_t *ymm,int16_t *wmm,int16_t *hmm) {
   if (fmn_hero.sprite) {
-    *xmm=fmn_hero.sprite->x;
-    *ymm=fmn_hero.sprite->y;
-    *wmm=fmn_hero.sprite->w;
-    *hmm=fmn_hero.sprite->h;
+    *xmm=fmn_hero.sprite->x+FMN_HERO_BOUNDS_LEFT;
+    *ymm=fmn_hero.sprite->y+FMN_HERO_BOUNDS_UP;
+    *wmm=fmn_hero.sprite->w-FMN_HERO_BOUNDS_LEFT+FMN_HERO_BOUNDS_RIGHT;
+    *hmm=fmn_hero.sprite->h-FMN_HERO_BOUNDS_UP+FMN_HERO_BOUNDS_DOWN;
   } else {
     *xmm=fmn_hero.holdposx;
     *ymm=fmn_hero.holdposy;
     *wmm=FMN_MM_PER_TILE;
     *hmm=FMN_MM_PER_TILE;
+  }
+  // Add umbrella depth if deployed.
+  if (fmn_hero.action_in_progress==FMN_ACTION_UMBRELLA) switch (fmn_hero.facedir) {
+    case FMN_DIR_N: (*ymm)-=FMN_HERO_UMBRELLA_DEPTH; (*hmm)+=FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_W: (*xmm)-=FMN_HERO_UMBRELLA_DEPTH; (*wmm)+=FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_S: (*hmm)+=FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_E: (*wmm)+=FMN_HERO_UMBRELLA_DEPTH; break;
   }
 }
 
@@ -116,6 +123,21 @@ uint8_t fmn_hero_get_action() {
 }
 
 uint8_t fmn_hero_get_facedir() {
+  return fmn_hero.facedir;
+}
+
+/* Deployed umbrella.
+ */
+ 
+uint8_t fmn_hero_get_deflector(int16_t *x_or_y) {
+  if (fmn_hero.action_in_progress!=FMN_ACTION_UMBRELLA) return 0;
+  if (fmn_hero.umbrellatime<FMN_HERO_UMBRELLA_TIME) return 0; // not deployed yet
+  switch (fmn_hero.facedir) {
+    case FMN_DIR_N: *x_or_y=fmn_hero.sprite->y+FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_W: *x_or_y=fmn_hero.sprite->x+FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_S: *x_or_y=fmn_hero.sprite->y+fmn_hero.sprite->h-FMN_HERO_UMBRELLA_DEPTH; break;
+    case FMN_DIR_E: *x_or_y=fmn_hero.sprite->y+fmn_hero.sprite->w-FMN_HERO_UMBRELLA_DEPTH; break;
+  }
   return fmn_hero.facedir;
 }
 
