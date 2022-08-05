@@ -352,6 +352,7 @@ void akpico_send_framebuffer(const void *src) {
   
   _wait_vsync();
   _flip();
+  while (_in_flip) ;
 }
 
 /* Initialize framebuffer.
