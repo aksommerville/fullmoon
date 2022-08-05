@@ -8,11 +8,21 @@ static void fmn_hero_broom_begin() {
 }
 
 static void fmn_hero_broom_end() {
+  if (fmn_sprite_collide(0,0,fmn_hero.sprite,FMN_TILE_SOLID|FMN_TILE_HOLE,0,0)) {
+    // We must be over water -- don't get off the broom.
+    return;
+  }
   fmn_hero.action_in_progress=0;
-  //TODO must verify we're on solid ground, otherwise preserve action_in_progress
 }
 
 static void fmn_hero_broom_update() {
+  if (!fmn_hero.inbutton) {
+    // User tried to get off the broom and we declined.
+    // Check again every frame.
+    if (!fmn_sprite_collide(0,0,fmn_hero.sprite,FMN_TILE_SOLID|FMN_TILE_HOLE,0,0)) {
+      fmn_hero.action_in_progress=0;
+    }
+  }
 }
 
 /* Feather.

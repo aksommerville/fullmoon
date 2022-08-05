@@ -3,8 +3,6 @@ size=72 60
 region=home
 poi=49 42 START 0 0 0 
 poi=71 0 EDGE_DOOR 0 25 0 forest
-poi=47 41 SPRITE 0 0 0 pushbox
-poi=51 41 SPRITE 0 0 0 pushbox
 poi=47 37 INTERIOR_DOOR 24 54 0 
 poi=39 42 INTERIOR_DOOR 11 54 0 
 poi=39 37 INTERIOR_DOOR 2 54 0 
@@ -18,7 +16,10 @@ poi=58 36 SPRITE 0 0 0 pushbox
 poi=5 55 SPRITE 2 0 0 firewall
 poi=7 57 SPRITE 2 8 0 fire
 poi=7 56 SPRITE 2 8 0 fire
-poi=58 41 SPRITE 0 0 0 raccoon
+poi=16 51 SPRITE 1 0 0 treasure
+poi=16 52 SPRITE 2 0 0 treasure
+poi=16 53 SPRITE 4 0 0 treasure
+poi=15 51 SPRITE 8 0 0 treasure
 BEGIN_BODY
 c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1b3d1d1d1b4c1c1c1c1c1c2656667c0c1c1c1b3d1d21d1d1ed0d1b4c1c1c1c1c1c1c1b3d1d1d1d1b4c1c1c1c1c1c1c1c1c1c1c1c1
 c1c1c1c1c1c1b3d1d1d1d1d1d1d1d1d1d1b4c1c1c21d1d1dd0b4c1c1c1c1c2656667d0d1d1d1d21e1e1d1e1d1d1ed0d1d1d1d1d1d1d1d21d1d1d1dd0d1d1d1d1b4c1c1c1c1c1c1c1
