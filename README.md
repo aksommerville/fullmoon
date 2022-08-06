@@ -40,7 +40,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Spell of Invisibility
 - - [ ] Revisit passwords
 - - [ ] Design-rule validation for passwords
-- - [ ] fanfare on picking up treasure
+- - [x] fanfare on picking up treasure
 - - [x] Delay before switching to gameover mode? Mega-man "bwoo-woo-woo" effect?
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?

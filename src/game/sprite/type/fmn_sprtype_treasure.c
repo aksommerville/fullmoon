@@ -1,4 +1,5 @@
 #include "game/fullmoon.h"
+#include "game/ui/fmn_fanfare.h"
 #include "game/sprite/fmn_sprite.h"
 #include "game/sprite/hero/fmn_hero.h"
 
@@ -63,6 +64,14 @@ static uint8_t fmn_treasure_action_if_only(uint16_t mask) {
   return 0;
 }
 
+static uint8_t fmn_treasure_action(uint16_t mask) {
+  if (mask&FMN_STATE_BROOM) return FMN_ACTION_BROOM;
+  if (mask&FMN_STATE_FEATHER) return FMN_ACTION_FEATHER;
+  if (mask&FMN_STATE_WAND) return FMN_ACTION_WAND;
+  if (mask&FMN_STATE_UMBRELLA) return FMN_ACTION_UMBRELLA;
+  return 0;
+}
+
 static void _fmn_treasure_update(struct fmn_sprite *sprite) {
   if (!sprite->tileid) {
     fmn_sprite_del_later(sprite);
@@ -75,11 +84,14 @@ static void _fmn_treasure_update(struct fmn_sprite *sprite) {
   int16_t herox,heroy;
   fmn_hero_get_world_position_center(&herox,&heroy);
   if ((herox>=sprite->x)&&(heroy>=sprite->y)&&(herox<sprite->x+sprite->w)&&(heroy<sprite->y+sprite->h)) {
-    //TODO fanfare
     fmn_game_set_state(treasure_mask,treasure_mask);
     uint8_t action=fmn_treasure_action_if_only(treasure_mask);
     if (action) fmn_hero_set_action(action);
     fmn_sprite_del_later(sprite);
+    if (action=fmn_treasure_action(treasure_mask)) {
+      fmn_fanfare_set_action(action);
+      fmn_set_uimode(FMN_UIMODE_FANFARE);
+    }
   }
 }
 

@@ -61,6 +61,7 @@ void fmn_platform_init_framebuffer(struct fmn_image *fb);
 #define FMN_UIMODE_PAUSE    3
 #define FMN_UIMODE_PASSWORD 4
 #define FMN_UIMODE_GAMEOVER 5
+#define FMN_UIMODE_FANFARE  6
 void fmn_set_uimode(uint8_t mode);
 
 /* Business.

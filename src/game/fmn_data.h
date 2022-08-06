@@ -5,6 +5,7 @@ extern const struct fmn_image titlesplash;
 extern const struct fmn_image bgtiles;
 extern const struct fmn_image mainsprites;
 extern const struct fmn_image uibits;
+extern const struct fmn_image fanfare;
 
 extern const struct fmn_map cheatertrap; // TODO Remove, instead validate passwords refer to a real map and reject.
 extern const struct fmn_map home;
