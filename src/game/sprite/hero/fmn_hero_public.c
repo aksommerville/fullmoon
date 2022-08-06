@@ -126,6 +126,11 @@ uint8_t fmn_hero_get_facedir() {
   return fmn_hero.facedir;
 }
 
+uint8_t fmn_hero_get_feather_dir() {
+  if (fmn_hero.action_in_progress==FMN_ACTION_FEATHER) return fmn_hero.facedir;
+  return 0;
+}
+
 /* Deployed umbrella.
  */
  

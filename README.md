@@ -30,10 +30,10 @@ Targets must individually declare the rules for generating data sources, even da
 - - [x] Sprite: firewall
 - - [x] Sprite: raccoon
 - - [x] Umbrella must deflect missiles
-- - [ ] Sprite: octopus statue -- disappearable
-- - [ ] Sprite: mermaid statue -- moveable
-- - [ ] Sprite: lobster statue -- moveable
-- - [ ] Sprite: fish statue -- summonable
+- - [x] Sprite: octopus statue -- disappearable
+- - [x] Sprite: mermaid statue -- moveable
+- - [x] Sprite: lobster statue -- moveable
+- - [x] Sprite: fish statue -- summonable
 - - [ ] Sprite: bat. what does it do?
 - - [ ] Sprite: fire nozzle
 - - [ ] Sprite: werewolf

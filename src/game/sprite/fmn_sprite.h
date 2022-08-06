@@ -134,6 +134,7 @@ extern const struct fmn_sprtype fmn_sprtype_stompbox;
 extern const struct fmn_sprtype fmn_sprtype_firewall;
 extern const struct fmn_sprtype fmn_sprtype_raccoon;
 extern const struct fmn_sprtype fmn_sprtype_missile;
+extern const struct fmn_sprtype fmn_sprtype_statue;
 
 /* Sprite resource.
  *****************************************************************/

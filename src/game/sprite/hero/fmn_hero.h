@@ -15,6 +15,9 @@ void fmn_hero_injure(struct fmn_sprite *assailant);
 struct fmn_sprite *fmn_hero_get_sprite();
 uint8_t fmn_hero_get_facedir();
 
+// Zero if feather not being used, otherwise a cardinal direction.
+uint8_t fmn_hero_get_feather_dir();
+
 /* Umbrella (or possibly some future item I haven't thought of yet).
  * If deployed, returns the direction of deployment and depth.
  * (x_or_y) returns with the absolute position of the shield's interior edge. The other three edges match the hero's own bounds.

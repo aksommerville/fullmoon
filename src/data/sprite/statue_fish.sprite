@@ -1,0 +1,4 @@
+type statue
+image mainsprites
+tileid 0xb3
+flags SOLID

@@ -30,11 +30,11 @@ web_IMAGE_SET:=24c
 web_FBFMT:=rgba8888
 
 # What you probably want:
-linux_IMAGE_SET:=24c
-linux_FBFMT:=rgba8888
+#linux_IMAGE_SET:=24c
+#linux_FBFMT:=rgba8888
 # For testing Thumby:
-#linux_IMAGE_SET:=8b
-#linux_FBFMT:=thumby
+linux_IMAGE_SET:=8b
+linux_FBFMT:=thumby
 # For testing Tiny:
 #linux_IMAGE_SET:=8c
 #linux_FBFMT:=bgr332
