@@ -26,16 +26,7 @@ Targets must individually declare the rules for generating data sources, even da
 
 - [ ] Finish all dev for Thumby
 - - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
-- - [x] Sprite: stompbox
-- - [x] Sprite: firewall
-- - [x] Sprite: raccoon
-- - [x] Umbrella must deflect missiles
-- - [x] Sprite: octopus statue -- disappearable
-- - [x] Sprite: mermaid statue -- moveable
-- - [x] Sprite: lobster statue -- moveable
-- - [x] Sprite: fish statue -- summonable
-- - [x] Sprite: bat.
-- - [ ] Sprite: fire nozzle
+- - [x] Sprite: fire nozzle
 - - [ ] Sprite: werewolf
 - - [ ] Sprite: table saw
 - - [ ] lots more sprites

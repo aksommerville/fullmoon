@@ -1,0 +1,4 @@
+type firenozzle
+image mainsprites
+tileid 0x85
+xform SWAP XREV

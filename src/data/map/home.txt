@@ -24,6 +24,11 @@ poi=64 57 SPRITE 0 0 0 statue_octopus
 poi=65 56 SPRITE 0 0 0 statue_mermaid
 poi=67 56 SPRITE 0 0 0 statue_shell
 poi=69 56 SPRITE 0 0 0 statue_fish
+poi=25 51 SPRITE 0 1 210 firenozzle_w
+poi=22 53 SPRITE 6 0 180 firenozzle_n
+poi=19 52 SPRITE 0 1 150 firenozzle_e
+poi=21 51 SPRITE 6 0 0 firenozzle_s
+poi=25 53 SPRITE 6 0 1 stompbox
 BEGIN_BODY
 c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1b3d1d1d1b4c1c1c1c1c1c2656667c0c1c1c1b3d1d21d1d1ed0d1b4c1c1c1c1c1c1c1b3d1d1d1d1d1b4c1c1c1b3d1d1d1d1d1c1c1
 c1c1c1c1c1c1b3d1d1d1d1d1d1d1d1d1d1b4c1c1c21d1d1dd0b4c1c1c1c1c2656667d0d1d1d1d21e1e1d1e1d1d1ed0d1d1d1d1d1d1b4c21dbbbcbd1dd0d1b4c1c21db8b9ba1dc0c1
