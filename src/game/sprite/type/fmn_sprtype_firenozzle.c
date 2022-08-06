@@ -12,6 +12,7 @@
 
 #define stage sprite->bv[4]
 #define clock sprite->bv[5]
+#define lockon sprite->bv[6] /* for the lucky nozzle that burns a witch -- it gets to stay on forever */
 
 // (sv) are two rectangles: My proximity zone and my kill zone.
 // These are constant after init, the kill zone stays put even when we are turned off.
@@ -105,6 +106,12 @@ static int8_t _firenozzle_init(struct fmn_sprite *sprite,const struct fmn_sprdef
  
 static void _firenozzle_update(struct fmn_sprite *sprite) {
 
+  // lockon overrides everything else.
+  if (lockon) {
+    stage=FMN_FIRENOZZLE_STAGE_BURN;
+    return;
+  }
+
   // Check gstate first if in play -- a false here tells us everything we need to know.
   if (gstatep) {
     if (!fmn_gstate[gstatep]) {
@@ -142,6 +149,7 @@ static void _firenozzle_update(struct fmn_sprite *sprite) {
   if (stage==FMN_FIRENOZZLE_STAGE_BURN) {
     if ((herox>=killx)&&(heroy>=killy)&&(herox<killx+killw)&&(heroy<killy+killh)) {
       fmn_hero_injure(sprite);
+      lockon=1;
     }
   }
 }

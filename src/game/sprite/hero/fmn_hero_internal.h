@@ -27,6 +27,7 @@
 
 extern struct fmn_hero {
 
+  // Sprite may be null, if we are dead and animating the outtro.
   struct fmn_sprite *sprite;
   
   int8_t indx,indy;

@@ -291,6 +291,7 @@ static void fmn_hero_render_head(struct fmn_image *dst,int16_t dstx,int16_t dsty
  */
  
 void fmn_hero_render(struct fmn_image *dst,int16_t scrollx,int16_t scrolly,struct fmn_sprite *sprite) {
+  if (!fmn_hero.sprite) return;
   fmn_hero.framec++;
   int16_t dstx=((sprite->x-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
   int16_t dsty=((sprite->y-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;

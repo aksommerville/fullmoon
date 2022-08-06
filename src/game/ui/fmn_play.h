@@ -15,4 +15,9 @@ void fmn_play_render(struct fmn_image *fb);
 
 void fmn_bgbits_dirty();
 
+/* Signal that the hero is dead and we should wait a tasteful interval, then switch to GAMEOVER.
+ * If nonzero (x,y) is the position in mm where the hero was; we may put some fireworks there.
+ */
+void fmn_game_end(int16_t x,int16_t y);
+
 #endif

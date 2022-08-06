@@ -1,4 +1,5 @@
 #include "game/sprite/hero/fmn_hero_internal.h"
+#include "game/ui/fmn_play.h"
 
 /* Reset.
  */
@@ -10,6 +11,8 @@ void fmn_hero_reset() {
   fmn_hero.feathertarget=0;
   fmn_hero.featherspellc=0;
   fmn_hero.spellc=0;
+  fmn_hero.walkspeed=0;
+  fmn_hero.action_in_progress=0;
   //TODO
 }
 
@@ -137,6 +140,7 @@ uint8_t fmn_hero_get_feather_dir() {
 uint8_t fmn_hero_get_deflector(int16_t *x_or_y) {
   if (fmn_hero.action_in_progress!=FMN_ACTION_UMBRELLA) return 0;
   if (fmn_hero.umbrellatime<FMN_HERO_UMBRELLA_TIME) return 0; // not deployed yet
+  if (!fmn_hero.sprite) return 0;
   switch (fmn_hero.facedir) {
     case FMN_DIR_N: *x_or_y=fmn_hero.sprite->y+FMN_HERO_UMBRELLA_DEPTH; break;
     case FMN_DIR_W: *x_or_y=fmn_hero.sprite->x+FMN_HERO_UMBRELLA_DEPTH; break;
@@ -150,5 +154,12 @@ uint8_t fmn_hero_get_deflector(int16_t *x_or_y) {
  */
 
 void fmn_hero_injure(struct fmn_sprite *assailant) {
-  fmn_set_uimode(FMN_UIMODE_GAMEOVER);
+  int16_t x=0,y=0;
+  if (fmn_hero.sprite) {
+    x=fmn_hero.sprite->x+(fmn_hero.sprite->w>>1);
+    y=fmn_hero.sprite->y+(fmn_hero.sprite->h>>1);
+    fmn_sprite_del_later(fmn_hero.sprite);
+    fmn_hero.sprite=0;
+  }
+  fmn_game_end(x,y);
 }

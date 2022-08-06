@@ -84,6 +84,10 @@ static void fmn_hero_update_motion() {
  */
  
 void fmn_hero_update(struct fmn_sprite *sprite) {
+  /* There can be one update cycle, where the sprite has not been deleted but we have already dropped it.
+   * That's fine, just get out.
+   */
+  if (!fmn_hero.sprite) return;
   fmn_hero_update_motion();
   if (fmn_hero.action_in_progress) fmn_hero_update_action();
 }

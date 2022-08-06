@@ -23,6 +23,7 @@ static uint8_t bgbitsdirty=1;
 
 static uint16_t raintime=0;
 static uint16_t statebits=0;
+static uint16_t gameovertime=0; // if nonzero counts down to gameover
 
 uint32_t fmn_play_frame_count=0;
  
@@ -78,10 +79,12 @@ void fmn_play_update() {
 
   fmn_sprites_update();
 
-  int16_t x,y;
-  fmn_hero_get_world_position_center(&x,&y);
-  fmn_map_update(x,y);
-  fmn_proximity_update(x,y);
+  if (fmn_hero_get_sprite()) {
+    int16_t x,y;
+    fmn_hero_get_world_position_center(&x,&y);
+    fmn_map_update(x,y);
+    fmn_proximity_update(x,y);
+  }
   
   fmn_sprites_execute_deathrow();
   
@@ -89,6 +92,12 @@ void fmn_play_update() {
   else if (raintime==1) {
     raintime=0;
     fmn_finish_rain();
+  }
+  
+  if (gameovertime) {
+    if (!--gameovertime) {
+      fmn_set_uimode(FMN_UIMODE_GAMEOVER);
+    }
   }
 }
 
@@ -253,4 +262,17 @@ uint8_t fmn_game_cast_spell(const uint8_t *src,uint8_t srcc) {
   //TODO spells. i want like a dozen
   #undef CHECKSPELL
   return 0;
+}
+
+/* End game.
+ */
+ 
+void fmn_game_end(int16_t x,int16_t y) {
+  gameovertime=180;
+  if (x||y) {
+    // Generate the seven circles of a witch's soul, and send them off to their reward.
+    uint8_t i=7; while (i-->0) {
+      struct fmn_sprite *sprite=fmn_sprite_new(&fmn_sprtype_soulball,0,x,y,i,7,0);
+    }
+  }
 }

@@ -47,7 +47,7 @@ static void _fmn_missile_update(struct fmn_sprite *sprite) {
     case FMN_DIR_E: if (midx>=shieldp) { if (dx<0) dx=-dx; return; } break;
   }
   
-  fmn_sprite_del_later(sprite);
+  //fmn_sprite_del_later(sprite); //...i'm thinking it's cooler if the missile keeps going. not sure
   fmn_hero_injure(sprite);
 }
 

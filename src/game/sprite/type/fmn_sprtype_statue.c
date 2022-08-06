@@ -90,7 +90,11 @@ static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,u
   
     case 0xb0: { // gamma aka octopus
         if ((c>=3)&&(v[c-3]==FMN_DIR_W)&&(v[c-2]==FMN_DIR_E)&&(v[c-1]==FMN_DIR_W)) {
-          //TODO some kind of "poof!"
+          int16_t x=sprite->x+(sprite->w>>1);
+          int16_t y=sprite->y+(sprite->h>>1);
+          uint8_t i=5; while (i-->0) {
+            struct fmn_sprite *soulball=fmn_sprite_new(&fmn_sprtype_soulball,0,x,y,i,5,0);
+          }
           fmn_sprite_del_later(sprite);
           return 1;
         }
