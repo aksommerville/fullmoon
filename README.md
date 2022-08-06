@@ -34,7 +34,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [x] Sprite: mermaid statue -- moveable
 - - [x] Sprite: lobster statue -- moveable
 - - [x] Sprite: fish statue -- summonable
-- - [ ] Sprite: bat. what does it do?
+- - [x] Sprite: bat.
 - - [ ] Sprite: fire nozzle
 - - [ ] Sprite: werewolf
 - - [ ] Sprite: table saw

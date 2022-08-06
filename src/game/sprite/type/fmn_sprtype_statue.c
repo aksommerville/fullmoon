@@ -4,6 +4,7 @@
 #include "game/sprite/hero/fmn_hero.h"
 
 #define movec sprite->bv[0]
+#define levitate sprite->bv[1]
 #define movex sprite->sv[0]
 #define movey sprite->sv[1]
 
@@ -26,38 +27,43 @@ static void fmn_statue_float(struct fmn_sprite *sprite,int8_t dx,int8_t dy) {
   fmn_sprite_collide(0,0,sprite,FMN_TILE_SOLID,FMN_SPRITE_FLAG_SOLID,1);
 }
 
-static void fmn_statue_tsu_update(struct fmn_sprite *sprite) {
+static uint8_t fmn_statue_tsu_update(struct fmn_sprite *sprite) {
   uint8_t herodir=fmn_hero_get_feather_dir();
-  if (!herodir) return;
+  if (!herodir) return 0;
   int16_t herox,heroy;
   fmn_hero_get_world_position_center(&herox,&heroy);
   switch (herodir) {
     case FMN_DIR_E: {
-        if ((heroy<sprite->y)||(heroy>=sprite->y+sprite->h)) return;
-        if (herox>sprite->x) return;
+        if ((heroy<sprite->y)||(heroy>=sprite->y+sprite->h)) return 0;
+        if (herox>sprite->x) return 0;
         fmn_statue_float(sprite,-1,0);
-      } break;
+      } return 1;
     case FMN_DIR_W: {
-        if ((heroy<sprite->y)||(heroy>=sprite->y+sprite->h)) return;
-        if (herox<sprite->x) return;
+        if ((heroy<sprite->y)||(heroy>=sprite->y+sprite->h)) return 0;
+        if (herox<sprite->x) return 0;
         fmn_statue_float(sprite,1,0);
-      } break;
+      } return 1;
     case FMN_DIR_S: {
-        if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return;
-        if (heroy>sprite->y) return;
+        if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return 0;
+        if (heroy>sprite->y) return 0;
         fmn_statue_float(sprite,0,-1);
-      } break;
+      } return 1;
     case FMN_DIR_N: {
-        if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return;
-        if (heroy<sprite->y) return;
+        if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return 0;
+        if (heroy<sprite->y) return 0;
         fmn_statue_float(sprite,0,1);
-      } break;
+      } return 1;
   }
+  return 0;
 }
 
 static void _statue_update(struct fmn_sprite *sprite) {
   if (sprite->tileid==0xb3) {
-    fmn_statue_tsu_update(sprite);
+    if (fmn_statue_tsu_update(sprite)) {
+      levitate++;
+    } else {
+      levitate=0;
+    }
   } else if (movec&&(movex||movey)) {
     movec--;
     sprite->x+=movex;
@@ -127,10 +133,26 @@ static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,u
   return 0;
 }
 
+static void _statue_render(struct fmn_image *dst,int16_t xscroll,int16_t yscroll,struct fmn_sprite *sprite) {
+  if (!sprite||!sprite->image) return;
+  int16_t dstx=((sprite->x+(sprite->w>>1)-xscroll)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1);
+  int16_t dsty=((sprite->y+(sprite->h>>1)-yscroll)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1);
+  if (levitate) {
+    fmn_image_fill_rect(dst,dstx,dsty+FMN_TILESIZE-FMN_GFXSCALE,FMN_TILESIZE,FMN_GFXSCALE*2,levitate&1);
+    int16_t displace=levitate&0x3f;
+    if (displace>=0x20) displace=0x40-displace;
+    dsty-=(displace*FMN_GFXSCALE)/0x11;
+  }
+  fmn_blit_tile(dst,dstx,dsty,
+    sprite->image,sprite->tileid,sprite->xform
+  );
+}
+
 const struct fmn_sprtype fmn_sprtype_statue={
   .name="statue",
   .init=_statue_init,
   .update=_statue_update,
   .render=fmn_sprite_render_default,
   .featherspell=_statue_featherspell,
+  .render=_statue_render,
 };
