@@ -41,6 +41,7 @@ Try `make run`
 - - [ ] swamp
 - - [ ] desert
 - - [ ] castle
+- - [ ] win-game ui
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
 - - [ ] Low quality synth suitable for Tiny
