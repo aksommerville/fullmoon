@@ -4,7 +4,7 @@
 
 # What hosts are we building for?
 # "linux" is fairly generic, should be the template for other PCs.
-FMN_TARGETS:=linux thumby pico tiny web
+FMN_TARGETS:=macos
 
 thumby_PICO_SDK:=/home/andy/proj/thirdparty/pico-sdk
 thumby_ELF2UF2:=$(thumby_PICO_SDK)/build/elf2uf2/elf2uf2
@@ -42,6 +42,6 @@ linux_FBFMT:=thumby
 macos_IMAGE_SET:=24c
 macos_FBFMT:=rgba8888
 
-run:linux-run
+run:macos-run
 
 edit:;node src/editor/main.js --host=localhost --port=2040 --htdocs=$(abspath src/editor/www)
