@@ -2,32 +2,21 @@
 
 Adventure game for Thumby. [https://tinycircuits.com/]
 
-It also builds for Linux, to facilitate development.
-I do intend to extend that, and also build for WebAssembly, MacOS, and Windows.
-But not a high priority.
+Also for TinyArcade, PicoSystem, Linux, MacOS, and WebAssembly.
+Will eventually add Windows and maybe Playdate, if it ever arrives...
+Also I do intend to at least give it a shot, building for 68k and PowerPC MacOS (and thence Pippin!).
 
 ## Setup
 
-Create `etc/config.mk` if it's not there.
-In there, you must define `FMN_TARGETS:=` with the names of targets you want to build for.
-See `etc/make/target_*.mk`.
-Most targets will want some additional config, location of toolchains etc.
+Check `etc/config.mk`, that will hold your host-specific settings.
+If you're building for the lil guys, you'll need to indicate where the various toolchains and SDKs are located.
 
-Making a new target? Best idea is to copy `etc/make/target_linux.mk`.
-It's stable and pretty generic.
-Define `{TARGET}_OPT_ENABLE` with the names of directories under `src/opt/` to include in the source.
-You must include one opt unit with a `main()`: `genioc`, `macos`, `thumby`.
-Or if you need to write your own `main()`, you can make a new opt unit for it.
-See `src/game/fullmoon.h` for a few other hooks you must implement there.
-
-Targets must individually declare the rules for generating data sources, even data like maps that won't change from platform to platform.
+Try `make run`
 
 ## TODO
 
 - [ ] Finish all dev for Thumby
-- - [x] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast. ...meh not a big deal
 - - [ ] Sprite: werewolf
-- - [x] Sprite: table saw
 - - [ ] lots more sprites
 - - [ ] Rain should extinguish fires
 - - [ ] Can we prevent rain from working indoors?
@@ -69,7 +58,6 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] macaudio
 - - [ ] macos: Can we drop OpenGL
 - - [ ] macos: review deprecated WM functions
-- - [ ] macos: Update for hi-res
 - - [ ] mswin
 - - [ ] web: Clean up wrapper
 - - [ ] web: Reduce exported symbols
