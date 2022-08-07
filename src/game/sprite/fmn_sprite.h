@@ -137,6 +137,7 @@ extern const struct fmn_sprtype fmn_sprtype_missile;
 extern const struct fmn_sprtype fmn_sprtype_statue;
 extern const struct fmn_sprtype fmn_sprtype_firenozzle;
 extern const struct fmn_sprtype fmn_sprtype_soulball;
+extern const struct fmn_sprtype fmn_sprtype_tablesaw;
 
 /* Sprite resource.
  *****************************************************************/

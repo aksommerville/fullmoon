@@ -25,10 +25,9 @@ Targets must individually declare the rules for generating data sources, even da
 ## TODO
 
 - [ ] Finish all dev for Thumby
-- - [ ] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast.
-- - [x] Sprite: fire nozzle
+- - [x] Is there some kind of vsync signal on Thumby? I get tearing, visible if you strobe b/w really fast. ...meh not a big deal
 - - [ ] Sprite: werewolf
-- - [ ] Sprite: table saw
+- - [x] Sprite: table saw
 - - [ ] lots more sprites
 - - [ ] Rain should extinguish fires
 - - [ ] Can we prevent rain from working indoors?
@@ -38,10 +37,6 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Spell of Home Teleportation
 - - [ ] Spell of Slow Motion
 - - [ ] Spell of Invisibility
-- - [x] Revisit passwords
-- - [x] Design-rule validation for passwords
-- - [x] fanfare on picking up treasure
-- - [x] Delay before switching to gameover mode? Mega-man "bwoo-woo-woo" effect?
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
