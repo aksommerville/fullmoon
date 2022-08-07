@@ -1,3 +1,4 @@
 type hazard
 image mainsprites
 tileid 0xa0
+flags RAINABLE

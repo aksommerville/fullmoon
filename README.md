@@ -18,8 +18,8 @@ Try `make run`
 - [ ] Finish all dev for Thumby
 - - [x] Sprite: werewolf
 - - [ ] lots more sprites
-- - [ ] Rain should extinguish fires
-- - [ ] Can we prevent rain from working indoors?
+- - [x] Rain should extinguish fires
+- - xxx Can we prevent rain from working indoors? ...i'm going to say no
 - - [ ] Spell of Opening
 - - [ ] Spell of Animation
 - - [ ] Spell of Trailhead Teleportation

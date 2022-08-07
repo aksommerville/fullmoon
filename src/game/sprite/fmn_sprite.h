@@ -22,10 +22,12 @@ void fmn_sprites_render(struct fmn_image *fb);
 #define FMN_SPRITE_PV_COUNT 8
 
 #define FMN_SPRITE_FLAG_SOLID     0x0001 /* hero can't walk thru */
-#define FMN_SPRITE_FLAG_DEATHROW  0x0002
+#define FMN_SPRITE_FLAG_DEATHROW  0x0002 /* programmatic use only: fmn_sprite_del_later() */
+#define FMN_SPRITE_FLAG_RAINABLE  0x0004 /* auto-destroy during rain */
 
 #define FMN_FOR_EACH_SPRITE_FLAG \
-  _(SOLID)
+  _(SOLID) \
+  _(RAINABLE)
  
 struct fmn_sprite {
   const struct fmn_sprtype *type;

@@ -68,7 +68,19 @@ void fmn_play_input(uint16_t input,uint16_t prev) {
  */
  
 static void fmn_finish_rain() {
-  //TODO ok now what? what does the rain spell do?
+  int16_t scrollx,scrolly;
+  fmn_map_get_scroll_mm(&scrollx,&scrolly);
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    struct fmn_sprite *sprite=*p;
+    if (!(sprite->flags&FMN_SPRITE_FLAG_RAINABLE)) continue;
+    if (sprite->x>=scrollx+FMN_SCREENW_MM) continue;
+    if (sprite->y>=scrolly+FMN_SCREENH_MM) continue;
+    if (sprite->x+sprite->w<=scrollx) continue;
+    if (sprite->y+sprite->h<=scrolly) continue;
+    fmn_sprite_del_later(sprite);
+  }
 }
 
 /* Update.
