@@ -2,6 +2,8 @@
 #include "game/sprite/hero/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
 
+#define animclock sprite->bv[0] /* for wolfballs. if nonzero, we animate tiles (+0,+1,+2,+1) */
+#define animframe sprite->bv[1]
 #define ttl sprite->sv[0]
 #define dx sprite->sv[1]
 #define dy sprite->sv[2]
@@ -23,6 +25,15 @@ static void _fmn_missile_update(struct fmn_sprite *sprite) {
     fmn_sprite_del_later(sprite);
     return;
   }
+  
+  if (animclock) {
+    if (!--animclock) {
+      animclock=5;
+      animframe++;
+      if (animframe>=4) animframe=0;
+    }
+  }
+  
   sprite->x+=dx;
   sprite->y+=dy;
   
@@ -51,9 +62,28 @@ static void _fmn_missile_update(struct fmn_sprite *sprite) {
   fmn_hero_injure(sprite);
 }
 
+static void _fmn_missile_render(
+  struct fmn_image *dst,
+  int16_t scrollx,int16_t scrolly,
+  struct fmn_sprite *sprite
+) {
+  if (!sprite||!sprite->image) return;
+  uint8_t tileid=sprite->tileid;
+  switch (animframe) {
+    case 0: break; // important that frame zero be "no change"
+    case 1: case 3: tileid+=1; break;
+    case 2: tileid+=2; break;
+  }
+  fmn_blit_tile(dst,
+    ((sprite->x+(sprite->w>>1)-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1),
+    ((sprite->y+(sprite->h>>1)-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE-(FMN_TILESIZE>>1),
+    sprite->image,tileid,sprite->xform
+  );
+}
+
 const struct fmn_sprtype fmn_sprtype_missile={
   .name="missile",
   .init=_fmn_missile_init,
   .update=_fmn_missile_update,
-  .render=fmn_sprite_render_default,
+  .render=_fmn_missile_render,
 };
