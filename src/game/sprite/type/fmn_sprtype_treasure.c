@@ -12,7 +12,7 @@
 #define timer_period sprite->bv[5]
 
 static int8_t _fmn_treasure_init(struct fmn_sprite *sprite,const struct fmn_sprdef *def) {
-  if (fmn_game_generate_password()&treasure_mask) {
+  if (fmn_game_get_state()&treasure_mask) {
     fmn_sprite_del_later(sprite);
     return 0;
   }

@@ -156,7 +156,6 @@ const struct fmn_sprtype fmn_sprtype_statue={
   .name="statue",
   .init=_statue_init,
   .update=_statue_update,
-  .render=fmn_sprite_render_default,
   .featherspell=_statue_featherspell,
   .render=_statue_render,
 };

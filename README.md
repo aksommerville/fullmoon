@@ -38,8 +38,8 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] Spell of Home Teleportation
 - - [ ] Spell of Slow Motion
 - - [ ] Spell of Invisibility
-- - [ ] Revisit passwords
-- - [ ] Design-rule validation for passwords
+- - [x] Revisit passwords
+- - [x] Design-rule validation for passwords
 - - [x] fanfare on picking up treasure
 - - [x] Delay before switching to gameover mode? Mega-man "bwoo-woo-woo" effect?
 - [ ] Map editor.
@@ -57,6 +57,7 @@ Targets must individually declare the rules for generating data sources, even da
 - - [ ] swamp
 - - [ ] desert
 - - [ ] castle
+- [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
 - - [ ] Low quality synth suitable for Tiny
 - - [ ] Higher quality synth for PCs?

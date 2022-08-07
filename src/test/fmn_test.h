@@ -41,6 +41,11 @@ void fmn_report_test_skipped(const char *name);
 /* Assertions.
  *******************************************************************/
  
+#define FMN_FAIL(...) { \
+  FMN_FAIL_BEGIN(""__VA_ARGS__) \
+  FMN_FAIL_END \
+}
+ 
 #define FMN_ASSERT(condition,...) if (!(condition)) { \
   FMN_FAIL_BEGIN(""__VA_ARGS__) \
   FMN_FAIL_MORE("Expected","true") \

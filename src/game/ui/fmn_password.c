@@ -1,5 +1,6 @@
 #include "game/fullmoon.h"
 #include "game/ui/fmn_password.h"
+#include "game/model/fmn_map.h"
 #include "game/fmn_data.h"
 #include <string.h>
 
@@ -10,81 +11,148 @@ static uint8_t fbdirty=0;
 static uint8_t cursorp=0;
 static uint8_t cursorframe=0;
 static uint8_t cursortime=0;
-static uint8_t password[FMN_PASSWORD_LENGTH]={0}; // 0=unset, 1..32=chars
+static char entry[FMN_PASSWORD_LENGTH]="AAAAAA";
 
-/* The password system.
- * There are "decoded" aka "display" passwords which are just the displayed digits, 5 bits each.
- * Then there's "encoded" aka "pw", which is a valid state of the game.
- * pw 0xffffffff is the error signal.
+/* Password format.
+ * There is a third password format "bin" which is only used here.
+ * That is a close representation of the text password -- text is produced by reading 5 bits at a time from bin, little-endianly.
+ * The top 2 bits of bin are not used.
+ * Generating a state from a bin validates the checksum but not the business rules.
+ *
+ * state<=>bin is where the real action happens.
+ * bin is 5 fields: xxCC CCCh hhhh hhhh ssss ssss ssss ssss
+ *   'x' 2 bits always zero, always at the top.
+ *   'C' 5 bit checksum, forces popcnt to 32.
+ *   'h' 9 bit hash: ~((statehi<<1)^statelo) # ensures that there be at least 1 'on' bit, and any 1-bit change affects at least 2 bits.
+ *   's' 16 bit plaintext state
+ * With those 5 fields generated, encoder slices them to separate the bits from each field:
+ *   xx ssshh ssshC ssshC ssshC sshhC sshhC
  */
  
-static const uint8_t pwglyph0[32]={2,27,29,26,18,7,17,0,16,1,19,28,4,10,8,24,31,23,30,11,12,15,25,3,9,13,5,21,20,22,6,14};
-static const uint8_t pwglyph1[32]={2,9,15,30,28,1,14,3,27,21,6,11,10,31,12,22,25,13,16,18,20,19,0,24,17,26,29,8,5,4,23,7};
-static const uint8_t pwglyph2[32]={14,30,10,16,13,25,29,1,26,24,20,21,8,3,12,22,31,17,9,5,19,18,2,7,23,0,28,11,27,15,4,6};
-static const uint8_t pwglyph3[32]={11,31,0,5,26,23,30,8,24,1,16,18,12,13,15,14,9,4,21,25,29,17,2,28,7,22,6,20,3,19,10,27};
-static const uint8_t pwglyph4[32]={7,31,9,2,21,11,12,24,6,4,14,29,22,13,10,17,5,8,1,0,25,26,15,19,30,27,20,16,28,18,3,23};
+const char fmn_password_alphabet[32]="ABCDEFGHIJKLMNOPQRSTUVWXYZ134679";
 
-static uint8_t findpw(const uint8_t *v,uint8_t display) {
-  uint8_t i=0; for (;i<32;i++) {
-    if (v[i]==display) return i;
-  }
-  return 0xff;
+static const uint8_t fmn_password_c_pos[5]={20,15,10,5,0};
+static const uint8_t fmn_password_h_pos[9]={1,6,11,16,21,25,2,7,26};
+static const uint8_t fmn_password_s_pos[16]={29,24,19,14,9,4,28,23,18,13,8,3,27,22,17,12};
+ 
+static uint32_t fmn_password_hash(uint16_t s) {
+
+  // Calculate 'h' from state (9 bits output).
+  uint16_t h=~(((s&0xff00)>>7)^(s&0xff));
+  h&=0x1ff;
+  
+  // Count the ones in 'h' and 's', derive 'c' from that.
+  uint16_t q,onec=0;
+  for (q=h;q;q>>=1) if (q&1) onec++;
+  for (q=s;q;q>>=1) if (q&1) onec++;
+  uint16_t c=(32-onec)&0x1f;
+  
+  // Weave 's', 'h', and 'c' together bit by bit.
+  uint32_t bin=0;
+  uint8_t i;
+  for (i=0;i<sizeof(fmn_password_c_pos);i++) if (c&(1<<i)) bin|=1<<fmn_password_c_pos[i];
+  for (i=0;i<sizeof(fmn_password_h_pos);i++) if (h&(1<<i)) bin|=1<<fmn_password_h_pos[i];
+  for (i=0;i<sizeof(fmn_password_s_pos);i++) if (s&(1<<i)) bin|=1<<fmn_password_s_pos[i];
+  
+  return bin;
+}
+
+static int8_t fmn_password_unhash(uint16_t *state,uint32_t bin) {
+
+  // It's not possible to arrive here with 'x' nonzero, but in case I'm wrong about that, call it a checksum failure.
+  if (bin&0xc0000000) return FMN_PASSWORD_CHECKSUM;
+
+  // Extract the three fields 'c', 'h', 's'.
+  uint16_t c=0,h=0,s=0;
+  uint8_t i;
+  for (i=0;i<sizeof(fmn_password_c_pos);i++) if (bin&(1<<fmn_password_c_pos[i])) c|=1<<i;
+  for (i=0;i<sizeof(fmn_password_h_pos);i++) if (bin&(1<<fmn_password_h_pos[i])) h|=1<<i;
+  for (i=0;i<sizeof(fmn_password_s_pos);i++) if (bin&(1<<fmn_password_s_pos[i])) s|=1<<i;
+  
+  // Count the ones in 'h' and 's'.
+  uint16_t q,onec=0;
+  for (q=h;q;q>>=1) if (q&1) onec++;
+  for (q=s;q;q>>=1) if (q&1) onec++;
+  
+  // Validate checksum.
+  c+=onec;
+  if (c&0x1f) return FMN_PASSWORD_CHECKSUM;
+  
+  // Validate hash.
+  uint16_t expecth=~(((s&0xff00)>>7)^(s&0xff));
+  expecth&=0x1ff;
+  if (h!=expecth) return FMN_PASSWORD_CHECKSUM;
+  
+  // OK valid.
+  *state=s;
+  return FMN_PASSWORD_OK;
+}
+
+static int8_t fmn_password_check_business_rules(uint16_t state) {
+  int8_t err;
+  if (err=fmn_map_validate_region((state&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT)) return err;
+  if (state&FMN_STATE_RESERVED) return FMN_PASSWORD_RESERVED;
+  
+  // SEQUENCE rules are the diciest.
+  // Like, nothing technically prevents the user from having a broom without a feather.
+  // But we know from having designed the game that it is not possible in practice.
+  // And as a general policy, we want to validate as aggressively as possible.
+  
+  // The four treasures can only be acquired in a specific order: feather, wand, broom, umbrella
+  if ((state&FMN_STATE_WAND)&&!(state&FMN_STATE_FEATHER)) return FMN_PASSWORD_SEQUENCE;
+  if ((state&FMN_STATE_BROOM)&&!(state&FMN_STATE_WAND)) return FMN_PASSWORD_SEQUENCE;
+  if ((state&FMN_STATE_UMBRELLA)&&!(state&FMN_STATE_BROOM)) return FMN_PASSWORD_SEQUENCE;
+  
+  // Similarly, some narrative flags are not possible without some precondition.
+  if ((state&FMN_STATE_CASTLE_OPEN)&&!(state&FMN_STATE_WAND)) return FMN_PASSWORD_SEQUENCE;
+  if ((state&FMN_STATE_WOLF_DEAD)&&!(state&FMN_STATE_CASTLE_OPEN)) return FMN_PASSWORD_SEQUENCE;
+  
+  return FMN_PASSWORD_OK;
 }
  
-uint32_t fmn_password_decode(uint32_t display) {
-
-  // Split, and undo the display obfuscation.
-  uint8_t v[5];
-  if ((v[0]=findpw(pwglyph0,(display>> 0)&0x1f))>31) return 0xffffffff;
-  if ((v[1]=findpw(pwglyph1,(display>> 5)&0x1f))>31) return 0xffffffff;
-  if ((v[2]=findpw(pwglyph2,(display>>10)&0x1f))>31) return 0xffffffff;
-  if ((v[3]=findpw(pwglyph3,(display>>15)&0x1f))>31) return 0xffffffff;
-  if ((v[4]=findpw(pwglyph4,(display>>20)&0x1f))>31) return 0xffffffff;
-  
-  // Reassemble interleaved.
-  uint32_t pw=0,shift=0;
-  uint8_t i=0; for (;i<5;i++) {
-    uint8_t j=0; for (;j<5;j++,shift++) {
-      pw|=(v[j]&(1<<i))?(1<<shift):0;
+int8_t fmn_password_eval(uint16_t *state,const char *pw/*6*/) {
+  if (!state||!pw) return FMN_PASSWORD_ARGUMENT;
+  uint32_t bin=0;
+  uint8_t shift=0;
+  uint8_t i=0;
+  for (;i<FMN_PASSWORD_LENGTH;i++,shift+=5) {
+    char ch=pw[i];
+    uint8_t v;
+    
+    // A few basic normalization rules.
+    if ((ch>='a')&&(ch<='z')) ch-=0x20;
+    if (ch=='0') ch='O';
+    if (ch=='2') ch='Z';
+    if (ch=='5') ch='S';
+    if (ch=='8') ch='B';
+    
+    // A..Z are the first 26 of our alphabet, don't bother searching for them.
+    if ((ch>='A')&&(ch<='Z')) v=ch-'A';
+    else {
+      v=0xff;
+      uint8_t p=26; for (;p<32;p++) {
+        if (ch==fmn_password_alphabet[p]) {
+          v=p;
+          break;
+        }
+      }
+      if (v==0xff) return FMN_PASSWORD_ILLEGAL_CHAR;
     }
+    
+    bin|=v<<shift;
   }
-  
-  // Now the high 10 bits are a hash of the low 15.
-  uint32_t expect=pw>>15;
-  uint32_t actual=(pw&0x3ff)^((pw&0x7c00)>>5)^((pw&0x7c00)>>10);
-  if (expect!=actual) return 0xffffffff;
-  
-  // It's good! Strip off the hash and return it.
-  return pw&0x7fff;
+  return fmn_password_unhash(state,bin);
 }
 
-uint32_t fmn_password_encode(uint32_t pw) {
-
-  // (pw) must use only the low 15 bits.
-  if (pw&~0x7fff) return 0xffffffff;
-  
-  // Calculate and append hash.
-  uint32_t hash=(pw&0x3ff)^((pw&0x7c00)>>5)^((pw&0x7c00)>>10);
-  pw|=hash<<15;
-  
-  // Deinterleave into five five-bit buckets.
-  uint8_t v[5]={0};
-  uint32_t mask=1;
-  uint8_t i=0; for (;i<5;i++) {
-    uint8_t j=0; for (;j<5;j++,mask<<=1) {
-      v[j]|=(pw&mask)?(1<<i):0;
-    }
+int8_t fmn_password_repr(char *pw/*6*/,uint16_t state) {
+  if (!pw) return FMN_PASSWORD_ARGUMENT;
+  int8_t err=fmn_password_check_business_rules(state);
+  if (err<0) return err; // business rules shouldn't fail <0 but allow it
+  uint32_t bin=fmn_password_hash(state);
+  uint8_t i=0; for (;i<FMN_PASSWORD_LENGTH;i++,bin>>=5) {
+    pw[i]=fmn_password_alphabet[bin&0x1f];
   }
-
-  // Apply display obfuscation.
-  v[0]=pwglyph0[v[0]];
-  v[1]=pwglyph1[v[1]];
-  v[2]=pwglyph2[v[2]];
-  v[3]=pwglyph3[v[3]];
-  v[4]=pwglyph4[v[4]];
-  
-  // Combine those buckets and we're done.
-  return v[0]|(v[1]<<5)|(v[2]<<10)|(v[3]<<15)|(v[4]<<20);
+  return err;
 }
 
 /* Begin.
@@ -92,7 +160,7 @@ uint32_t fmn_password_encode(uint32_t pw) {
  
 void fmn_password_begin() {
   fbdirty=1;
-  memset(password,0,sizeof(password));
+  memset(entry,'A',sizeof(entry));
   cursorp=0;
 }
 
@@ -106,15 +174,13 @@ void fmn_password_end() {
  */
  
 static void fmn_password_submit() {
-  uint32_t packed=0,shift=0;
-  int i=0; for (;i<FMN_PASSWORD_LENGTH;i++,shift+=5) {
-    if ((password[i]<1)||(password[i]>32)) return;
-    packed|=(password[i]-1)<<shift;
-  }
-  uint32_t pw=fmn_password_decode(packed);
-  if (pw!=0xffffffff) {
-    fmn_game_reset_with_password(pw);
+  uint16_t state=0;
+  int8_t err=fmn_password_eval(&state,entry);
+  if (err==FMN_PASSWORD_OK) {
+    fmn_game_reset_with_state(state);
     fmn_set_uimode(FMN_UIMODE_PLAY);
+  } else {
+    fprintf(stderr,"%s: '%.6s' err=%d\n",__func__,entry,err);
   }
 }
 
@@ -122,13 +188,11 @@ static void fmn_password_submit() {
  */
  
 static void modify_char(int8_t d) {
-  if (d<0) {
-    if (password[cursorp]<=1) password[cursorp]=32;
-    else password[cursorp]--;
-  } else {
-    if (password[cursorp]==32) password[cursorp]=1;
-    else password[cursorp]++;
-  }
+  uint8_t p=0;
+  uint8_t i=0; for (;i<32;i++) if (entry[cursorp]==fmn_password_alphabet[i]) { p=i; break; }
+  p+=d;
+  p&=0x1f;
+  entry[cursorp]=fmn_password_alphabet[p];
 }
 
 /* Input.
@@ -184,13 +248,24 @@ void fmn_password_render(struct fmn_image *fb) {
   if (!fbdirty) return;
   fbdirty=0;
   fmn_blit(fb,0,0,&uibits,FMN_NSCOORD(0,24),FMN_NSCOORD(72,40),0);
-  int16_t dstx=5,i;
-  for (i=0;i<FMN_PASSWORD_LENGTH;i++,dstx+=13) {
-    if (password[i]<1) ;
-    else if (password[i]<=12) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-1)*10,64),FMN_NSCOORD(10,10),0);
-    else if (password[i]<=24) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-13)*10,74),FMN_NSCOORD(10,10),0);
-    else if (password[i]<=32) fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,FMN_NSCOORD((password[i]-25)*10,84),FMN_NSCOORD(10,10),0);
+  int16_t dstx=4,i;
+  for (i=0;i<FMN_PASSWORD_LENGTH;i++,dstx+=11) {
+    int16_t srcx=0,srcy=64*FMN_GFXSCALE;
+    if ((entry[i]>='A')&&(entry[i]<='P')) { // top row
+      srcx=(entry[i]-'A')*8*FMN_GFXSCALE;
+    } else if ((entry[i]>='Q')&&(entry[i]<='Z')) { // bottom row, left
+      srcy+=10*FMN_GFXSCALE;
+      srcx=(entry[i]-'Q')*8*FMN_GFXSCALE;
+    } else switch (entry[i]) { // six more glyphs on the bottom row (digits)
+      case '1': srcy+=10*FMN_GFXSCALE; srcx=80*FMN_GFXSCALE; break;
+      case '3': srcy+=10*FMN_GFXSCALE; srcx=88*FMN_GFXSCALE; break;
+      case '4': srcy+=10*FMN_GFXSCALE; srcx=96*FMN_GFXSCALE; break;
+      case '6': srcy+=10*FMN_GFXSCALE; srcx=104*FMN_GFXSCALE; break;
+      case '7': srcy+=10*FMN_GFXSCALE; srcx=112*FMN_GFXSCALE; break;
+      case '9': srcy+=10*FMN_GFXSCALE; srcx=120*FMN_GFXSCALE; break;
+    }
+    fmn_blit(fb,FMN_NSCOORD(dstx,14),&uibits,srcx,srcy,FMN_NSCOORD(8,10),0);
   }
-  fmn_blit(fb,FMN_NSCOORD(6+cursorp*13,9),&uibits,FMN_NSCOORD(48+cursorframe*7,0),FMN_NSCOORD(7,5),0);
-  fmn_blit(fb,FMN_NSCOORD(6+cursorp*13,24),&uibits,FMN_NSCOORD(48+cursorframe*7,5),FMN_NSCOORD(7,5),0);
+  fmn_blit(fb,FMN_NSCOORD(5+cursorp*11,9),&uibits,FMN_NSCOORD(48+cursorframe*7,0),FMN_NSCOORD(7,5),0);
+  fmn_blit(fb,FMN_NSCOORD(5+cursorp*11,24),&uibits,FMN_NSCOORD(48+cursorframe*7,5),FMN_NSCOORD(7,5),0);
 }

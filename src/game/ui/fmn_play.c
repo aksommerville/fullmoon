@@ -29,7 +29,7 @@ uint32_t fmn_play_frame_count=0;
  
 /* Begin.
  * Mind that this only means "ui mode changed"; not necessarily "start a fresh game".
- * There will always be fmn_game_reset() or fmn_game_reset_with_password() before the first fmn_play_begin().
+ * There will always be fmn_game_reset() or fmn_game_reset_with_state() before the first fmn_play_begin().
  */
  
 void fmn_play_begin() {
@@ -207,26 +207,21 @@ void fmn_game_reset() {
   fmn_hero_reset();
 }
 
-void fmn_game_reset_with_password(uint32_t pw) {
+void fmn_game_reset_with_state(uint16_t state) {
   fmn_play_frame_count=0;
 
-  if (pw&0xffff0000) pw=0;
-  statebits=pw;
+  statebits=state;
 
   raintime=0;
-  fmn_map_reset_region((pw&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT);
+  fmn_map_reset_region((state&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT);
   fmn_hero_reset();
 }
 
 /* Generate password.
  */
 
-uint32_t fmn_game_generate_password() {
-  return (statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
-}
-
 uint16_t fmn_game_get_state() {
-  return statebits;
+  return (statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
 }
 
 void fmn_game_set_state(uint16_t mask,uint16_t value) {

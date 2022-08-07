@@ -15,6 +15,9 @@ uint8_t *fmn_map_get_view(uint8_t *stride);
 void fmn_map_reset();
 void fmn_map_reset_region(uint8_t region);
 
+// Return 0 or a FMN_PASSWORD_* error, querying some region from a password.
+int8_t fmn_map_validate_region(uint8_t region);
+
 /* Check hero position.
  * May change the current map or current scroll.
  * If so, we trigger proximity and visibility POI as warranted.

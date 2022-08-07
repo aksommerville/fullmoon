@@ -71,8 +71,7 @@ void fmn_game_reset();
 
 /* (pw) is the decoded "internal use" password (the only kind that units outside the password manager see).
  */
-void fmn_game_reset_with_password(uint32_t pw);
-uint32_t fmn_game_generate_password();
+void fmn_game_reset_with_state(uint16_t pw);
 
 uint16_t fmn_game_get_state();
 void fmn_game_set_state(uint16_t mask,uint16_t value);
@@ -84,12 +83,31 @@ void fmn_game_set_state(uint16_t mask,uint16_t value);
 #define FMN_STATE_UMBRELLA       0x0008
 #define FMN_STATE_LOCATION_MASK  0x0070 /* starting map... */
 #define FMN_STATE_LOCATION_SHIFT      4
-#define FMN_STATE_CASTLE_OPEN    0x0080 /* gameplay flags... */
+#define FMN_STATE_CASTLE_OPEN    0x0080 /* gameplay flags, a bit from fmn_gstate... */
 #define FMN_STATE_WOLF_DEAD      0x0100
+#define FMN_STATE_RESERVED       0xfe00
 
-#define FMN_PASSWORD_LENGTH 5
-uint32_t fmn_password_encode(uint32_t pw);
-uint32_t fmn_password_decode(uint32_t display);
+extern const char fmn_password_alphabet[32];
+#define FMN_PASSWORD_LENGTH 6
+
+int8_t fmn_password_eval(uint16_t *state,const char *pw/*6*/);
+int8_t fmn_password_repr(char *pw/*6*/,uint16_t state);
+//XXX uint32_t fmn_password_encode(uint32_t pw);
+//uint32_t fmn_password_decode(uint32_t display);
+
+/* Repr and eval of passwords can fail for both technical and business reasons.
+ * Technical errors are <0, and no output is generated.
+ * Business rule violations are >0, and we do generate output in case you want to proceed anyway.
+ * A password can have more than one thing wrong with it -- codes are arranged with the lowest values taking precedence.
+ */
+#define FMN_PASSWORD_ARGUMENT     -3
+#define FMN_PASSWORD_ILLEGAL_CHAR -2
+#define FMN_PASSWORD_CHECKSUM     -1
+#define FMN_PASSWORD_OK            0
+#define FMN_PASSWORD_LOCATION      1
+#define FMN_PASSWORD_RESERVED      2
+#define FMN_PASSWORD_SEQUENCE      3
+#define FMN_PASSWORD_BUSINESS      4
 
 // Convenience to spare me some typing...
 static inline void fmn_blit_tile(

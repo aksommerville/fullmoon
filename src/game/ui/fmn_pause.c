@@ -11,7 +11,8 @@ static uint8_t fbdirty=0;
 static uint8_t cursorp=0;
 static uint8_t cursorframe=0;
 static uint8_t cursortime=0;
-static uint8_t password[5];
+static char password[FMN_PASSWORD_LENGTH];
+static int8_t password_error;
 static uint16_t itemflags=0;
 
 /* Begin.
@@ -19,10 +20,13 @@ static uint16_t itemflags=0;
  
 void fmn_pause_begin() {
   fbdirty=1;
-  uint32_t state=fmn_game_generate_password();
-  uint32_t display=fmn_password_encode(state);
-  uint8_t i=0; for (;i<5;i++) password[i]=(display>>(i*5))&0x1f;
+  uint16_t state=fmn_game_get_state();
+  password_error=fmn_password_repr(password,state);
   itemflags=state&(FMN_STATE_BROOM|FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_UMBRELLA);
+  
+  if (password_error) {
+    fprintf(stderr,"!!! %s: password_error=%d state=0x%04x\n",__func__,password_error,state);
+  }
   
   // If at least one item is available, ensure something valid is selected.
   if (itemflags) {
@@ -81,7 +85,7 @@ uint8_t fmn_pause_get_action() {
 }
 
 uint8_t fmn_pause_get_verified_action() {
-  itemflags=fmn_game_generate_password()&(FMN_STATE_BROOM|FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_UMBRELLA);
+  itemflags=fmn_game_get_state()&(FMN_STATE_BROOM|FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_UMBRELLA);
   return fmn_pause_get_action();
 }
 
@@ -141,7 +145,7 @@ void fmn_pause_render(struct fmn_image *fb) {
   fbdirty=0;
   fmn_image_clear(fb);
   
-  fmn_blit(fb,FMN_NSCOORD(cursorp*18,5),&uibits,FMN_NSCOORD(cursorframe*18,94),FMN_NSCOORD(18,18),0);
+  fmn_blit(fb,FMN_NSCOORD(cursorp*18,5),&uibits,FMN_NSCOORD(cursorframe*18,84),FMN_NSCOORD(18,18),0);
   
   uint8_t i=0;
   for (i=0;i<4;i++) {
@@ -154,6 +158,21 @@ void fmn_pause_render(struct fmn_image *fb) {
     fmn_blit(fb,FMN_NSCOORD(1+i*18,6),&mainsprites,FMN_NSCOORD(i*16,32),FMN_NSCOORD(16,16),0);
   }
   
-  fmn_blit(fb,FMN_NSCOORD(6,30),&uibits,FMN_NSCOORD(0,112),FMN_NSCOORD(34,7),0);
-  for (i=0;i<5;i++) fmn_blit(fb,FMN_NSCOORD(44+i*4,30),&uibits,FMN_NSCOORD(password[i]*3,119),FMN_NSCOORD(3,7),0);
+  if (!password_error) {
+    fmn_blit(fb,FMN_NSCOORD(1,30),&uibits,FMN_NSCOORD(0,102),FMN_NSCOORD(34,7),0);
+    for (i=0;i<FMN_PASSWORD_LENGTH;i++) {
+      uint8_t chp;
+      if ((password[i]>='A')&&(password[i]<='Z')) chp=password[i]-'A';
+      else switch (password[i]) {
+        case '1': chp=26; break;
+        case '3': chp=27; break;
+        case '4': chp=28; break;
+        case '6': chp=29; break;
+        case '7': chp=30; break;
+        case '9': chp=31; break;
+      }
+      if (chp>=16) fmn_blit(fb,FMN_NSCOORD(36+i*6,30),&uibits,FMN_NSCOORD((chp-16)*5,116),FMN_NSCOORD(5,7),0);
+      else fmn_blit(fb,FMN_NSCOORD(36+i*6,30),&uibits,FMN_NSCOORD(chp*5,109),FMN_NSCOORD(5,7),0);
+    }
+  }
 }

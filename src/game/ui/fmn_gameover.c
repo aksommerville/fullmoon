@@ -9,8 +9,8 @@
  
 static uint16_t clock=0;
 static uint8_t cursorp=0; // 0,1,2 = none,continue,quit
-static uint32_t pw_plain,pw_display;
-static uint8_t password[5];
+static char password[FMN_PASSWORD_LENGTH];
+static int8_t password_error;
  
 /* Begin.
  */
@@ -18,9 +18,9 @@ static uint8_t password[5];
 void fmn_gameover_begin() {
   clock=0;
   cursorp=0;
-  pw_plain=fmn_game_generate_password();
-  pw_display=fmn_password_encode(pw_plain);
-  uint8_t i=0; for (;i<5;i++) password[i]=(pw_display>>(i*5))&0x1f;
+  password_error=fmn_password_repr(password,fmn_game_get_state());
+  // It would be a really big deal if password_error were ever nonzero.
+  // We do what we can at least, if it's invalid just don't show a password.
 }
 
 /* End.
@@ -39,7 +39,11 @@ void fmn_gameover_input(uint16_t input,uint16_t pvinput) {
     else if (_(RIGHT)) cursorp=2;
     else if (_(A)||_(B)) {
       switch (cursorp) {
-        case 1: fmn_game_reset_with_password(pw_plain); fmn_set_uimode(FMN_UIMODE_PLAY); break;
+        case 1: {
+            if (password_error) fmn_game_reset();
+            else fmn_game_reset_with_state(fmn_game_get_state());
+            fmn_set_uimode(FMN_UIMODE_PLAY);
+          } break;
         case 2: fmn_set_uimode(FMN_UIMODE_TITLE); break;
       }
     }
@@ -86,7 +90,22 @@ void fmn_gameover_render(struct fmn_image *fb) {
   }
   
   // Password
-  fmn_blit(fb,FMN_NSCOORD(6,23),&uibits,FMN_NSCOORD(0,112),FMN_NSCOORD(34,7),0);
-  uint8_t i;
-  for (i=0;i<5;i++) fmn_blit(fb,FMN_NSCOORD(46+i*4,23),&uibits,FMN_NSCOORD(password[i]*3,119),FMN_NSCOORD(3,7),0);
+  if (!password_error) {
+    fmn_blit(fb,FMN_NSCOORD(1,23),&uibits,FMN_NSCOORD(0,102),FMN_NSCOORD(34,7),0);
+    uint8_t i;
+    for (i=0;i<FMN_PASSWORD_LENGTH;i++) {
+      uint8_t chp;
+      if ((password[i]>='A')&&(password[i]<='Z')) chp=password[i]-'A';
+      else switch (password[i]) {
+        case '1': chp=26; break;
+        case '3': chp=27; break;
+        case '4': chp=28; break;
+        case '6': chp=29; break;
+        case '7': chp=30; break;
+        case '9': chp=31; break;
+      }
+      if (chp>=16) fmn_blit(fb,FMN_NSCOORD(36+i*6,23),&uibits,FMN_NSCOORD((chp-16)*5,116),FMN_NSCOORD(5,7),0);
+      else fmn_blit(fb,FMN_NSCOORD(36+i*6,23),&uibits,FMN_NSCOORD(chp*5,109),FMN_NSCOORD(5,7),0);
+    }
+  }
 }

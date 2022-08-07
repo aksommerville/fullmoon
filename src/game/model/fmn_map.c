@@ -52,6 +52,13 @@ void fmn_map_reset_region(uint8_t region) {
   fmn_map_load(map_region_heads[region&7],-1,-1);
 }
 
+int8_t fmn_map_validate_region(uint8_t region) {
+  if (region>=8) return FMN_PASSWORD_ARGUMENT;
+  if (!map_region_heads[region]) return FMN_PASSWORD_LOCATION;
+  if (map_region_heads[region]==&cheatertrap) return FMN_PASSWORD_LOCATION;
+  return 0;
+}
+
 /* Actions associated with entering or exiting a view.
  * (full) if the map changed, otherwise only the scroll within a map changed.
  */
