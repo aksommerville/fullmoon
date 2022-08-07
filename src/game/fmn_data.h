@@ -11,6 +11,7 @@ extern const struct fmn_image castlesprites;
 extern const struct fmn_map cheatertrap; // TODO Remove, instead validate passwords refer to a real map and reject.
 extern const struct fmn_map home;
 extern const struct fmn_map forest;
+extern const struct fmn_map castle_1;
 
 extern const struct fmn_map *map_region_heads[8];
 

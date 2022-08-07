@@ -228,6 +228,22 @@ void fmn_password_input(uint16_t input,uint16_t prev) {
   }
 }
 
+/* Text input.
+ */
+ 
+void fmn_password_text_input(uint32_t codepoint) {
+  if ((codepoint>='a')&&(codepoint<='z')) {
+    entry[cursorp]=codepoint-0x20;
+    if (++cursorp>=FMN_PASSWORD_LENGTH) cursorp=0;
+  } else if ((codepoint>='A')&&(codepoint<='Z')) {
+    entry[cursorp]=codepoint;
+    if (++cursorp>=FMN_PASSWORD_LENGTH) cursorp=0;
+  } else if ((codepoint>='0')&&(codepoint<='9')) {
+    entry[cursorp]=codepoint;
+    if (++cursorp>=FMN_PASSWORD_LENGTH) cursorp=0;
+  }
+}
+
 /* Update.
  */
  

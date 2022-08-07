@@ -11,4 +11,6 @@ void fmn_password_input(uint16_t input,uint16_t prev);
 void fmn_password_update();
 void fmn_password_render(struct fmn_image *fb);
 
+void fmn_password_text_input(uint32_t codepoint);
+
 #endif

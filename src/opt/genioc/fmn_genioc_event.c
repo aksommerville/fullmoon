@@ -25,12 +25,14 @@ static struct fmn_genioc_keymap {
   uint16_t btnid;
 } fmn_genioc_keymapv[]={
 // Must sort manually by (keycode).
+  /*XXX don't use letters
   {0x00070004,FMN_BUTTON_LEFT},//a
   {0x00070007,FMN_BUTTON_RIGHT},//d
   {0x00070016,FMN_BUTTON_DOWN},//s
   {0x0007001a,FMN_BUTTON_UP},//w
   {0x0007001b,FMN_BUTTON_B},//x
   {0x0007001d,FMN_BUTTON_A},//z
+  /**/
   {0x00070036,FMN_BUTTON_B},//comma
   {0x00070037,FMN_BUTTON_A},//dot
   {0x0007004f,FMN_BUTTON_RIGHT},//right arrow
@@ -81,6 +83,7 @@ int fmn_genioc_cb_key(struct video_driver *driver,int keycode,int value) {
  */
 
 int fmn_genioc_cb_text(struct video_driver *driver,int codepoint) {
+  fmn_text_event(codepoint);
   return 0;
 }
 

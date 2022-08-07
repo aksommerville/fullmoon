@@ -31,7 +31,7 @@ const struct fmn_map *map_region_heads[8]={
   &cheatertrap, // "caves" TODO
   &cheatertrap, // "desert" TODO
   &cheatertrap, // "swamp" TODO
-  &cheatertrap, // "castle" TODO
+  &castle_1, // "castle"
   &cheatertrap, // cheatertrap, for real
 };
 

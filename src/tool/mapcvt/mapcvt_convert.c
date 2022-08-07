@@ -143,7 +143,6 @@ static int mapcvt_eval_region(uint8_t *dst,const char *src,int srcc) {
   if ((srcc==5)&&!memcmp(src,"swamp",5)) { *dst=5; return 0; }
   if ((srcc==6)&&!memcmp(src,"castle",6)) { *dst=6; return 0; }
   if ((srcc==11)&&!memcmp(src,"cheatertrap",11)) { *dst=7; return 0; }
-  //TODO symbolic region names
   
   return -1;
 }

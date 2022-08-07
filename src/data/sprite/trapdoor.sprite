@@ -1,0 +1,6 @@
+type door
+image mainsprites
+tileid 0xb4
+xform 0
+flags SOLID OPENABLE
+layer -10

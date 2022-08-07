@@ -13,7 +13,9 @@ void fmn_hero_reset() {
   fmn_hero.spellc=0;
   fmn_hero.walkspeed=0;
   fmn_hero.action_in_progress=0;
-  //TODO
+  fmn_hero.indx=0;
+  fmn_hero.indy=0;
+  fmn_hero.inbutton=0;
 }
 
 /* Receive input.

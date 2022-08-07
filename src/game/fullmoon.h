@@ -64,6 +64,9 @@ void fmn_platform_init_framebuffer(struct fmn_image *fb);
 #define FMN_UIMODE_FANFARE  6
 void fmn_set_uimode(uint8_t mode);
 
+// Dispatch a text-input event to our UI. This is entirely optional, just to make password entry more convenient under Linux.
+void fmn_text_event(uint32_t codepoint);
+
 /* Business.
  ***********************************************************************/
 

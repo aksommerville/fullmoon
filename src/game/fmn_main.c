@@ -95,3 +95,12 @@ void loop() {
   
   fmn_platform_send_framebuffer(fb.v);
 }
+
+/* Text event.
+ */
+
+void fmn_text_event(uint32_t codepoint) {
+  switch (uimode) {
+    case FMN_UIMODE_PASSWORD: fmn_password_text_input(codepoint); break;
+  }
+}

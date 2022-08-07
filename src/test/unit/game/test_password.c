@@ -111,6 +111,7 @@ static int test_known_valid_passwords() {
   _(2,FMN_STATE_FEATHER,"get feather")
   _(1,FMN_STATE_FEATHER,"after getting feather")
   //TODO finish the narrative...
+  _(6,FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_BROOM|FMN_STATE_UMBRELLA|FMN_STATE_CASTLE_OPEN,"all but WOLF_DEAD")
 
   #undef _
   return 0;

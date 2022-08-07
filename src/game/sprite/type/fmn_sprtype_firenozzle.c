@@ -13,6 +13,7 @@
 #define stage sprite->bv[4]
 #define clock sprite->bv[5]
 #define lockon sprite->bv[6] /* for the lucky nozzle that burns a witch -- it gets to stay on forever */
+#define proxendure sprite->bv[7]
 
 // (sv) are two rectangles: My proximity zone and my kill zone.
 // These are constant after init, the kill zone stays put even when we are turned off.
@@ -37,6 +38,7 @@
 #define FMN_FIRENOZZLE_STAGE_COOLOFF 3
 
 #define FMN_FIRENOZZLE_WARMUP_TIME 15
+#define FMN_FIRENOZZLE_PROXENDURE_TIME 45 /* minimum time to stay on due to proximity trigger */
 
 /* Setup.
  */
@@ -125,8 +127,14 @@ static void _firenozzle_update(struct fmn_sprite *sprite) {
   
   // Proximity test.
   uint8_t proxok=0;
+  if (proxendure) proxendure--;
   if (!proximity_enable) proxok=1;
-  else if ((herox>=proxx)&&(heroy>=proxy)&&(herox<proxx+proxw)&&(heroy<proxy+proxh)) proxok=1;
+  else if ((herox>=proxx)&&(heroy>=proxy)&&(herox<proxx+proxw)&&(heroy<proxy+proxh)) {
+    proxok=1;
+    proxendure=FMN_FIRENOZZLE_PROXENDURE_TIME;
+  } else if (proxendure) {
+    proxok=1;
+  }
   if (!proxok) {
     stage=FMN_FIRENOZZLE_STAGE_OFF;
     clock=0;

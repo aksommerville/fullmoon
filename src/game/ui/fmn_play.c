@@ -121,9 +121,11 @@ void fmn_bgbits_dirty() {
 }
  
 static void fmn_render_bgbits() {
+  const struct fmn_map *mapobj=fmn_map_get();
+  const struct fmn_image *srcimg=(mapobj?mapobj->tilesheet:0);
   uint8_t mapstride=0;
   const uint8_t *map=fmn_map_get_view(&mapstride);
-  if (map) {
+  if (map&&srcimg) {
     int16_t dsty=0;
     int16_t yi=FMN_SCREENH_TILES;
     const uint8_t *row=map;
@@ -134,8 +136,7 @@ static void fmn_render_bgbits() {
       for (;xi-->0;dstx+=FMN_TILESIZE,srcp++) {
         int16_t srcx=((*srcp)&0x0f)*FMN_TILESIZE;
         int16_t srcy=((*srcp)>>4)*FMN_TILESIZE;
-        //TODO not bgtiles. Get image from map
-        fmn_blit(&bgbits,dstx,dsty,&bgtiles,srcx,srcy,FMN_TILESIZE,FMN_TILESIZE,0);
+        fmn_blit(&bgbits,dstx,dsty,srcimg,srcx,srcy,FMN_TILESIZE,FMN_TILESIZE,0);
       }
     }
   } else {
@@ -159,7 +160,6 @@ static const int16_t rainseed[9]={
 };
 
 static void render_rain(struct fmn_image *fb) {
-  // TODO This visibly slows down the Pico. I bet we can do better.
   int16_t dstx=0;
   uint8_t xi=FMN_SCREENW_TILES;
   for (;xi-->0;dstx+=FMN_TILESIZE) {
@@ -189,21 +189,6 @@ void fmn_play_render(struct fmn_image *fb) {
   // Rain.
   if (raintime) render_rain(fb);
   
-  //XXX Highlight the hero's bounds.
-  if (0) {
-    if (fmn_play_frame_count&1) {
-      int16_t scrollx,scrolly;
-      fmn_map_get_scroll_mm(&scrollx,&scrolly);
-      int16_t dstx,dsty,dstw,dsth;
-      fmn_hero_get_world_bounds(&dstx,&dsty,&dstw,&dsth);
-      int16_t right=((dstx+dstw-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
-      int16_t bottom=((dsty+dsth-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;
-      dstx=((dstx-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
-      dsty=((dsty-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;
-      fmn_image_fill_rect(fb,dstx,dsty,right-dstx,bottom-dsty,(fmn_play_frame_count&2)?1:0);
-    }
-  }
-  
   //TODO additional overlay?
 }
 
@@ -214,7 +199,6 @@ void fmn_game_reset() {
   fmn_play_frame_count=0;
   raintime=0;
   statebits=0;
-  //statebits=0x000f;//XXX
   fmn_map_reset();
   fmn_hero_reset();
 }
@@ -245,7 +229,19 @@ void fmn_game_set_state(uint16_t mask,uint16_t value) {
  */
  
 static void fmn_spell_open() {
-  fprintf(stderr,"%s\n",__func__);
+  int16_t scrollx,scrolly;
+  fmn_map_get_scroll_mm(&scrollx,&scrolly);
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    struct fmn_sprite *sprite=*p;
+    if (!(sprite->flags&FMN_SPRITE_FLAG_OPENABLE)) continue;
+    if (sprite->x>=scrollx+FMN_SCREENW_MM) continue;
+    if (sprite->y>=scrolly+FMN_SCREENH_MM) continue;
+    if (sprite->x+sprite->w<=scrollx) continue;
+    if (sprite->y+sprite->h<=scrolly) continue;
+    fmn_sprite_del_later(sprite);
+  }
 }
  
 static void fmn_spell_rain() {
