@@ -199,6 +199,7 @@ void fmn_game_reset() {
   fmn_play_frame_count=0;
   raintime=0;
   statebits=0;
+  memset((void*)fmn_gstate,0,sizeof(fmn_gstate));
   fmn_map_reset();
   fmn_hero_reset();
 }
@@ -207,6 +208,9 @@ void fmn_game_reset_with_state(uint16_t state) {
   fmn_play_frame_count=0;
 
   statebits=state;
+  
+  memset((void*)fmn_gstate,0,sizeof(fmn_gstate));
+  if (state&FMN_STATE_TUNNEL_SWITCH) fmn_gstate[FMN_GSTATE_tunnel_switch]=1;
 
   raintime=0;
   fmn_map_reset_region((state&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT);
@@ -217,12 +221,24 @@ void fmn_game_reset_with_state(uint16_t state) {
  */
 
 uint16_t fmn_game_get_state() {
-  return (statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
+  uint16_t state=(statebits&~FMN_STATE_LOCATION_MASK)|(fmn_map_get_region()<<FMN_STATE_LOCATION_SHIFT);
+  
+  #define GSTATE(p,mask) if (fmn_gstate[p]) state|=mask; else state&=~mask;
+  GSTATE(FMN_GSTATE_tunnel_switch,FMN_STATE_TUNNEL_SWITCH)
+  #undef GSTATE
+  
+  return state;
 }
 
 void fmn_game_set_state(uint16_t mask,uint16_t value) {
   if (value&~mask) return; // invalid
-  statebits=(statebits&~mask)|value;
+  
+  // The fmn_game_get_state() here ensures that we pick up changes to fmn_gstate made behind our back.
+  statebits=(fmn_game_get_state()&~mask)|value;
+  
+  #define GSTATE(p,m) fmn_gstate[p]=(statebits&m)?1:0;
+  GSTATE(FMN_GSTATE_tunnel_switch,FMN_STATE_TUNNEL_SWITCH)
+  #undef GSTATE
 }
 
 /* Spells.

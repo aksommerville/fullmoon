@@ -88,6 +88,7 @@ void fmn_game_set_state(uint16_t mask,uint16_t value);
 #define FMN_STATE_LOCATION_SHIFT      4
 #define FMN_STATE_CASTLE_OPEN    0x0080 /* gameplay flags, a bit from fmn_gstate... */
 #define FMN_STATE_WOLF_DEAD      0x0100
+#define FMN_STATE_TUNNEL_SWITCH  0x0200 /* gstate 2 */
 #define FMN_STATE_RESERVED       0xfe00
 
 extern const char fmn_password_alphabet[32];
@@ -186,6 +187,7 @@ extern volatile uint8_t fmn_gstate[256];
 // These are more for documentation than actual use, so I can see which have been spoken for.
 #define FMN_GSTATE_forest_treadle 0
 #define FMN_GSTATE_forest_early_treadle 1
+#define FMN_GSTATE_tunnel_switch 2
 
 #ifdef __cplusplus
   }

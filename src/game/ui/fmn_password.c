@@ -89,6 +89,7 @@ static int8_t fmn_password_unhash(uint16_t *state,uint32_t bin) {
 }
 
 static int8_t fmn_password_check_business_rules(uint16_t state) {
+  /* XXX 2022-08-07 Disabling business rules as they are making testing very painful...
   int8_t err;
   if (err=fmn_map_validate_region((state&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT)) return err;
   if (state&FMN_STATE_RESERVED) return FMN_PASSWORD_RESERVED;
@@ -106,6 +107,7 @@ static int8_t fmn_password_check_business_rules(uint16_t state) {
   // Similarly, some narrative flags are not possible without some precondition.
   if ((state&FMN_STATE_CASTLE_OPEN)&&!(state&FMN_STATE_WAND)) return FMN_PASSWORD_SEQUENCE;
   if ((state&FMN_STATE_WOLF_DEAD)&&!(state&FMN_STATE_CASTLE_OPEN)) return FMN_PASSWORD_SEQUENCE;
+  /**/
   
   return FMN_PASSWORD_OK;
 }
