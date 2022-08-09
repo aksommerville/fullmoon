@@ -1,0 +1,6 @@
+type portcullis
+image castlesprites
+tileid 0x42
+xform 0
+layer 0
+flags SOLID OPENABLE

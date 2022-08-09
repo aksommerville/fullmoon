@@ -16,18 +16,14 @@ Try `make run`
 ## TODO
 
 - [ ] Finish all dev for Thumby
-- - [x] Sprite: werewolf
+- - [ ] Giant spider
 - - [ ] lots more sprites
-- - [x] Rain should extinguish fires
-- - xxx Can we prevent rain from working indoors? ...i'm going to say no
-- - [x] Spell of Opening
 - - [ ] Spell of Animation
 - - [ ] Spell of Trailhead Teleportation
 - - [ ] Spell of Home Teleportation
 - - [ ] Spell of Slow Motion
 - - [ ] Spell of Invisibility
 - - [ ] fmn_password_check_business_rules(): reenable once ready
-- - [x] tunnel door gets shut after killing the werewolf
 - [ ] Map editor.
 - - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
 - - [ ] Delete map
@@ -43,7 +39,8 @@ Try `make run`
 - - [ ] swamp
 - - [ ] desert
 - - [ ] castle
-- - - [ ] open outer door
+- - - [x] open outer door
+- - - [ ] populate upper floors
 - - [ ] win-game ui
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
@@ -52,6 +49,15 @@ Try `make run`
 - - [ ] WebAudio
 - - [ ] Consider a limited set of sound effects for Thumby and Pico.
 - - [ ] write music
+- - - [ ] splash: Full Moon Theme (TODO catchier name)
+- - - [ ] home: tbd
+- - - [ ] forest: tbd
+- - - [ ] caves: Infinite Stories Deep
+- - - [ ] desert: tbd
+- - - [ ] swamp: tbd
+- - - [ ] castle: The Seven Circles of a Witch's Soul
+- - - [ ] denouement
+- - - [ ] game over (same as splash?)
 - [ ] Other platforms
 - - [ ] tiny: 8c graphics -- finish 8b first
 - - [ ] tiny: content for SD card. splash and readme

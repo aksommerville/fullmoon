@@ -256,7 +256,11 @@ static void fmn_spell_open() {
     if (sprite->y>=scrolly+FMN_SCREENH_MM) continue;
     if (sprite->x+sprite->w<=scrollx) continue;
     if (sprite->y+sprite->h<=scrolly) continue;
-    fmn_sprite_del_later(sprite);
+    if (sprite->type->spell_open) {
+      sprite->type->spell_open(sprite);
+    } else {
+      fmn_sprite_del_later(sprite);
+    }
   }
 }
  
