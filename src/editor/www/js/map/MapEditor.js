@@ -296,6 +296,16 @@ export class MapEditor {
     this.render();
   }
   
+  onFocusCell(x, y) {
+    this.entryHighlight = { x, y };
+    this.window.setTimeout(() => {
+      this.entryHighlight = null;
+      this.render();
+    }, 1000);
+    this.render();
+    // Can we scroll it into view too?
+  }
+  
   onMapEvent(event) {
     switch (event.event) {
       case "dirty": this.onDirty(); break;
@@ -306,6 +316,7 @@ export class MapEditor {
       case "sizeChanged": this.onSizeChanged(); break;
       case "tileSize": this.onTileSize(event.tileSize); break;
       case "renderFeatures": this.onRenderFeaturesChanged(event.features); break;
+      case "focusCell": this.onFocusCell(event.x, event.y); break;
     }
   }
   

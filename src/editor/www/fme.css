@@ -194,11 +194,14 @@ body {
 }
 
 .MapToolbox .tool.selected-left {
-  background-color: #ff0;
+  background-color: #f00;
+}
+.MapToolbox .tool.selected-left.selected-right {
+  background-color: #f00;
 }
 
 .MapToolbox .tool.selected-right {
-  background-color: #f00;
+  background-color: #ff0;
 }
 
 .MapExtras {

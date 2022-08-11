@@ -21,6 +21,7 @@
  *  { event:"region", region:string }
  *  { event:"tileSize", tileSize: >=1 }
  *  { event:"renderFeatures", features:array } // "cellLines","screenLines"
+ *  { event:"focusCell", x, y } // activated interior door
  */
  
 import { FullmoonMap } from "./FullmoonMap.js";
@@ -281,6 +282,7 @@ export class MapService {
     switch (FullmoonMap.POI_NAMES[poi.q[0]]) {
       case "DOOR": this.navigate(poi.qp, poi.q[1], poi.q[2]); return true;
       case "EDGE_DOOR": this.navigate(poi.qp); return true;
+      case "INTERIOR_DOOR": this.broadcast({ event: "focusCell", x: poi.q[1], y: poi.q[2] }); return true;
     }
     return false;
   }
