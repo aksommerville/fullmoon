@@ -53,11 +53,19 @@ export class ToolboxController {
     const actions = this.dom.spawn(this.element, "DIV", ["actions"]);
     this.dom.spawn(actions, "INPUT", { type: "button", value: "New Map", "on-click": () => this.onnewmap() });
     
-    const reslist = this.dom.spawn(this.element, "UL", ["reslist", "accordion", "open"]);
-    this.dom.spawn(reslist, "DIV", ["accordion-header"], "Resources", { "on-click": (event) => this.onClickAccordion(event) });
+    this.addResourceList(this.element, "tilesheet", true);
+    this.addResourceList(this.element, "map", true);
+    this.addResourceList(this.element, "sprite", false);
+    this.addResourceList(this.element, "unknown", false);
     
     const tools = this.dom.spawn(this.element, "UL", ["tools", "accordion", "open"]);
     this.dom.spawn(tools, "DIV", ["accordion-header"], "Tools", { "on-click": (event) => this.onClickAccordion(event) });
+  }
+  
+  addResourceList(parent, name, initiallyOpen) {
+    const cssClasses = ["reslist", "accordion", initiallyOpen ? "open" : "closed"];
+    const reslist = this.dom.spawn(parent, "UL", cssClasses, { "data-restype": name });
+    this.dom.spawn(reslist, "DIV", ["accordion-header"], name, { "on-click": (event) => this.onClickAccordion(event) });
   }
   
   clearAccordion(parent) {
@@ -68,12 +76,15 @@ export class ToolboxController {
   }
   
   onGetResourcePaths(paths) {
-    const reslist = this.element.querySelector(".reslist");
-    this.clearAccordion(reslist);
-    for (let path of paths) {
+    for (const accordion of this.element.querySelectorAll(".accordion.reslist")) {
+      this.clearAccordion(accordion);
+    }
+    for (const path of paths) {
       const displayName = this.displayNameForResourcePath(path);
-      const li = this.dom.spawn(reslist, "LI", ["res"], { "on-click": () => this.oneditresource(path, displayName) });
-      this.dom.spawn(li, "IMG", { src: `/img/res-${this.resourceTypeTagFromPath(path)}.png` });
+      const typeName = this.resourceTypeTagFromPath(path);
+      const accordion = this.element.querySelector(`.accordion.reslist[data-restype='${typeName}']`);
+      const li = this.dom.spawn(accordion, "LI", ["res"], { "on-click": () => this.oneditresource(path, displayName) });
+      this.dom.spawn(li, "IMG", { src: `/img/res-${typeName}.png` });
       this.dom.spawn(li, "SPAN", displayName);
     }
   }
@@ -86,6 +97,7 @@ export class ToolboxController {
   resourceTypeTagFromPath(path) {
     if (path.endsWith("_props.txt")) return "tilesheet";
     if (path.startsWith("/res/map/")) return "map";
+    if (path.startsWith("/res/sprite/")) return "sprite";
     return "unknown";
   }
   

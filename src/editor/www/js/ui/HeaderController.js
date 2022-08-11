@@ -22,6 +22,7 @@ export class HeaderController {
   }
   
   setResource(data) {
+    this.element.querySelector(".resourceName").innerText = data?.path || "";
     const container = this.element.querySelector(".editorExtras");
     container.innerHTML = "";
     const controllerClass = this.dataFactory.extrasClassForData(data);
@@ -39,6 +40,7 @@ export class HeaderController {
     this.dom.spawn(this.element, "DIV", ["syncStatus"]);
     this.dom.spawn(this.element, "BUTTON", ["saveButton"], "Save", { disabled: true, "on-click": () => this.onSave() });
     this.dom.spawn(this.element, "BUTTON", "Launch", { "on-click": () => this.onLaunch() });
+    this.dom.spawn(this.element, "DIV", ["resourceName"]);
     this.dom.spawn(this.element, "DIV", ["editorExtras"]);
   }
   

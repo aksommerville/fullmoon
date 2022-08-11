@@ -124,8 +124,10 @@ body {
 .ToolboxController {
   flex: 1;
   max-width: 200px;
+  height: calc(100vh - 2em);
   background-color: #444;
   border-right: 1px solid #000;
+  overflow-y: scroll;
 }
 
 .ToolboxController .reslist li {

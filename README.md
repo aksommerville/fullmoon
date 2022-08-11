@@ -31,6 +31,8 @@ Try `make run`
 - - [ ] Tilesheet, cache group lists etc
 - - [ ] Setting negative poi.q (eg edge door), highly painful today.
 - - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
+- - [x] sidebar: Make each resource type an accordion
+- - [x] sprite editor
 - [ ] Design
 - - [ ] Fill forest with puzzles
 - - [ ] Dead space in home NE, what should go there?
@@ -40,6 +42,7 @@ Try `make run`
 - - [ ] desert
 - - [ ] castle
 - - - [x] open outer door
+- - - [ ] the two tablesaw right next to each other -- no way is this possible on a thumby, nerf it
 - - - [ ] populate upper floors
 - - [ ] win-game ui
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?

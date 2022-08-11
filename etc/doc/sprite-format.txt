@@ -1,0 +1,20 @@
+Full Moon sprite format.
+Line-oriented text, "KEY VALUE".
+
+type NAME
+  Links against `const struct fmn_sprtype fmn_sprtype_{{NAME}}`
+  
+image NAME
+  Name stem eg "mainsprites"
+  
+tileid TILEID
+  0..255
+  
+xform XFORM
+  0..7 or some combination of: XREV YREV SWAP
+  
+flags FLAGS
+  0..16 or some combination of: SOLID RAINABLE OPENABLE
+  
+layer INTEGER
+  -128..127

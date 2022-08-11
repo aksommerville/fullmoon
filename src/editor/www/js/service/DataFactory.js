@@ -11,6 +11,8 @@ import { Tilesheet } from "../tilesheet/Tilesheet.js";
 import { TilesheetEditor } from "../tilesheet/TilesheetEditor.js";
 import { TilesheetToolbox } from "../tilesheet/TilesheetToolbox.js";
 import { TilesheetExtras } from "../tilesheet/TilesheetExtras.js";
+import { Sprite } from "../sprite/Sprite.js";
+import { SpriteEditor } from "../sprite/SpriteEditor.js";
  
 export class DataFactory {
   static getDependencies() {
@@ -25,6 +27,7 @@ export class DataFactory {
   decode(serial, path) {
     if (path.startsWith("/res/map/")) return new FullmoonMap(serial, path);
     if (path.match(/^\/res\/image\/.*_props.txt$/)) return new Tilesheet(serial, path);
+    if (path.startsWith("/res/sprite/")) return new Sprite(serial, path);
     console.warn(`DataFactory.decode, unimplemented data type`, { serial, path });
     return null;
   }
@@ -32,6 +35,7 @@ export class DataFactory {
   controllerClassForData(data) {
     if (data instanceof FullmoonMap) return MapEditor;
     if (data instanceof Tilesheet) return TilesheetEditor;
+    if (data instanceof Sprite) return SpriteEditor;
     return null;
   }
   
