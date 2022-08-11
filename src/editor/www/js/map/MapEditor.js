@@ -28,6 +28,7 @@ export class MapEditor {
     this.mouseX = 0; // in cells, most recent observed position
     this.mouseY = 0;
     this.mouseInProgress = false;
+    this.entryHighlight = null; // null or {x,y}
     
     this.poiIcons = new Image();
     this.poiIcons.src = "/img/poiicons.png";
@@ -61,10 +62,19 @@ export class MapEditor {
     });
   }
   
-  setup(map) {
+  setup(map, extra) {
     this.mapService.reset(map);
     this.mapSubscription = this.mapService.subscribe(e => this.onMapEvent(e));
     this.map = map;
+    if (extra && (typeof(extra.x) === "number") && (typeof(extra.y) === "number")) {
+      this.entryHighlight = { x: extra.x, y: extra.y };
+      this.window.setTimeout(() => {
+        this.entryHighlight = null;
+        this.render();
+      }, 1000);
+    } else {
+      this.entryHighlight = null;
+    }
     this.setSizerSize();
     this.onTilesheetChanged();
     this.render();
@@ -168,6 +178,14 @@ export class MapEditor {
       }
       ctx.strokeStyle = "#f80";
       ctx.stroke();
+    }
+    
+    // Entry highlight.
+    if (this.entryHighlight) {
+      ctx.globalAlpha=0.7;
+      ctx.fillStyle = "#ff0";
+      ctx.fillRect(this.entryHighlight.x * this.pixelsPerTile + left, this.entryHighlight.y * this.pixelsPerTile + top, this.pixelsPerTile, this.pixelsPerTile);
+      ctx.globalAlpha = 1.0;
     }
   }
   

@@ -94,6 +94,10 @@ export class Dom {
     }
   }
   
+  hasModal() {
+    return !!this.document.querySelector(".modalWrapper");
+  }
+  
   /* private **********************************************************************/
   
   tagNameForControllerClass(clazz) {

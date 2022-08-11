@@ -42,9 +42,6 @@ export class MapToolbox {
     
     this.dom.spawn(this.element, "CANVAS", ["palette"], { width: 32, height: 32, "on-click": () => this.onEditPalette() });
     
-    /* Interestingly, though, there is actually no need to click on a tool.
-     * All 7 tools are reachable with some combination of left/right button and shift/control, by default.
-     */
     const toolsRow = this.dom.spawn(this.element, "DIV", ["toolsRow"], {
       "on-click": (event) => this.onToolClick(event),
       "on-contextmenu": (event) => this.onToolClick(event), 
@@ -70,10 +67,10 @@ export class MapToolbox {
   
   onClickSize() {
     if (!this.map) return;
-    const newSize = this.window.prompt("Size (w,h), multiple of (9,5):", `${this.map.w},${this.map.h}`);
+    const newSize = this.window.prompt("Size (w,h), in screens (9,5 tiles each):", `${this.map.w / 9},${this.map.h / 5}`);
     if (!newSize) return;
     const [w, h] = newSize.split(',').map(n => +n.trim());
-    this.mapService.resize(w, h);
+    this.mapService.resize(w * 9, h * 5);
   }
   
   onClickRegion() {
@@ -100,8 +97,8 @@ export class MapToolbox {
   refreshToolHighlight() {
     for (const element of this.element.querySelectorAll(".tool.selected-left")) element.classList.remove("selected-left");
     for (const element of this.element.querySelectorAll(".tool.selected-right")) element.classList.remove("selected-right");
-    this.element.querySelector(`.tool[data-name='${this.leftTool}']`).classList.add("selected-left");
-    this.element.querySelector(`.tool[data-name='${this.rightTool}']`).classList.add("selected-right");
+    this.element.querySelector(`.tool[data-name='${this.leftTool}']`)?.classList.add("selected-left");
+    this.element.querySelector(`.tool[data-name='${this.rightTool}']`)?.classList.add("selected-right");
   }
   
   renderPalette() {

@@ -25,7 +25,8 @@ Try `make run`
 - - [ ] Spell of Invisibility
 - - [ ] fmn_password_check_business_rules(): reenable once ready
 - [ ] Map editor.
-- - [ ] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
+- - [x] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
+- - [ ] "new" for all types
 - - [ ] Delete map
 - - [ ] Gamepad controls for MapEditor? :D that would be so cool
 - - [ ] Tilesheet, cache group lists etc

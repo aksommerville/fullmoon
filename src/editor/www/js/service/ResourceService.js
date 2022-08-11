@@ -24,6 +24,9 @@ export class ResourceService {
     
     this.resourcePaths = []; // Just the HTTP path eg "/res/image/titlesplash.png", as reported by GET /api/reslist
     this.resourcePathsUpdating = null; // null or Promise
+    
+    // Anyone can reassign but please be judicious. Only RootController should do this.
+    this.oneditresource = (path, name, extra) => {};
   }
   
   getResource(path, decode) {
@@ -43,6 +46,10 @@ export class ResourceService {
       image.onerror = (e) => reject(e);
       image.src = path;
     });
+  }
+  
+  editResource(path, name, extra) {
+    this.oneditresource(path, name, extra);
   }
   
   /* TOC.

@@ -24,13 +24,17 @@
  */
  
 import { FullmoonMap } from "./FullmoonMap.js";
+import { ResourceService } from "../service/ResourceService.js";
+import { Dom } from "../util/Dom.js";
  
 export class MapService {
   static getDependencies() {
-    return [Window];
+    return [Window, ResourceService, Dom];
   }
-  constructor(window) {
+  constructor(window, resourceService, dom) {
     this.window = window;
+    this.resourceService = resourceService;
+    this.dom = dom;
     
     this.nextSubscriberId = 1;
     this.reset(null);
@@ -38,13 +42,14 @@ export class MapService {
     this.window.addEventListener("keydown", (event) => this.onKeyDown(event));
     this.window.addEventListener("keyup", (event) => this.onKeyUp(event));
   }
+  
   reset(map) {
     this.map = map;
     this.tilesheet = null;
     this.tilesheetImage = null; // img
     this.paletteChoice = 0; // 0..255
-    this.leftTool = "pencil";
-    this.rightTool = "poiedit";
+    if (!this.leftTool) this.leftTool = "pencil";
+    if (!this.rightTool) this.rightTool = "poiedit";
     this.leftToolAnchor = this.leftTool;
     this.rightToolAnchor = this.rightTool;
     this.toolInProgress = null; // while mouse button down
@@ -52,8 +57,8 @@ export class MapService {
     this.poiDragIndex = -1;
     this.hoverX = -1;
     this.hoverY = -1;
-    this.tileSize = 32;
-    this.renderFeatures = ["cellLines", "screenLines"];
+    if (!this.tileSize) this.tileSize = 32;
+    if (!this.renderFeatures) this.renderFeatures = ["cellLines", "screenLines"];
     this.subscribers = [];
   }
   
@@ -260,7 +265,38 @@ export class MapService {
     this.broadcast({ event: "dirty" });
   }
   
+  /* The finger tool: Context sensitive "activation", eg follow doors.
+   ********************************************************************/
+   
+  navigate(name, x, y) {
+    const path = `/res/map/${name}.txt`;
+    if ((typeof(x) === "number") && (typeof(y) === "number")) {
+      this.resourceService.editResource(path, name, { x, y });
+    } else {
+      this.resourceService.editResource(path, name);
+    }
+  }
+   
+  activatePoi(poi) {
+    switch (FullmoonMap.POI_NAMES[poi.q[0]]) {
+      case "DOOR": this.navigate(poi.qp, poi.q[1], poi.q[2]); return true;
+      case "EDGE_DOOR": this.navigate(poi.qp); return true;
+    }
+    return false;
+  }
+   
+  activateCell(x, y) {
+    if (!this.map) return;
+    if ((x < 0) || (y < 0) || (x >= this.map.w) || (y >= this.map.h)) return;
+    for (const poi of this.map.pois) {
+      if (poi.x !== x) continue;
+      if (poi.y !== y) continue;
+      if (this.activatePoi(poi)) return;
+    }
+  }
+  
   /* Key events from window so we can track modifier keys.
+   * Also using this for tool-switch hotkeys.
    ******************************************************************/
    
   applyTemporaryToolAlias() {
@@ -273,6 +309,12 @@ export class MapService {
     if (rightVariant !== this.rightTool) {
       this.setRightTool(rightVariant, true);
     }
+  }
+  
+  hasKeyboardFocus() {
+    if (!this.dom.document.querySelector(".MapEditor")) return false;
+    if (this.dom.hasModal()) return false;
+    return true;
   }
    
   onKeyDown(event) {
@@ -287,6 +329,18 @@ export class MapService {
           this.shiftKeyDown = true;
           this.applyTemporaryToolAlias();
         } break;
+    }
+    if (this.hasKeyboardFocus()) {
+      switch (event.key) {
+        case "p": this.setLeftTool("pencil"); event.stopPropagation(); return; // P for Pencil
+        case "o": this.setLeftTool("pickup"); event.stopPropagation(); return; // O like GIMP
+        case "r": this.setLeftTool("rainbow"); event.stopPropagation(); return; // R for Rainbow
+        case "f": this.setLeftTool("finger"); event.stopPropagation(); return; // F for Finger
+        case "n": this.setLeftTool("poinew"); event.stopPropagation(); return; // N for New POI
+        case "m": this.setLeftTool("poimove"); event.stopPropagation(); return; // M for Move POI
+        case "d": this.setLeftTool("poidelete"); event.stopPropagation(); return; // D for Delete POI
+        case "e": this.setLeftTool("poiedit"); event.stopPropagation(); return; // E for Edit POI
+      }
     }
   }
   
@@ -336,6 +390,10 @@ export class MapService {
   pencilMouseUp() {}
   rainbowMouseUp() {}
   poimoveMouseUp() {}
+  
+  fingerMouseDown(x, y) {
+    this.activateCell(x, y);
+  }
   
   poinewMouseDown(x, y) {
     this.broadcast({
@@ -398,6 +456,7 @@ export class MapService {
       case "pickup": this.pickupMouseDown(x, y); break;
       case "pencil": this.pencilMouseDown(x, y); break;
       case "rainbow": this.rainbowMouseDown(x, y); break;
+      case "finger": this.fingerMouseDown(x, y); this.toolInProgress = null; break;
       case "poinew": this.poinewMouseDown(x, y); this.toolInProgress = null; break;
       case "poiedit": this.poieditMouseDown(x, y); this.toolInProgress = null; break;
       case "poidelete": this.poideleteMouseDown(x, y); this.toolInProgress = null; break;
@@ -432,7 +491,7 @@ export class MapService {
 MapService.singleton = true;
 
 MapService.TOOLS = [
-  "pickup", "pencil", "rainbow", 
+  "pickup", "pencil", "rainbow", "finger",
   "poinew", "poiedit", "poidelete", "poimove",
 ];
 
@@ -441,6 +500,7 @@ MapService.TOOL_VARIANTS = {
   pickup: ["pickup", "pickup", "pencil", "pencil"],
   pencil: ["pencil", "rainbow", "pickup", "pickup"],
   rainbow: ["rainbow", "pencil", "pickup", "pickup"],
+  finger: ["finger", "finger", "pickup", "pickup"],
   poinew: ["poinew", "poinew", "poinew", "poinew"],
   poiedit: ["poiedit", "poimove", "poinew", "poidelete"],
   poidelete: ["poidelete", "poidelete", "poidelete", "poidelete"],

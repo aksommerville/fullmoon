@@ -18,7 +18,13 @@ export class RootController {
     this.toolboxController = null;
     this.canvasController = null;
     
+    this.resourceService.oneditresource = (path, name, extra) => this.onEditResource(path, name, extra);
+    
     this.buildUi();
+  }
+  
+  onRemoveFromDom() {
+    this.resourceService.oneditResource = () => {};
   }
   
   buildUi() {
@@ -35,8 +41,8 @@ export class RootController {
     this.canvasController = this.dom.spawnController(midRow, CanvasController);
   }
   
-  onEditResource(path, displayName) {
-    this.canvasController.setResource(path, displayName).then((data) => {
+  onEditResource(path, displayName, extra) {
+    this.canvasController.setResource(path, displayName, extra).then((data) => {
       this.toolboxController.setResource(data);
       this.headerController.setResource(data);
     });
