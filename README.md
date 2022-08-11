@@ -26,12 +26,13 @@ Try `make run`
 - - [ ] fmn_password_check_business_rules(): reenable once ready
 - [ ] Map editor.
 - - [x] Some kind of tool to validate point doors, normally one expects a mutual link. A button to jump to its target?
-- - [ ] "new" for all types
-- - [ ] Delete map
-- - [ ] Gamepad controls for MapEditor? :D that would be so cool
-- - [ ] Tilesheet, cache group lists etc
-- - [ ] Setting negative poi.q (eg edge door), highly painful today.
+- - xxx "new" for all types
+- - xxx Delete map
+- - xxx Gamepad controls for MapEditor? :D that would be so cool
+- - xxx Tilesheet, cache group lists etc
+- - [x] Setting negative poi.q (eg edge door), highly painful today.
 - - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
+- - [ ] is there some venue where we could validate that edge doors are mutually consistent?
 - - [x] sidebar: Make each resource type an accordion
 - - [x] sprite editor
 - [ ] Design
