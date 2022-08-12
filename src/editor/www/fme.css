@@ -123,6 +123,7 @@ body {
 
 .ToolboxController {
   flex: 1;
+  min-width: 100px;
   max-width: 200px;
   height: calc(100vh - 2em);
   background-color: #444;
@@ -307,4 +308,28 @@ body {
   width: 64px;
   height: 64px;
   image-rendering: crisp-edges;
+}
+
+.TileTemplatesModal input[type="checkbox"] {
+  display: none;
+}
+
+.TileTemplatesModal input[type="checkbox"] + label {
+  border: 1px solid #000;
+  margin: 0 0.25em;
+  background-color: #ccc;
+}
+
+.TileTemplatesModal input[type="checkbox"]:checked + label {
+  background-color: #ff0;
+}
+
+.TileTemplatesModal .menu {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.TileTemplatesModal .option {
+  min-width: 100px;
+  min-height: 100px;
 }

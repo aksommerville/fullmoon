@@ -125,6 +125,13 @@ export class Tilesheet {
     // Oops.
     return tileids[0];
   }
+  
+  unusedGroupId() {
+    const used = new Set();
+    for (const tile of this.tiles) used.add(tile.group);
+    for (let i=1; i<256; i++) if (!used.has(i)) return i;
+    return 0;
+  }
 }
 
 Tilesheet.PROPS_SOLID = 0x01;

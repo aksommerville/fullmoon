@@ -5,6 +5,7 @@ import { Dom } from "../util/Dom.js";
 import { Tilesheet } from "./Tilesheet.js";
 import { ResourceService } from "../service/ResourceService.js";
 import { TileModal } from "./TileModal.js";
+import { TileTemplatesModal } from "./TileTemplatesModal.js";
 
 export class TilesheetEditor {
   static getDependencies() {
@@ -50,7 +51,7 @@ export class TilesheetEditor {
     this.spawnButton(buttonsRow, "Mask");
     this.spawnButton(buttonsRow, "Priority");
     
-    this.dom.spawn(this.element, "CANVAS", { "on-click": (e) => this.onClickCanvas(e) });
+    this.dom.spawn(this.element, "CANVAS", { "on-click": (e) => this.onClickCanvas(e), "on-contextmenu": (e) => this.onContextMenu(e) });
   }
   
   spawnButton(parent, label) {
@@ -70,6 +71,14 @@ export class TilesheetEditor {
     controller.ondirty = (tileid) => this.onTileChanged(tileid);
   }
   
+  presentTemplatesModal(tileid) {
+    const wrapper = this.dom.spawnModal();
+    const controller = this.dom.spawnController(wrapper, TileTemplatesModal);
+    controller.setup(this.tilesheet, this.image, tileid);
+    controller.ondirty = () => this.onTileChanged();
+  }
+  
+  // We don't actually care about (tileid); the whole thing gets dirty at once.
   onTileChanged(tileid) {
     this.render();
     this.resourceService.dirty(this.tilesheet.path, () => this.tilesheet.encode()).then(() => {
@@ -93,6 +102,23 @@ export class TilesheetEditor {
     const tileid = Math.floor((my - bounds.y) / tilesize) * 16 + Math.floor((mx - bounds.x) / tilesize);
     if ((tileid < 0) || (tileid > 0xff)) return;
     this.presentTileModal(tileid);
+  }
+  
+  onContextMenu(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const bounds = this.imageBounds();
+    const mx = e.layerX - e.target.offsetLeft;
+    const my = e.layerY - e.target.offsetTop;
+    if (mx < bounds.x) return;
+    if (my < bounds.y) return;
+    if (mx >= bounds.x + bounds.w) return;
+    if (my >= bounds.y + bounds.h) return;
+    const tilesize = bounds.w >> 4;
+    if (!tilesize) return;
+    const tileid = Math.floor((my - bounds.y) / tilesize) * 16 + Math.floor((mx - bounds.x) / tilesize);
+    if ((tileid < 0) || (tileid > 0xff)) return;
+    this.presentTemplatesModal(tileid);
   }
   
   imageBounds(canvas) {

@@ -224,12 +224,21 @@ export class MapService {
     if (!tile0.group) return;
     
     // Compose the neighbor mask.
+    const clampEdges = true; // debatable: If true, cells on the edge will join fake neighbors out of bounds.
     let neighbors = 0;
     for (let bit=0x80,dy=-1; dy<=1; dy++) {
-      const ny = y + dy; // don't skip if OOB; we need to step (bit)
+      let ny = y + dy; // don't skip if OOB; we need to step (bit)
+      if (clampEdges) {
+        if (ny < 0) ny = 0;
+        else if (ny >= this.map.h) ny = this.map.h - 1;
+      }
       for (let dx=-1; dx<=1; dx++) {
         if (!dx && !dy) continue;
-        const nx = x + dx;
+        let nx = x + dx;
+        if (clampEdges) {
+          if (nx < 0) nx = 0;
+          else if (nx >= this.map.w) nx = this.map.w - 1;
+        }
         if ((nx >= 0) && (ny >= 0) && (nx < this.map.w) && (ny < this.map.h)) {
           if (this.tilesheet.tiles[this.map.cells[ny * this.map.w + nx]].group === tile0.group) {
             neighbors |= bit;

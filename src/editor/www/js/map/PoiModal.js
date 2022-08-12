@@ -90,6 +90,8 @@ export class PoiModal {
           let s16 = (this.poi.q[1] << 8) | this.poi.q[2];
           if (s16 & 0x8000) s16 |= ~0xffff;
           value = s16;
+          params.min = -32768;
+          params.max = 32767;
         } break;
     }
     
