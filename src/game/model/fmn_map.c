@@ -28,10 +28,10 @@ const struct fmn_map *map_region_heads[8]={
   &cheatertrap, // reserved
   &home,        // "home"
   &forest,      // "forest"
-  &cheatertrap, // "caves" TODO
-  &cheatertrap, // "desert" TODO
-  &cheatertrap, // "swamp" TODO
-  &castle_1, // "castle"
+  &mountains,   // "caves"
+  &desert_1,    // "desert"
+  &swamp_1,     // "swamp"
+  &castle_1,    // "castle"
   &cheatertrap, // cheatertrap, for real
 };
 

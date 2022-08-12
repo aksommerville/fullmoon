@@ -33,6 +33,7 @@ static struct fmn_genioc_keymap {
   {0x0007001b,FMN_BUTTON_B},//x
   {0x0007001d,FMN_BUTTON_A},//z
   /**/
+  {0x00070028,FMN_BUTTON_A},//enter (helpful for password text entry)
   {0x00070036,FMN_BUTTON_B},//comma
   {0x00070037,FMN_BUTTON_A},//dot
   {0x0007004f,FMN_BUTTON_RIGHT},//right arrow

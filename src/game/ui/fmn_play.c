@@ -7,6 +7,9 @@
 #include "game/sprite/hero/fmn_hero.h"
 #include <string.h>
 
+#define FMN_SLOMO_TIME 300
+#define FMN_SLOMO_FACTOR 4
+
 /* Globals.
  */
  
@@ -24,6 +27,7 @@ static uint8_t bgbitsdirty=1;
 static uint16_t raintime=0;
 static uint16_t statebits=0;
 static uint16_t gameovertime=0; // if nonzero counts down to gameover
+static uint16_t slomotime=0;
 
 uint32_t fmn_play_frame_count=0;
  
@@ -89,7 +93,16 @@ static void fmn_finish_rain() {
 void fmn_play_update() {
   fmn_play_frame_count++;
 
-  fmn_sprites_update();
+  if (slomotime) {
+    if (!(fmn_play_frame_count%FMN_SLOMO_FACTOR)) {
+      fmn_sprites_update();
+    } else {
+      struct fmn_sprite *hero=fmn_hero_get_sprite();
+      if (hero) hero->type->update(hero);
+    }
+  } else {
+    fmn_sprites_update();
+  }
 
   if (fmn_hero_get_sprite()) {
     int16_t x,y;
@@ -104,6 +117,11 @@ void fmn_play_update() {
   else if (raintime==1) {
     raintime=0;
     fmn_finish_rain();
+  }
+  
+  if (slomotime>1) slomotime--;
+  else if (slomotime==1) {
+    slomotime=0;
   }
   
   if (gameovertime) {
@@ -189,6 +207,13 @@ void fmn_play_render(struct fmn_image *fb) {
   // Rain.
   if (raintime) render_rain(fb);
   
+  // Slomo warning.
+  if (slomotime<60) {
+    if (slomotime%20>=10) {
+      fmn_image_invert(fb);
+    }
+  }
+  
   //TODO additional overlay?
 }
 
@@ -211,6 +236,14 @@ void fmn_game_reset_with_state(uint16_t state) {
   
   memset((void*)fmn_gstate,0,sizeof(fmn_gstate));
   if (state&FMN_STATE_TUNNEL_SWITCH) fmn_gstate[FMN_GSTATE_tunnel_switch]=1;
+  
+  // If only one item is present, select it. More than one, start with nothing armed.
+  switch (state&(FMN_STATE_FEATHER|FMN_STATE_WAND|FMN_STATE_BROOM|FMN_STATE_UMBRELLA)) {
+    case FMN_STATE_FEATHER: fmn_hero_set_action(FMN_ACTION_FEATHER); break;
+    case FMN_STATE_WAND: fmn_hero_set_action(FMN_ACTION_WAND); break;
+    case FMN_STATE_BROOM: fmn_hero_set_action(FMN_ACTION_BROOM); break;
+    case FMN_STATE_UMBRELLA: fmn_hero_set_action(FMN_ACTION_UMBRELLA); break;
+  }
 
   raintime=0;
   fmn_map_reset_region((state&FMN_STATE_LOCATION_MASK)>>FMN_STATE_LOCATION_SHIFT);
@@ -265,8 +298,29 @@ static void fmn_spell_open() {
 }
  
 static void fmn_spell_rain() {
-  // Maybe check if we're indoors? Like, certain maps should be "rainproof".
-  raintime=180;
+  raintime=120;
+}
+
+static void fmn_spell_animate() {
+  fprintf(stderr,"TODO %s\n",__func__);//TODO
+}
+
+static void fmn_spell_trailhead() {
+  //TODO some kind of wobble-wobble transition effect
+  fmn_map_reset_region(fmn_map_get_region());
+}
+
+static void fmn_spell_home() {
+  //TODO some kind of wobble-wobble transition effect
+  fmn_map_reset();
+}
+
+static void fmn_spell_slomo() {
+  slomotime=FMN_SLOMO_TIME;
+}
+
+static void fmn_spell_invisibility() {
+  fprintf(stderr,"TODO %s\n",__func__);//TODO
 }
 
 /* Cast a spell.
@@ -282,7 +336,11 @@ uint8_t fmn_game_cast_spell(const uint8_t *src,uint8_t srcc) {
   }
   CHECKSPELL(fmn_spell_open,FMN_DIR_W,FMN_DIR_E,FMN_DIR_W,FMN_DIR_N,FMN_DIR_N)
   CHECKSPELL(fmn_spell_rain,FMN_DIR_N,FMN_DIR_S,FMN_DIR_S,FMN_DIR_S)
-  //TODO spells. i want like a dozen
+  CHECKSPELL(fmn_spell_animate,FMN_DIR_S,FMN_DIR_N,FMN_DIR_S,FMN_DIR_N,FMN_DIR_S,FMN_DIR_S,FMN_DIR_N)
+  CHECKSPELL(fmn_spell_trailhead,FMN_DIR_E,FMN_DIR_N,FMN_DIR_W,FMN_DIR_S,FMN_DIR_E,FMN_DIR_W)
+  CHECKSPELL(fmn_spell_home,FMN_DIR_W,FMN_DIR_N,FMN_DIR_E,FMN_DIR_S,FMN_DIR_W,FMN_DIR_E)
+  CHECKSPELL(fmn_spell_slomo,FMN_DIR_E,FMN_DIR_W,FMN_DIR_W,FMN_DIR_E,FMN_DIR_W,FMN_DIR_W,FMN_DIR_S,FMN_DIR_W)
+  CHECKSPELL(fmn_spell_invisibility,FMN_DIR_N,FMN_DIR_N,FMN_DIR_E,FMN_DIR_N,FMN_DIR_W,FMN_DIR_S,FMN_DIR_W)
   #undef CHECKSPELL
   return 0;
 }

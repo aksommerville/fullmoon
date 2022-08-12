@@ -19,14 +19,14 @@ Try `make run`
 - - [ ] Giant spider
 - - [ ] lots more sprites
 - - [ ] Spell of Animation
-- - [ ] Spell of Trailhead Teleportation
-- - [ ] Spell of Home Teleportation
-- - [ ] Spell of Slow Motion
+- - [x] Spell of Trailhead Teleportation
+- - [x] Spell of Home Teleportation
+- - [x] Spell of Slow Motion
 - - [ ] Spell of Invisibility
 - - [ ] fmn_password_check_business_rules(): reenable once ready
-- [ ] Map editor.
-- - [ ] mapcvt validate FMN_POI_EDGE_DOOR aligns to screen sizes.
-- - [ ] is there some venue where we could validate that edge doors are mutually consistent?
+- - [x] auto-select only item at reset
+- - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
+- - [ ] transition effect for teleport spells
 - [ ] Design
 - - [ ] Fill forest with puzzles
 - - [ ] Dead space in home NE, what should go there?
@@ -35,8 +35,8 @@ Try `make run`
 - - [ ] swamp
 - - [ ] desert
 - - [ ] castle
-- - - [x] open outer door
 - - - [ ] the two tablesaw right next to each other -- no way is this possible on a thumby, nerf it
+- - - - hold on that a bit. might be reasonable with slomo
 - - - [ ] populate upper floors
 - - [ ] win-game ui
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
@@ -62,7 +62,7 @@ Try `make run`
 - - [ ] linux: PulseAudio
 - - [ ] machid
 - - [ ] macaudio
-- - [ ] macos: Can we drop OpenGL
+- - [ ] macos: Can we drop OpenGL?
 - - [ ] macos: review deprecated WM functions
 - - [ ] mswin
 - - [ ] web: Clean up wrapper
@@ -72,3 +72,12 @@ Try `make run`
 - - [ ] 68k Mac?
 - - [ ] Pippin?
 - - [ ] Best way to run on mobile devices, native or web?
+
+## Passwords
+
+HWDDBD home () ()
+FURRRT home (feather,wand,broom,umbrella) ()
+RE3QT1 castle (feather,wand,broom,umbrella) (basement door)
+VU3QRS caves (feather,wand,broom,umbrella) (basement door)
+XUDDRC caves (feather) ()
+BEBTT3 desert (feather,wand,broom) ()

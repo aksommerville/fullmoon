@@ -705,3 +705,15 @@ void fmn_image_clear(struct fmn_image *dst) {
   uint8_t *row=dst->v;
   for (;yi-->0;row+=dst->stride) memset(row,0,cpc);
 }
+
+/* Invert: A cheap highlight flash effect.
+ */
+ 
+void fmn_image_invert(struct fmn_image *dst) {
+  if (!dst||!dst->writeable) return;
+  int32_t c;
+  if (dst->fmt==FMN_IMGFMT_thumby) c=dst->stride*(dst->h>>3);
+  else c=dst->stride*dst->h;
+  uint8_t *v=dst->v;
+  for (;c-->0;v++) (*v)^=0xff;
+}

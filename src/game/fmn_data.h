@@ -12,6 +12,9 @@ extern const struct fmn_map cheatertrap; // TODO Remove, instead validate passwo
 extern const struct fmn_map home;
 extern const struct fmn_map forest;
 extern const struct fmn_map castle_1;
+extern const struct fmn_map mountains;
+extern const struct fmn_map desert_1;
+extern const struct fmn_map swamp_1;
 
 extern const struct fmn_map *map_region_heads[8];
 

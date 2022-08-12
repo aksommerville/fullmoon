@@ -27,7 +27,7 @@ static void fmn_statue_float(struct fmn_sprite *sprite,int8_t dx,int8_t dy) {
   fmn_sprite_collide(0,0,sprite,FMN_TILE_SOLID,FMN_SPRITE_FLAG_SOLID,1);
 }
 
-static uint8_t fmn_statue_tsu_update(struct fmn_sprite *sprite) {
+static uint8_t fmn_statue_lambda_update(struct fmn_sprite *sprite) {
   uint8_t herodir=fmn_hero_get_feather_dir();
   if (!herodir) return 0;
   int16_t herox,heroy;
@@ -59,7 +59,7 @@ static uint8_t fmn_statue_tsu_update(struct fmn_sprite *sprite) {
 
 static void _statue_update(struct fmn_sprite *sprite) {
   if (sprite->tileid==0xb3) {
-    if (fmn_statue_tsu_update(sprite)) {
+    if (fmn_statue_lambda_update(sprite)) {
       levitate++;
     } else {
       levitate=0;
@@ -88,7 +88,7 @@ static void _statue_update(struct fmn_sprite *sprite) {
 static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,uint8_t c) {
   switch (sprite->tileid) {
   
-    case 0xb0: { // gamma aka octopus
+    case 0xb0: { // gamma
         if ((c>=3)&&(v[c-3]==FMN_DIR_W)&&(v[c-2]==FMN_DIR_E)&&(v[c-1]==FMN_DIR_W)) {
           int16_t x=sprite->x+(sprite->w>>1);
           int16_t y=sprite->y+(sprite->h>>1);
@@ -100,7 +100,7 @@ static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,u
         }
       } return 0;
       
-    case 0xb1: { // to aka mermaid
+    case 0xb1: { // alpha
         if (c>=4) {
           uint8_t move=0;
           switch (v[c-4]) {
@@ -118,7 +118,7 @@ static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,u
         }
       } return 0;
       
-    case 0xb2: { // aa aka lobster
+    case 0xb2: { // mu
         if (c>=5) {
           if ((v[c-5]==v[c-4])&&(v[c-4]==v[c-3])&&(v[c-3]==v[c-1])&&(v[c-2]!=v[c-1])) switch (v[c-2]) {
             case FMN_DIR_W: movex=-SPEED; movey=     0; movec=FMN_MM_PER_TILE/SPEED; return 1;
@@ -129,7 +129,7 @@ static uint8_t _statue_featherspell(struct fmn_sprite *sprite,const uint8_t *v,u
         }
       } return 0;
       
-    case 0xb3: { // tsu aka fish
+    case 0xb3: { // lambda
         // not a feather spell; summon the statue from a distance
       } return 0;
       

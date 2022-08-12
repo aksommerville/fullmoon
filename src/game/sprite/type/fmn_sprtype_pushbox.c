@@ -23,6 +23,30 @@ static int8_t _pushbox_init(struct fmn_sprite *sprite,const struct fmn_sprdef *s
   return 0;
 }
 
+// We are doing charmed motion and a collision occurred.
+// Step at minimum speed toward the nearest cell boundary on the cross axis.
+// So the player doesn't need to get perfect alignment for 2D navigation, just within half a cell.
+static void pushbox_sidle_charmed(struct fmn_sprite *sprite) {
+  switch (charmdir) {
+    case FMN_DIR_N:
+    case FMN_DIR_S: {
+        int16_t mod=sprite->x%FMN_MM_PER_TILE;
+        if (mod>=FMN_MM_PER_TILE>>1) sprite->x++;
+        else if (mod) sprite->x--;
+        else return;
+      } break;
+    case FMN_DIR_W:
+    case FMN_DIR_E: {
+        int16_t mod=sprite->y%FMN_MM_PER_TILE;
+        if (mod>=FMN_MM_PER_TILE>>1) sprite->y++;
+        else if (mod) sprite->y--;
+        else return;
+      } break;
+    default: return;
+  }
+  fmn_sprite_collide(0,0,sprite,FMN_TILE_SOLID|FMN_TILE_HOLE,FMN_SPRITE_FLAG_SOLID,1);
+}
+
 static void pushbox_move_charmed(struct fmn_sprite *sprite) {
 
   // Confirm the hero's center is still in the ribbon stretching out from my charm direction.
@@ -70,6 +94,8 @@ static void pushbox_move_charmed(struct fmn_sprite *sprite) {
     if (!adjx&&!adjy) {
       sprite->x-=dx*PUSHBOX_CHARM_SPEED;
       sprite->y-=dy*PUSHBOX_CHARM_SPEED;
+    } else {
+      pushbox_sidle_charmed(sprite);
     }
   }
 }

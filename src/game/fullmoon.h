@@ -188,6 +188,13 @@ extern volatile uint8_t fmn_gstate[256];
 #define FMN_GSTATE_forest_treadle 0
 #define FMN_GSTATE_forest_early_treadle 1
 #define FMN_GSTATE_tunnel_switch 2
+#define FMN_GSTATE_caves_switch_1 3
+#define FMN_GSTATE_caves_switch_2 4
+#define FMN_GSTATE_caves_nozzle_1 5
+#define FMN_GSTATE_caves_switch_3 6
+#define FMN_GSTATE_caves_switch_4 7
+#define FMN_GSTATE_desert_switch_1 8
+#define FMN_GSTATE_desert_switch_2 9
 
 #ifdef __cplusplus
   }
