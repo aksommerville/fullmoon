@@ -717,3 +717,41 @@ void fmn_image_invert(struct fmn_image *dst) {
   uint8_t *v=dst->v;
   for (;c-->0;v++) (*v)^=0xff;
 }
+
+/* Blackout: Fade to black.
+ */
+
+static void fmn_image_blackout_draw_pattern(uint8_t *dst/*32*/,uint8_t amt) {
+  // Any prime number will do.
+  // Note that a symmetry is introduced by the pattern being 256 units long and we apply it straight LRTB to the image.
+  // So this doesn't look completely random but it does look cool, so ok.
+  const uint32_t prime=89;
+  uint8_t i=amt; while (i-->0) {
+    uint8_t p=prime*i;
+    dst[p>>3]|=1<<(p&7);
+  }
+}
+ 
+void fmn_image_blackout(struct fmn_image *dst,uint8_t amt) {
+  if (!dst||!dst->writeable) return;
+  if (amt<1) return;
+  if (amt>=0xff) {
+    fmn_image_clear(dst);
+    return;
+  }
+  // Generate a 256-bit pattern from (amt) and tile it over the image.
+  //TODO if this works out, consider tracking the last requested blackout, we shouldn't need to redraw the pattern from scratch each time.
+  uint8_t pattern[32]={0};
+  fmn_image_blackout_draw_pattern(pattern,amt);
+  uint8_t patternp=0;
+  uint8_t patternmask=1;
+  struct fmn_image_iterator iter;
+  if (!fmn_image_iterate(&iter,dst,0,0,dst->w,dst->h,0)) return;
+  do {
+    if (pattern[patternp]&patternmask) fmn_image_iterator_write(&iter,0);
+    if (patternmask==0x80) {
+      patternmask=1;
+      if (++patternp>=32) patternp=0;
+    } else patternmask<<=1;
+  } while (fmn_image_iterator_next(&iter));
+}

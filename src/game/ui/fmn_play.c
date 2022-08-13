@@ -9,6 +9,7 @@
 
 #define FMN_SLOMO_TIME 300
 #define FMN_SLOMO_FACTOR 4
+#define FMN_BLACKOUT_SPEED 4 /* in 1/256ths of the effect per frame */
 
 /* Globals.
  */
@@ -28,6 +29,9 @@ static uint16_t raintime=0;
 static uint16_t statebits=0;
 static uint16_t gameovertime=0; // if nonzero counts down to gameover
 static uint16_t slomotime=0;
+static uint8_t blackout=0; // 0..255 how much faded out
+static int8_t dblackout=0; // -1,0,1 if blackout in progress
+static uint8_t blackout_region=0; // region to jump to at the peak of the blackout, if nonzero
 
 uint32_t fmn_play_frame_count=0;
  
@@ -87,6 +91,17 @@ static void fmn_finish_rain() {
   }
 }
 
+/* Blackout completed, trigger any deferred task eg load a new map.
+ */
+ 
+static void fmn_blackout_complete() {
+  dblackout=-1;
+  if (blackout_region) {
+    fmn_map_reset_region(blackout_region);
+    blackout_region=0;
+  }
+}
+
 /* Update.
  */
  
@@ -122,6 +137,21 @@ void fmn_play_update() {
   if (slomotime>1) slomotime--;
   else if (slomotime==1) {
     slomotime=0;
+  }
+  
+  if (dblackout<0) {
+    if (blackout>FMN_BLACKOUT_SPEED) blackout-=FMN_BLACKOUT_SPEED;
+    else {
+      blackout=0;
+      dblackout=0;
+    }
+  } else if (dblackout>0) {
+    if (blackout<0xff-FMN_BLACKOUT_SPEED) blackout+=FMN_BLACKOUT_SPEED;
+    else {
+      blackout=0xff;
+      dblackout=0;
+      fmn_blackout_complete();
+    }
   }
   
   if (gameovertime) {
@@ -214,7 +244,10 @@ void fmn_play_render(struct fmn_image *fb) {
     }
   }
   
-  //TODO additional overlay?
+  // Blackout
+  if (blackout) {
+    fmn_image_blackout(fb,blackout);
+  }
 }
 
 /* Reset game.
@@ -223,7 +256,10 @@ void fmn_play_render(struct fmn_image *fb) {
 void fmn_game_reset() {
   fmn_play_frame_count=0;
   raintime=0;
+  slomotime=0;
   statebits=0;
+  blackout=0;
+  dblackout=0;
   memset((void*)fmn_gstate,0,sizeof(fmn_gstate));
   fmn_map_reset();
   fmn_hero_reset();
@@ -231,6 +267,10 @@ void fmn_game_reset() {
 
 void fmn_game_reset_with_state(uint16_t state) {
   fmn_play_frame_count=0;
+  raintime=0;
+  slomotime=0;
+  blackout=0;
+  dblackout=0;
 
   statebits=state;
   
@@ -306,13 +346,13 @@ static void fmn_spell_animate() {
 }
 
 static void fmn_spell_trailhead() {
-  //TODO some kind of wobble-wobble transition effect
-  fmn_map_reset_region(fmn_map_get_region());
+  dblackout=1;
+  blackout_region=fmn_map_get_region();
 }
 
 static void fmn_spell_home() {
-  //TODO some kind of wobble-wobble transition effect
-  fmn_map_reset();
+  dblackout=1;
+  blackout_region=1;
 }
 
 static void fmn_spell_slomo() {

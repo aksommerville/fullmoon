@@ -19,14 +19,10 @@ Try `make run`
 - - [ ] Giant spider
 - - [ ] lots more sprites
 - - [ ] Spell of Animation
-- - [x] Spell of Trailhead Teleportation
-- - [x] Spell of Home Teleportation
-- - [x] Spell of Slow Motion
 - - [ ] Spell of Invisibility
 - - [ ] fmn_password_check_business_rules(): reenable once ready
-- - [x] auto-select only item at reset
 - - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
-- - [ ] transition effect for teleport spells
+- - [x] transition effect for teleport spells
 - [ ] Design
 - - [ ] Fill forest with puzzles
 - - [ ] Dead space in home NE, what should go there?

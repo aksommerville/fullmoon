@@ -43,6 +43,7 @@ struct fmn_image {
 void fmn_image_clear(struct fmn_image *dst);
 
 void fmn_image_invert(struct fmn_image *dst);
+void fmn_image_blackout(struct fmn_image *dst,uint8_t amt);
 
 void fmn_image_fill_rect(
   struct fmn_image *dst,
