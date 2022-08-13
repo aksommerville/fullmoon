@@ -78,6 +78,7 @@ static void _tablesaw_render(
 ) {
 
   // Track is tiles +0 for the edge and +16 middle. Images are oriented vertically, to pack them nicer.
+  /*XXX do this as part of the map, for better layering
   int16_t dstx=((col*FMN_MM_PER_TILE-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
   int16_t dsty=((sprite->y-scrolly-(FMN_MM_PER_TILE>>1))*FMN_TILESIZE)/FMN_MM_PER_TILE;
   fmn_blit_tile(dst,dstx,dsty,sprite->image,sprite->tileid,FMN_XFORM_SWAP|FMN_XFORM_XREV);
@@ -85,11 +86,12 @@ static void _tablesaw_render(
   uint8_t i=colc-2;
   for (;i-->0;dstx+=FMN_TILESIZE) fmn_blit_tile(dst,dstx,dsty,sprite->image,sprite->tileid+0x10,FMN_XFORM_SWAP);
   fmn_blit_tile(dst,dstx,dsty,sprite->image,sprite->tileid,FMN_XFORM_SWAP|FMN_XFORM_YREV|FMN_XFORM_XREV);
+  /**/
 
   // Blade is two tiles, just right of the track tiles.
   int16_t bladeh=(ext*FMN_TILESIZE)/FMN_MM_PER_TILE;
-  dstx=((sprite->x-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
-  dsty=dsty+4*FMN_GFXSCALE-bladeh;
+  int16_t dstx=((sprite->x-scrollx)*FMN_TILESIZE)/FMN_MM_PER_TILE;
+  int16_t dsty=((sprite->y-scrolly-(FMN_MM_PER_TILE>>1))*FMN_TILESIZE)/FMN_MM_PER_TILE+4*FMN_GFXSCALE-bladeh;
   int16_t srcx=((sprite->tileid+1)&0x0f)*FMN_TILESIZE;
   int16_t srcy=(sprite->tileid>>4)*FMN_TILESIZE;
   fmn_blit(dst,dstx,dsty,sprite->image,srcx,srcy,FMN_TILESIZE,bladeh,(dx>0)?FMN_XFORM_XREV:0);

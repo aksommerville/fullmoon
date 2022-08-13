@@ -48,13 +48,13 @@ static uint8_t fmn_statue_lambda_update(struct fmn_sprite *sprite) {
     case FMN_DIR_S: {
         if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return 0;
         if (heroy>sprite->y) return 0;
-        if (heroy<sprite->y-FMN_SCREENH_MM) return 0;
+        if (heroy<sprite->y-FMN_SCREENW_MM) return 0; // sic SCREENW
         fmn_statue_float(sprite,0,-1);
       } return 1;
     case FMN_DIR_N: {
         if ((herox<sprite->x)||(herox>=sprite->x+sprite->w)) return 0;
         if (heroy<sprite->y) return 0;
-        if (heroy>sprite->y+FMN_SCREENH_MM) return 0;
+        if (heroy>sprite->y+FMN_SCREENW_MM) return 0; // sic SCREENW
         fmn_statue_float(sprite,0,1);
       } return 1;
   }

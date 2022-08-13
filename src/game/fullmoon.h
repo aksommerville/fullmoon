@@ -200,6 +200,15 @@ extern volatile uint8_t fmn_gstate[256];
 #define FMN_GSTATE_swamp_fire_1 12
 #define FMN_GSTATE_swamp_fire_2 13
 #define FMN_GSTATE_home_bridge 14
+#define FMN_GSTATE_caves_4puzzle_1 15
+#define FMN_GSTATE_caves_4puzzle_2 16
+#define FMN_GSTATE_caves_4puzzle_3 17
+#define FMN_GSTATE_caves_4puzzle_4 18
+#define FMN_GSTATE_desert_nozzle_1 19
+#define FMN_GSTATE_castle_switch_1 20
+#define FMN_GSTATE_castle_switch_2 21
+#define FMN_GSTATE_castle_switch_3 22
+#define FMN_GSTATE_castle_switch_4 23
 
 #ifdef __cplusplus
   }

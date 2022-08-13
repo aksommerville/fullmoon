@@ -27,13 +27,14 @@ Try `make run`
 - - [x] win-game ui
 - - [x] Turn into a pumpkin
 - - [ ] Cosmetic feedback for animation spell. Grow flowers or something?
-- [ ] First pass populating the world
+- - [ ] tablesaw should not draw its own track, make that part of the map. (see conflict w firenozzle_s in castle)
+- [x] First pass populating the world
 - - [x] home
 - - [x] forest
-- - [ ] caves
-- - [ ] desert
+- - [x] caves
+- - [x] desert
 - - [x] swamp
-- - [ ] castle
+- - [x] castle
 - [ ] Second pass populating the world
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
