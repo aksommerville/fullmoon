@@ -35,6 +35,7 @@ static uint8_t stompbox_bestepped(struct fmn_sprite *sprite) {
     int16_t midy=stepper->y+(stepper->h>>1);
     if (midy<sprite->y) continue;
     if (midy>=sprite->y+sprite->h) continue;
+    if ((stepper->type==&fmn_sprtype_hero)&&!fmn_hero_touching_ground()) continue;
     return 1;
   }
   return 0;

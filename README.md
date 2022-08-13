@@ -23,18 +23,16 @@ Try `make run`
 - - [ ] fmn_password_check_business_rules(): reenable once ready
 - - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
 - - [x] transition effect for teleport spells
-- [ ] Design
-- - [ ] Fill forest with puzzles
-- - [ ] Dead space in home NE, what should go there?
-- - [ ] Houses in home, what are they for?
-- - [ ] caves
-- - [ ] swamp
-- - [ ] desert
-- - [ ] castle
-- - - [ ] the two tablesaw right next to each other -- no way is this possible on a thumby, nerf it
-- - - - hold on that a bit. might be reasonable with slomo
-- - - [ ] populate upper floors
+- - [x] Don't trigger treadles while flying
 - - [ ] win-game ui
+- [ ] First pass populating the world
+- - [ ] home
+- - [ ] forest
+- - [ ] caves
+- - [ ] desert
+- - [x] swamp
+- - [ ] castle
+- [ ] Second pass populating the world
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
 - - [ ] Low quality synth suitable for Tiny
@@ -77,3 +75,4 @@ RE3QT1 castle (feather,wand,broom,umbrella) (basement door)
 VU3QRS caves (feather,wand,broom,umbrella) (basement door)
 XUDDRC caves (feather) ()
 BEBTT3 desert (feather,wand,broom) ()
+BUBTR3 swamp (feather,wand,broom) ()

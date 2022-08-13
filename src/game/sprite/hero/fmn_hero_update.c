@@ -13,6 +13,14 @@ static void fmn_hero_examine_new_position() {
   int16_t celly=y/FMN_MM_PER_TILE; if (y<0) celly--;
   if ((cellx==fmn_hero.cellx)&&(celly==fmn_hero.celly)) return;
   
+  // If we are flying, keep (cellx,celly) up to date but don't trigger anything.
+  if (fmn_hero.action_in_progress==FMN_ACTION_BROOM) {
+    fmn_hero.cellx=cellx;
+    fmn_hero.celly=celly;
+    return;
+  }
+  
+  // Changed cell, normal case.
   if (!(fmn_hero.cellx&0xff00)&&!(fmn_hero.celly&0xff00)) {
     fmn_map_exit_cell(fmn_hero.cellx,fmn_hero.celly);
   }

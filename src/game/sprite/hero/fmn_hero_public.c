@@ -136,6 +136,11 @@ uint8_t fmn_hero_get_feather_dir() {
   return 0;
 }
 
+uint8_t fmn_hero_touching_ground() {
+  if (fmn_hero.action_in_progress==FMN_ACTION_BROOM) return 0;
+  return 1;
+}
+
 /* Deployed umbrella.
  */
  

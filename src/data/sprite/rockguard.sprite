@@ -1,0 +1,6 @@
+type rockguard
+image castlesprites
+tileid 0x60
+xform 0
+flags SOLID
+layer 0

@@ -1,10 +1,13 @@
 #include "game/sprite/hero/fmn_hero_internal.h"
+#include "game/model/fmn_map.h"
 
 /* Broom.
+ * While flying, we stop participating in enter_cell/exit_cell.
  */
  
 static void fmn_hero_broom_begin() {
   fmn_hero.action_in_progress=FMN_ACTION_BROOM;
+  fmn_map_exit_cell(fmn_hero.cellx,fmn_hero.celly);
 }
 
 static void fmn_hero_broom_end() {
@@ -13,6 +16,7 @@ static void fmn_hero_broom_end() {
     return;
   }
   fmn_hero.action_in_progress=0;
+  fmn_map_enter_cell(fmn_hero.cellx,fmn_hero.celly);
 }
 
 static void fmn_hero_broom_update() {
@@ -21,6 +25,7 @@ static void fmn_hero_broom_update() {
     // Check again every frame.
     if (!fmn_sprite_collide(0,0,fmn_hero.sprite,FMN_TILE_SOLID|FMN_TILE_HOLE,0,0)) {
       fmn_hero.action_in_progress=0;
+      fmn_map_enter_cell(fmn_hero.cellx,fmn_hero.celly);
     }
   }
 }

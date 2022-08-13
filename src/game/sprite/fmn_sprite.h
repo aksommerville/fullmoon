@@ -146,6 +146,7 @@ extern const struct fmn_sprtype fmn_sprtype_tablesaw;
 extern const struct fmn_sprtype fmn_sprtype_werewolf;
 extern const struct fmn_sprtype fmn_sprtype_door;
 extern const struct fmn_sprtype fmn_sprtype_portcullis;
+extern const struct fmn_sprtype fmn_sprtype_rockguard;
 
 /* Sprite resource.
  *****************************************************************/

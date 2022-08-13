@@ -7,7 +7,8 @@
 
 // If the three POI parameters are zero, the nozzle is always on.
 #define gstatep sprite->bv[0] /* 0 means "no switch", always on */
-#define proximity_enable sprite->bv[1] /* 0,1 */
+#define proximity_enable (sprite->bv[1]&1)
+#define gstate_reverse (sprite->bv[1]&2) /* with gstatep, treat 0 as the ON state */
 #define period sprite->bv[2] /* period in frames, or zero for always on. 120..200 seems good */
 
 #define stage sprite->bv[4]
@@ -116,7 +117,10 @@ static void _firenozzle_update(struct fmn_sprite *sprite) {
 
   // Check gstate first if in play -- a false here tells us everything we need to know.
   if (gstatep) {
-    if (!fmn_gstate[gstatep]) {
+    if (
+      (!fmn_gstate[gstatep]&&!gstate_reverse)||
+      (fmn_gstate[gstatep]&&gstate_reverse)
+    ) {
       stage=FMN_FIRENOZZLE_STAGE_OFF;
       return;
     }

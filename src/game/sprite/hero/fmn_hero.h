@@ -14,6 +14,7 @@ uint8_t fmn_hero_get_action();
 void fmn_hero_injure(struct fmn_sprite *assailant);
 struct fmn_sprite *fmn_hero_get_sprite();
 uint8_t fmn_hero_get_facedir();
+uint8_t fmn_hero_touching_ground();
 
 // Zero if feather not being used, otherwise a cardinal direction.
 uint8_t fmn_hero_get_feather_dir();
