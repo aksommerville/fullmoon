@@ -1,5 +1,6 @@
 #include "game/fullmoon.h"
 #include "game/fmn_data.h"
+#include "game/ui/fmn_play.h"
 #include "game/model/fmn_map.h"
 #include "game/sprite/hero/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
@@ -304,7 +305,7 @@ static void fmn_werewolf_begin_DEAD(struct fmn_sprite *sprite) {
   sprite->flags=0; // no more HAZARD
   
   fmn_game_set_state(FMN_STATE_WOLF_DEAD,FMN_STATE_WOLF_DEAD);
-  //TODO win game. let there be a few seconds' timeout, then some kind of modal "you are super" slide.
+  fmn_game_win();
   
   // The seven circles of a werewolf's soul.
   int16_t x=sprite->x+(sprite->w>>1);

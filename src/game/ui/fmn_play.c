@@ -1,5 +1,6 @@
 #include "game/fullmoon.h"
 #include "game/ui/fmn_play.h"
+#include "game/ui/fmn_gameover.h"
 #include "game/fmn_data.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"
@@ -28,6 +29,7 @@ static uint8_t bgbitsdirty=1;
 static uint16_t raintime=0;
 static uint16_t statebits=0;
 static uint16_t gameovertime=0; // if nonzero counts down to gameover
+static uint8_t gameoverdisposition;
 static uint16_t slomotime=0;
 static uint8_t blackout=0; // 0..255 how much faded out
 static int8_t dblackout=0; // -1,0,1 if blackout in progress
@@ -157,6 +159,7 @@ void fmn_play_update() {
   if (gameovertime) {
     if (!--gameovertime) {
       fmn_set_uimode(FMN_UIMODE_GAMEOVER);
+      fmn_gameover_set_disposition(gameoverdisposition);
     }
   }
 }
@@ -390,10 +393,16 @@ uint8_t fmn_game_cast_spell(const uint8_t *src,uint8_t srcc) {
  
 void fmn_game_end(int16_t x,int16_t y) {
   gameovertime=180;
+  gameoverdisposition=FMN_GAMEOVER_DISPOSITION_DEAD;
   if (x||y) {
     // Generate the seven circles of a witch's soul, and send them off to their reward.
     uint8_t i=7; while (i-->0) {
       struct fmn_sprite *sprite=fmn_sprite_new(&fmn_sprtype_soulball,0,x,y,i,7,0);
     }
   }
+}
+
+void fmn_game_win() {
+  gameovertime=180;
+  gameoverdisposition=FMN_GAMEOVER_DISPOSITION_VICTORY;
 }

@@ -11,6 +11,7 @@ static uint16_t clock=0;
 static uint8_t cursorp=0; // 0,1,2 = none,continue,quit
 static char password[FMN_PASSWORD_LENGTH];
 static int8_t password_error;
+static uint8_t disposition;
  
 /* Begin.
  */
@@ -21,6 +22,11 @@ void fmn_gameover_begin() {
   password_error=fmn_password_repr(password,fmn_game_get_state());
   // It would be a really big deal if password_error were ever nonzero.
   // We do what we can at least, if it's invalid just don't show a password.
+  disposition=FMN_GAMEOVER_DISPOSITION_DEAD;
+}
+
+void fmn_gameover_set_disposition(uint8_t d) {
+  disposition=d;
 }
 
 /* End.
@@ -70,8 +76,12 @@ void fmn_gameover_render(struct fmn_image *fb) {
   if (cursorframe==3) cursorsrcx+=5;
   else cursorsrcx+=cursorframe*5;
   
-  // Skull & crossbones.
-  fmn_blit(fb,FMN_NSCOORD(36-13,0),&uibits,FMN_NSCOORD(72,24),FMN_NSCOORD(26,22),0);
+  // Skull & crossbones or "The End".
+  if (disposition==FMN_GAMEOVER_DISPOSITION_VICTORY) {
+    fmn_blit(fb,FMN_NSCOORD(36-15,0),&uibits,FMN_NSCOORD(98,42),FMN_NSCOORD(30,22),0);
+  } else {
+    fmn_blit(fb,FMN_NSCOORD(36-13,0),&uibits,FMN_NSCOORD(72,24),FMN_NSCOORD(26,22),0);
+  }
   
   if (clock>=FMN_GAMEOVER_BLACKOUT_TIME) {
     // "Continue"

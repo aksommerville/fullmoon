@@ -19,5 +19,6 @@ void fmn_bgbits_dirty();
  * If nonzero (x,y) is the position in mm where the hero was; we may put some fireworks there.
  */
 void fmn_game_end(int16_t x,int16_t y);
+void fmn_game_win();
 
 #endif
