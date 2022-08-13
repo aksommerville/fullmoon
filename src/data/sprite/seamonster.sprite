@@ -1,0 +1,5 @@
+type seamonster
+image mainsprites
+tileid 0xc2
+flags 0
+layer 0

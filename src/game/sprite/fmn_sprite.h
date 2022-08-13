@@ -148,6 +148,7 @@ extern const struct fmn_sprtype fmn_sprtype_werewolf;
 extern const struct fmn_sprtype fmn_sprtype_door;
 extern const struct fmn_sprtype fmn_sprtype_portcullis;
 extern const struct fmn_sprtype fmn_sprtype_rockguard;
+extern const struct fmn_sprtype fmn_sprtype_seamonster;
 
 /* Sprite resource.
  *****************************************************************/

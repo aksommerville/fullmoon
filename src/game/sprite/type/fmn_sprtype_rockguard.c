@@ -1,4 +1,5 @@
 #include "game/fullmoon.h"
+#include "game/model/fmn_map.h"
 #include "game/sprite/hero/fmn_hero.h"
 #include "game/sprite/fmn_sprite.h"
 #include <math.h>
@@ -56,6 +57,14 @@ static void fmn_rockguard_check_wakeup(struct fmn_sprite *sprite) {
  */
  
 static void fmn_rockguard_generate_fireball(struct fmn_sprite *sprite) {
+  
+  int16_t scrollx,scrolly;
+  fmn_map_get_scroll_mm(&scrollx,&scrolly);
+  if (sprite->x<scrollx) return;
+  if (sprite->y<scrolly) return;
+  if (sprite->x>=scrollx+FMN_SCREENW_MM) return;
+  if (sprite->y>=scrolly+FMN_SCREENH_MM) return;
+  
   int16_t x=sprite->x+FMN_MM_PER_TILE+(FMN_MM_PER_TILE>>1);
   int16_t y=sprite->y+FMN_MM_PER_TILE*2+(FMN_MM_PER_TILE>>1);
   struct fmn_sprite *fireball=fmn_sprite_new(&fmn_sprtype_missile,0,x,y,0,0,0);

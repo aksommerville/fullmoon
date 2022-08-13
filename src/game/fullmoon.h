@@ -199,6 +199,7 @@ extern volatile uint8_t fmn_gstate[256];
 #define FMN_GSTATE_swamp_switch_2 11
 #define FMN_GSTATE_swamp_fire_1 12
 #define FMN_GSTATE_swamp_fire_2 13
+#define FMN_GSTATE_home_bridge 14
 
 #ifdef __cplusplus
   }

@@ -445,3 +445,36 @@ uint8_t fmn_map_get_region() {
 const struct fmn_map *fmn_map_get() {
   return fmn_map;
 }
+
+/* Iterate cell props for rect.
+ */
+ 
+int8_t fmn_map_for_cell_props_in_rect(
+  int16_t xmm,int16_t ymm,int16_t wmm,int16_t hmm,
+  int8_t (*cb)(uint8_t props,void *userdata),
+  void *userdata
+) {
+  if (!fmn_map) return 0;
+  if (!fmn_map->tileprops) return 0;
+  int16_t cola=xmm/FMN_MM_PER_TILE;
+  int16_t colz=(xmm+wmm-1)/FMN_MM_PER_TILE;
+  if (cola<0) cola=0;
+  if (colz>=fmn_map->w) colz=fmn_map->w-1;
+  if (cola>colz) return 0;
+  int16_t rowa=ymm/FMN_MM_PER_TILE;
+  int16_t rowz=(ymm+hmm-1)/FMN_MM_PER_TILE;
+  if (rowa<0) rowa=0;
+  if (rowz>=fmn_map->h) rowz=fmn_map->h-1;
+  if (rowa>rowz) return 0;
+  const uint8_t *rowp=fmn_map->v+rowa*fmn_map->w+cola;
+  int16_t row=rowa;
+  for (;row<=rowz;row++,rowp+=fmn_map->w) {
+    const uint8_t *p=rowp;
+    int16_t col=cola;
+    for (;col<=colz;col++,p++) {
+      int8_t err=cb(fmn_map->tileprops[*p],userdata);
+      if (err) return err;
+    }
+  }
+  return 0;
+}

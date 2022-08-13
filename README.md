@@ -26,9 +26,10 @@ Try `make run`
 - - [x] Don't trigger treadles while flying
 - - [x] win-game ui
 - - [x] Turn into a pumpkin
+- - [ ] Cosmetic feedback for animation spell. Grow flowers or something?
 - [ ] First pass populating the world
-- - [ ] home
-- - [ ] forest
+- - [x] home
+- - [x] forest
 - - [ ] caves
 - - [ ] desert
 - - [x] swamp

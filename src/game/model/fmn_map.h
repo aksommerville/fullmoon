@@ -60,4 +60,12 @@ uint16_t fmn_map_poi_search(const struct fmn_map *map,uint8_t x,uint8_t y);
 uint8_t fmn_map_get_region();
 const struct fmn_map *fmn_map_get();
 
+// Trigger your callback for each cell under the given rectangle, with the properties of that cell.
+// OOB cells are not reported.
+int8_t fmn_map_for_cell_props_in_rect(
+  int16_t xmm,int16_t ymm,int16_t wmm,int16_t hmm,
+  int8_t (*cb)(uint8_t props,void *userdata),
+  void *userdata
+);
+
 #endif
