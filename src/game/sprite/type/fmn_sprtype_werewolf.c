@@ -500,6 +500,16 @@ static uint8_t _werewolf_featherspell(struct fmn_sprite *sprite,const uint8_t *v
   return 1;
 }
 
+/* Re-animate.
+ */
+ 
+static void _werewolf_animate(struct fmn_sprite *sprite) {
+  if (stage==FMN_WEREWOLF_STAGE_DEAD) {
+    fmn_game_set_state(FMN_STATE_WOLF_DEAD,0);
+    fmn_werewolf_begin_WALK(sprite);
+  }
+}
+
 /* Type definition.
  */
  
@@ -509,4 +519,5 @@ const struct fmn_sprtype fmn_sprtype_werewolf={
   .update=_werewolf_update,
   .render=_werewolf_render,
   .featherspell=_werewolf_featherspell,
+  .spell_animate=_werewolf_animate,
 };

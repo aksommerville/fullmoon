@@ -43,6 +43,7 @@ extern struct fmn_hero {
   uint8_t walkframe;
   uint8_t walkframeclock;
   uint16_t pushc; // Counts up while walking but not moving.
+  uint8_t form;
   
   uint8_t action;
   uint8_t action_in_progress; // action ID if in progress. (not necessarily matching (action) or (button)).

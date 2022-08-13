@@ -18,20 +18,6 @@ void fmn_hero_update_facedir() {
   }
 
   // Change to agree with input state.
-  // Prefer showing a horizontal face; they are prettier.
-  #if 0 // ...actually I want to always face the direction of most recent motion, to aid with triggering the firewall.
-  if (fmn_hero.indx<0) {
-    fmn_hero.facedir=FMN_DIR_W;
-    fmn_hero.xfacedir=FMN_DIR_W;
-  } else if (fmn_hero.indx>0) {
-    fmn_hero.facedir=FMN_DIR_E;
-    fmn_hero.xfacedir=FMN_DIR_E;
-  } else if (fmn_hero.indy<0) {
-    fmn_hero.facedir=FMN_DIR_N;
-  } else if (fmn_hero.indy>0) {
-    fmn_hero.facedir=FMN_DIR_S;
-  }
-  #else
   switch (fmn_hero.last_motion_dir) {
     case FMN_DIR_S: {
         if (fmn_hero.indy>0) fmn_hero.facedir=FMN_DIR_S;
@@ -57,7 +43,6 @@ void fmn_hero_update_facedir() {
   if (fmn_hero.facedir&(FMN_DIR_W|FMN_DIR_E)) {
     fmn_hero.xfacedir=fmn_hero.facedir&(FMN_DIR_W|FMN_DIR_E);
   }
-  #endif
 }
 
 /* Some conveniences for rendering.
@@ -73,6 +58,30 @@ void fmn_hero_update_facedir() {
 #define TILEPX(rx,ry,tileid,xform) fmn_blit_tile(dst,dstx+(rx),dsty+(ry),&mainsprites,tileid,xform);
 #define DECALPX(rx,ry,srcx,srcy,w,h,xform) { \
   fmn_blit(dst,dstx+(rx),dsty+(ry),&mainsprites,FMN_NSCOORD(srcx,srcy),FMN_NSCOORD(w,h),xform); \
+}
+
+/* Turned into a pumpkin.
+ */
+ 
+static void fmn_hero_render_pumpkin(struct fmn_image *dst,int16_t dstx,int16_t dsty) {
+  if (fmn_hero.indx||fmn_hero.indy) {
+    fmn_hero.walkframeclock++;
+    if (fmn_hero.walkframeclock>=6) {
+      fmn_hero.walkframeclock=0;
+      fmn_hero.walkframe++;
+      if (fmn_hero.walkframe>=4) {
+        fmn_hero.walkframe=0;
+      }
+    }
+    switch (fmn_hero.walkframe) {
+      case 0: DECAL(-1,-1,112,0,4,8,0) DECAL(2,-3,112,0,4,8,0) break;
+      case 2: DECAL(-1,-3,112,0,4,8,0) DECAL(2,-1,112,0,4,8,0) break;
+      case 1: case 3: DECAL(-1,-1,112,0,4,8,0) DECAL(2,-1,112,0,4,8,0) break;
+    }
+  } else {
+    TILE(-1,-1,0x0e,0)
+  }
+  TILE(-1,-3,0x0d,0)
 }
 
 /* Flying on the broom.
@@ -297,6 +306,9 @@ void fmn_hero_render(struct fmn_image *dst,int16_t scrollx,int16_t scrolly,struc
   int16_t dsty=((sprite->y-scrolly)*FMN_TILESIZE)/FMN_MM_PER_TILE;
   
   // Some states do their own thing entirely.
+  switch (fmn_hero.form) {
+    case FMN_HERO_FORM_PUMPKIN: fmn_hero_render_pumpkin(dst,dstx,dsty); return;
+  }
   switch (fmn_hero.action_in_progress) {
     case FMN_ACTION_BROOM: fmn_hero_render_broom(dst,dstx,dsty); return;
     case FMN_ACTION_WAND: fmn_hero_render_wand(dst,dstx,dsty); return;

@@ -114,6 +114,7 @@ struct fmn_sprtype {
   void (*push)(struct fmn_sprite *sprite,int8_t dx,int8_t dy); // if implemented, you get notified when the hero pushes you
   uint8_t (*featherspell)(struct fmn_sprite *sprite,const uint8_t *v,uint8_t c); // nonzero if accepted, ie blank caller's state. Check the tail.
   void (*spell_open)(struct fmn_sprite *sprite); // must have OPENABLE flag
+  void (*spell_animate)(struct fmn_sprite *sprite); // no flag required; this hook is the flag
   
   // Required.
   // Note that scroll is in mm -- not tiles, not pixels.

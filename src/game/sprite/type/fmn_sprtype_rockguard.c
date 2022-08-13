@@ -130,7 +130,7 @@ static void _rockguard_update(struct fmn_sprite *sprite) {
   }
 }
 
-/* Feather.
+/* Spells.
  */
  
 static uint8_t _rockguard_featherspell(struct fmn_sprite *sprite,const uint8_t *v,uint8_t c) {
@@ -140,6 +140,11 @@ static uint8_t _rockguard_featherspell(struct fmn_sprite *sprite,const uint8_t *
   charmed=1;
   breathing=0;
   return 1;
+}
+
+static void _rockguard_animate(struct fmn_sprite *sprite) {
+  // "Coming to life" and "waking up" are basically the same thing, why not.
+  awake=1;
 }
 
 /* Render.
@@ -214,4 +219,5 @@ const struct fmn_sprtype fmn_sprtype_rockguard={
   .update=_rockguard_update,
   .featherspell=_rockguard_featherspell,
   .render=_rockguard_render,
+  .spell_animate=_rockguard_animate,
 };

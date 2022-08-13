@@ -203,8 +203,6 @@ static void fmn_hero_umbrella_update() {
     if (fmn_hero.umbrellatime==FMN_HERO_UMBRELLA_TIME) {
       // sound effect? umbrella just popped open.
     }
-  } else {
-    //TODO deflect projectiles. does that happen here?
   }
 }
 
@@ -224,6 +222,10 @@ void fmn_hero_begin_action() {
     // Reject new action because one is still in progress.
     // eg flying over a hole, you release A but the action continues until you reach solid ground.
     // You can select a new action in that state, but you can't use it yet.
+    return;
+  }
+  if (fmn_hero.form!=FMN_HERO_FORM_NORMAL) {
+    // No actions when transformed.
     return;
   }
   switch (fmn_hero.action) {

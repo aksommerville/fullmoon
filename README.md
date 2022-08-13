@@ -18,13 +18,14 @@ Try `make run`
 - [ ] Finish all dev for Thumby
 - - [ ] Giant spider
 - - [ ] lots more sprites
-- - [ ] Spell of Animation
+- - [x] Spell of Animation
 - - [ ] Spell of Invisibility
 - - [ ] fmn_password_check_business_rules(): reenable once ready
 - - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
 - - [x] transition effect for teleport spells
 - - [x] Don't trigger treadles while flying
-- - [ ] win-game ui
+- - [x] win-game ui
+- - [x] Turn into a pumpkin
 - [ ] First pass populating the world
 - - [ ] home
 - - [ ] forest
@@ -72,6 +73,7 @@ Try `make run`
 HWDDBD home () ()
 FURRRT home (feather,wand,broom,umbrella) ()
 RE3QT1 castle (feather,wand,broom,umbrella) (basement door)
+RG1ZT1 castle (feather,wand,broom,umbrella) (door,wolf dead)
 VU3QRS caves (feather,wand,broom,umbrella) (basement door)
 XUDDRC caves (feather) ()
 BEBTT3 desert (feather,wand,broom) ()

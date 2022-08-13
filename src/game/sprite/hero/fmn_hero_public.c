@@ -16,6 +16,7 @@ void fmn_hero_reset() {
   fmn_hero.indx=0;
   fmn_hero.indy=0;
   fmn_hero.inbutton=0;
+  fmn_hero.form=FMN_HERO_FORM_NORMAL;
 }
 
 /* Receive input.
@@ -141,6 +142,10 @@ uint8_t fmn_hero_touching_ground() {
   return 1;
 }
 
+uint8_t fmn_hero_get_form() {
+  return fmn_hero.form;
+}
+
 /* Deployed umbrella.
  */
  
@@ -169,4 +174,23 @@ void fmn_hero_injure(struct fmn_sprite *assailant) {
     fmn_hero.sprite=0;
   }
   fmn_game_end(x,y);
+}
+
+/* Transform.
+ */
+ 
+void fmn_hero_set_form(uint8_t form) {
+  if (form==fmn_hero.form) return;
+  fmn_hero_end_action();
+  if (fmn_hero.action_in_progress) return;
+  fmn_hero.form=form;
+  int16_t x=fmn_hero.sprite->x+(fmn_hero.sprite->w>>1);
+  int16_t y=fmn_hero.sprite->y+(fmn_hero.sprite->h>>1);
+  uint8_t i=7; while (i-->0) {
+    struct fmn_sprite *sprite=fmn_sprite_new(&fmn_sprtype_soulball,0,x,y,i,7,0);
+  }
+}
+
+void fmn_hero_become_pumpkin() {
+  fmn_hero_set_form(FMN_HERO_FORM_PUMPKIN);
 }

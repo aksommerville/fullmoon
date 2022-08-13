@@ -345,7 +345,19 @@ static void fmn_spell_rain() {
 }
 
 static void fmn_spell_animate() {
-  fprintf(stderr,"TODO %s\n",__func__);//TODO
+  int16_t scrollx,scrolly;
+  fmn_map_get_scroll_mm(&scrollx,&scrolly);
+  struct fmn_sprite **p=fmn_spritev;
+  uint16_t i=fmn_spritec;
+  for (;i-->0;p++) {
+    struct fmn_sprite *sprite=*p;
+    if (!sprite->type->spell_animate) continue;
+    if (sprite->x>=scrollx+FMN_SCREENW_MM) continue;
+    if (sprite->y>=scrolly+FMN_SCREENH_MM) continue;
+    if (sprite->x+sprite->w<=scrollx) continue;
+    if (sprite->y+sprite->h<=scrolly) continue;
+    sprite->type->spell_animate(sprite);
+  }
 }
 
 static void fmn_spell_trailhead() {

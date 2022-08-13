@@ -33,4 +33,11 @@ uint8_t fmn_hero_get_deflector(int16_t *x_or_y);
 void fmn_hero_adjust_position(int16_t dxmm,int16_t dymm);
 void fmn_hero_force_position(int16_t xmm,int16_t ymm);
 
+uint8_t fmn_hero_get_form();
+void fmn_hero_set_form(uint8_t form);
+#define FMN_HERO_FORM_NORMAL 0
+#define FMN_HERO_FORM_PUMPKIN 1
+
+void fmn_hero_become_pumpkin();
+
 #endif
