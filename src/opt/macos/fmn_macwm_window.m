@@ -63,12 +63,17 @@
 
   NSRect bounds=NSMakeRect((screenw>>1)-(width>>1),(screenh>>1)-(height>>1),width,height);
 
-  NSUInteger styleMask=NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask;
+  NSWindowStyleMask styleMask=
+    NSWindowStyleMaskTitled|
+    NSWindowStyleMaskClosable|
+    NSWindowStyleMaskMiniaturizable|
+    NSWindowStyleMaskResizable|
+  0;
   
   FmnWindow *window=[[FmnWindow alloc]
     initWithContentRect:bounds
     styleMask:styleMask
-    backing:NSBackingStoreNonretained
+    backing:NSBackingStoreBuffered
     defer:0
     screen:0
   ];
@@ -152,7 +157,7 @@
 
 -(void)keyDown:(NSEvent*)event {
 
-  if (event.modifierFlags&NSCommandKeyMask) {
+  if (event.modifierFlags&NSEventModifierFlagCommand) {
     return;
   }
 

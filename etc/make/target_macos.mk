@@ -5,7 +5,7 @@ macos_OUTDIR:=out/macos
 
 macos_OPT_ENABLE:=intf macos minisyni
 
-macos_CCWARN:=-Werror -Wimplicit -Wno-parentheses -Wno-comment -Wno-deprecated-declarations
+macos_CCWARN:=-Werror -Wimplicit -Wno-parentheses -Wno-comment 
 macos_CCINC:=-I/usr/include/libdrm
 macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE)) -DFMN_IMAGE_SET_$(macos_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(macos_FBFMT)=1
 macos_CC:=gcc -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)

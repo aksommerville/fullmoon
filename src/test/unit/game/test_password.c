@@ -66,6 +66,7 @@ static int test_password_for_all_states() {
   FMN_ASSERT_INTS(resultv[1],0,"Expected no FMN_PASSWORD_LOCATION, as fmn_map_validate_region is stubbed for test purposes")
   FMN_ASSERT_INTS(resultv[4],0,"Expected no FMN_PASSWORD_BUSINESS. Did you add a rule? Can it be more specific?") // ok to change this assumption
   FMN_ASSERT_INTS_OP(resultv[0],<,0x1000,"Expected less than 1/16 of possible states to yield a valid password. It's OK to bump this number.")
+  // This test will fail while our business rule validation is disabled (you'll see 65536 valid passwords), that's ok.
   
   if (0) { // dump the histogram of results
     fprintf(stderr,"fmn_password_repr:\n");

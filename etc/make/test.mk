@@ -5,7 +5,7 @@
 test_MIDDIR:=mid/test
 test_OUTDIR:=out/test
 
-test_CC:=gcc -c -MMD -O0 -Werror -Wimplicit -Isrc -Wno-parentheses
+test_CC:=gcc -c -MMD -O0 -Werror -Wimplicit -Isrc -Wno-parentheses -Wno-comment
 test_LD:=gcc
 test_LDPOST:=
 

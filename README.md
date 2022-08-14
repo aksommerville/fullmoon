@@ -47,7 +47,7 @@ Try `make run`
 - - [ ] machid
 - - [ ] macaudio
 - - [ ] macos: Can we drop OpenGL?
-- - [ ] macos: review deprecated WM functions
+- - [x] macos: review deprecated WM functions
 - - [ ] mswin
 - - [ ] web: Clean up wrapper
 - - [ ] web: Reduce exported symbols

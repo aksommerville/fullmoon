@@ -25,6 +25,7 @@ tiny_LIBSROOT:=$(wildcard ~/Arduino/libraries)
 tiny_MENU_BIN:=etc/ArcadeMenu.ino.bin
 tiny_BUILDER:=$(tiny_IDEROOT)/arduino-builder
 
+# https://github.com/WebAssembly/wasi-sdk
 web_WASI_SDK:=/home/andy/proj/thirdparty/wasi-sdk/wasi-sdk-16.0
 web_IMAGE_SET:=24c
 web_FBFMT:=rgba8888
