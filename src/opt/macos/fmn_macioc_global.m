@@ -90,6 +90,11 @@ static int fmn_macioc_configure(int argc,char **argv) {
   fmn_macioc.argc=argc;
   fmn_macioc.argv=argv;
 
+  #if FMN_USE_inmap
+    fmn_macioc.inmap=fmn_inmap_new();
+    //TODO config file
+  #endif
+
   return 0;
 }
 
@@ -177,7 +182,11 @@ void fmn_platform_send_framebuffer(const void *fb) {
 }
 
 uint16_t fmn_platform_read_input() {
-  return fmn_macioc.input;
+  return fmn_macioc.input
+  #if FMN_USE_inmap
+    |fmn_inmap_get_state(fmn_macioc.inmap)
+  #endif
+  ;
 }
 
 /* Final performance report.

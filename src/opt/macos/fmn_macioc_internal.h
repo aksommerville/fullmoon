@@ -5,6 +5,10 @@
 #include "opt/intf/intf.h"
 #include <string.h>
 
+#if FMN_USE_inmap
+  #include "opt/inmap/fmn_inmap.h"
+#endif
+
 #ifdef __OBJC__
 #include <Cocoa/Cocoa.h>
 @interface AKAppDelegate : NSObject <NSApplicationDelegate> {
@@ -29,6 +33,10 @@ extern struct fmn_macioc {
   int framec;
   int64_t frametime;
   int64_t nexttime;
+
+  #if FMN_USE_inmap
+    struct fmn_inmap *inmap;
+  #endif
 } fmn_macioc;
 
 void fmn_macioc_abort(const char *fmt,...);

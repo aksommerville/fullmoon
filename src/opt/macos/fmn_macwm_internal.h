@@ -45,7 +45,7 @@ typedef void FmnWindow;
 #define FMN_MACWM_KEYS_DOWN_LIMIT 8
 
 // No performance penalty or anything for a huge scale, but i want it small so i can read the console
-#define FMN_MACOS_MAX_INITIAL_SCALE 8
+#define FMN_MACOS_MAX_INITIAL_SCALE 3
 
 extern struct fmn_macwm {
   FmnWindow *window;

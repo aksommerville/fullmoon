@@ -5,8 +5,8 @@
  * Link: -framework IOKit
  */
 
-#ifndef PS_MACHID_H
-#define PS_MACHID_H
+#ifndef FMN_MACHID_H
+#define FMN_MACHID_H
 
 /* All delegate functions are optional.
  * All except test_device can return <0 for error.
@@ -41,10 +41,6 @@ struct fmn_machid_delegate {
 int fmn_machid_init(const struct fmn_machid_delegate *delegate);
 
 void fmn_machid_quit();
-
-extern const struct fmn_machid_delegate fmn_machid_default_delegate;
-struct fmn_input_provider *fmn_machid_new_provider(); // => WEAK
-void fmn_machid_destroy_global_provider();
 
 /* Trigger our private run loop mode and return any errors gathered during it.
  */

@@ -1,4 +1,5 @@
 #include "fmn_machid.h"
+#include "opt/intf/intf.h" /* only needed for input_devid_new(); ok to remove if you've copied this code */
 #include <stdio.h>
 #include <IOKit/hid/IOHIDLib.h>
 
@@ -79,6 +80,9 @@ static int fmn_machid_dev_search_obj(IOHIDDeviceRef obj) {
 }
 
 static int fmn_machid_devid_unused() {
+  // For Full Moon:
+  return input_devid_new();
+#if 0 // The original standalone algorithm:
   if (fmn_machid.devc<1) return 1;
   
   /* Most cases: return one more than the highest used ID. */
@@ -92,6 +96,7 @@ static int fmn_machid_devid_unused() {
   int devid=1;
   for (i=0;i<fmn_machid.devc;i++) if (fmn_machid.devv[i].devid==devid) { devid++; i=-1; }
   return devid;
+#endif
 }
 
 /* Insert device to global list.
@@ -227,7 +232,7 @@ static int fmn_machid_dev_assign_aux_btnid(struct fmn_machid_dev *dev) {
       fprintf(stderr,"Ignoring hat %d due to no available aux ID.\n",btn->btnid);
       btn->btnid_aux=0;
     } else {
-      fprintf(stderr,"Assigned fake btnid %d for hat switch %d.\n",btn->btnid_aux,btn->btnid);
+      //fprintf(stderr,"Assigned fake btnid %d for hat switch %d.\n",btn->btnid_aux,btn->btnid);
     }
   }
   return 0;
@@ -279,7 +284,7 @@ static int fmn_machid_dev_apply_IOHIDElement(struct fmn_machid_dev *dev,IOHIDEle
     if (v<lo) v=lo; else if (v>hi) v=hi;
   }
 
-  fprintf(stderr,"  cookie=%d, range=%d..%d, value=%d, usage=%04x%04x\n",(int)cookie,(int)lo,(int)hi,v,usagepage,usage);
+  //fprintf(stderr,"  cookie=%d, range=%d..%d, value=%d, usage=%04x%04x\n",(int)cookie,(int)lo,(int)hi,v,usagepage,usage);
 
   fmn_machid_dev_define_button(dev,cookie,(usagepage<<16)|usage,lo,hi,v);
 
@@ -298,7 +303,7 @@ static int fmn_machid_dev_handshake(struct fmn_machid_dev *dev,int vid,int pid,i
   dev->prodname=fmn_machid_dev_get_string(dev,CFSTR(kIOHIDProductKey));
   dev->serial=fmn_machid_dev_get_string(dev,CFSTR(kIOHIDSerialNumberKey));
 
-  fprintf(stderr,"mfr='%s' prod='%s' serial='%s'...\n",dev->mfrname,dev->prodname,dev->serial);
+  //fprintf(stderr,"mfr='%s' prod='%s' serial='%s'...\n",dev->mfrname,dev->prodname,dev->serial);
 
   /* Get limits and current value for each reported element. */
   CFArrayRef elements=IOHIDDeviceCopyMatchingElements(dev->obj,0,0);
@@ -371,7 +376,7 @@ static void fmn_machid_axis_values_from_hat(int *x,int *y,int v) {
     case 6: *x=-1; break;
     case 7: *x=-1; *y=-1; break;
   }
-  fprintf(stderr,"hat(%d) => (%+d,%+d)\n",v,*x,*y);
+  //fprintf(stderr,"hat(%d) => (%+d,%+d)\n",v,*x,*y);
 }
 
 static void fmn_machid_cb_InputValue(void *context,IOReturn result,void *sender,IOHIDValueRef value) {
@@ -391,7 +396,7 @@ static void fmn_machid_cb_InputValue(void *context,IOReturn result,void *sender,
 
   /* Clamp value and confirm it actually changed. */
   CFIndex v=IOHIDValueGetIntegerValue(value);
-  fprintf(stderr,"%d[%d..%d]\n",(int)v,btn->lo,btn->hi);
+  //fprintf(stderr,"%d[%d..%d]\n",(int)v,btn->lo,btn->hi);
   if (v<btn->lo) v=btn->lo;
   else if (v>btn->hi) v=btn->hi;
   if (v==btn->value) return;

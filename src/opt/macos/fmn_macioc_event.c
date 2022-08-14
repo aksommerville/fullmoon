@@ -111,26 +111,45 @@ int fmn_macioc_cb_pcm(struct audio_driver *driver,int16_t *v,int c) {
   return 0;
 }
 
-/* Joystick events. TODO
+/* Joystick events.
  */
-  
+
+#if FMN_USE_inmap
+
+static int fmn_macioc_cb_devcap(struct input_driver *driver,int devid,int btnid,int hidusage,int value,int lo,int hi,void *userdata) {
+  return fmn_inmap_add_button(fmn_macioc.inmap,devid,btnid,hidusage,value,lo,hi);
+}
+
 int fmn_macioc_cb_connect(struct input_driver *driver,int devid) {
-  fprintf(stderr,"TODO %s %d\n",__func__,devid);
+  int vid,pid;
+  const char *name=input_device_get_ids(&vid,&pid,driver,devid);
+  if (fmn_inmap_connect(fmn_macioc.inmap,devid)<0) return -1;
+  if (fmn_inmap_set_ids(fmn_macioc.inmap,devid,vid,pid,name)<0) return -1;
+  if (input_device_iterate(driver,devid,fmn_macioc_cb_devcap,0)<0) return -1;
+  if (fmn_inmap_device_ready(fmn_macioc.inmap,devid)<0) return -1;
   return 0;
 }
 
 int fmn_macioc_cb_disconnect(struct input_driver *driver,int devid) {
-  fprintf(stderr,"TODO %s %d\n",__func__,devid);
-  return 0;
+  return fmn_inmap_disconnect(fmn_macioc.inmap,devid);
 }
 
 int fmn_macioc_cb_event(struct input_driver *driver,int devid,int btnid,int value) {
-  fprintf(stderr,"TODO %s %d.0x%08x=%d\n",__func__,devid,btnid,value);
-  return 0;
+  return fmn_inmap_event(fmn_macioc.inmap,devid,btnid,value);
 }
 
+#else
+
+// Without inmap, we won't bother using generic input.
+
+int fmn_macioc_cb_connect(struct input_driver *driver,int devid) { return 0; }
+int fmn_macioc_cb_disconnect(struct input_driver *driver,int devid) { return 0; }
+int fmn_macioc_cb_event(struct input_driver *driver,int devid,int btnid,int value) { return 0; }
+
+#endif
+
 int fmn_macioc_cb_premapped_event(struct input_driver *driver,uint16_t btnid,int value) {
-  fprintf(stderr,"%s 0x%04x=%d\n",__func__,btnid,value);
+  //fprintf(stderr,"%s 0x%04x=%d\n",__func__,btnid,value);
   if (value) fmn_macioc.input|=btnid;
   else fmn_macioc.input&=~btnid;
   return 0;
