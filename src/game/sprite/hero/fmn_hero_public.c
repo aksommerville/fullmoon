@@ -12,6 +12,7 @@ void fmn_hero_reset() {
   fmn_hero.featherspellc=0;
   fmn_hero.spellc=0;
   fmn_hero.walkspeed=0;
+  fmn_hero.action=0;
   fmn_hero.action_in_progress=0;
   fmn_hero.indx=0;
   fmn_hero.indy=0;

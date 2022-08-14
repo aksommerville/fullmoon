@@ -210,6 +210,9 @@ extern volatile uint8_t fmn_gstate[256];
 #define FMN_GSTATE_castle_switch_3 22
 #define FMN_GSTATE_castle_switch_4 23
 
+//XXX Troubleshooting without a serial link...
+void fmn_emergency_printf(const char *fmt,...);
+
 #ifdef __cplusplus
   }
 #endif

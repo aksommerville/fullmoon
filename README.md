@@ -27,7 +27,8 @@ Try `make run`
 - - [x] win-game ui
 - - [x] Turn into a pumpkin
 - - [ ] Cosmetic feedback for animation spell. Grow flowers or something?
-- - [ ] tablesaw should not draw its own track, make that part of the map. (see conflict w firenozzle_s in castle)
+- - [x] tablesaw should not draw its own track, make that part of the map. (see conflict w firenozzle_s in castle)
+- - [ ] "Quit" then "Begin" after dying didn't drop the hero's action.
 - [x] First pass populating the world
 - - [x] home
 - - [x] forest

@@ -1,6 +1,7 @@
 #include "game/fullmoon.h"
 #include "game/ui/fmn_play.h"
 #include "game/ui/fmn_gameover.h"
+#include "game/ui/fmn_pause.h"
 #include "game/fmn_data.h"
 #include "game/model/fmn_map.h"
 #include "game/model/fmn_proximity.h"
@@ -221,6 +222,58 @@ static void render_rain(struct fmn_image *fb) {
   }
 }
 
+/* XXX emergency printf
+ * I'll leave this here in case we need it again.
+ */
+#include <stdarg.h>
+static uint8_t fmn_emergency_printf_storage[72*2]={0};
+static struct fmn_image fmn_emergency_printf_image={
+  .v=fmn_emergency_printf_storage,
+  .w=72,
+  .h=8,
+  .stride=18,
+  .fmt=FMN_IMGFMT_ya11,
+  .writeable=1,
+};
+void fmn_emergency_printf(const char *fmt,...) {
+  fmn_image_clear(&fmn_emergency_printf_image);
+  fmn_image_fill_rect(&fmn_emergency_printf_image,0,0,72,5,1);
+  int16_t dstx=0;
+  #define PRINTCH(_ch) { \
+    uint8_t ch=_ch; \
+    if ((ch==0x20)||(ch==',')) dstx+=4; \
+    else if ((ch>=0x30)&&(ch<=0x39)) { \
+      fmn_blit(&fmn_emergency_printf_image,dstx,0,&uibits,(ch-0x30)*3,123,3,5,0); \
+      dstx+=4; \
+    } else if ((ch>=0x41)&&(ch<=0x5a)) { \
+      fmn_blit(&fmn_emergency_printf_image,dstx,0,&uibits,(ch-0x41)*3+30,123,3,5,0); \
+      dstx+=4; \
+    } else if ((ch>=0x61)&&(ch<=0x7a)) { \
+      fmn_blit(&fmn_emergency_printf_image,dstx,0,&uibits,(ch-0x61)*3+30,123,3,5,0); \
+      dstx+=4; \
+    } \
+  }
+  va_list vargs;
+  va_start(vargs,fmt);
+  for (;*fmt;fmt++) {
+    if (*fmt=='%') {
+      fmt++;
+      switch (*fmt) {
+        case 'd': {
+            int n=va_arg(vargs,int);
+            if (n<0) { PRINTCH('-') n=-n; }
+            if (n>=1000) PRINTCH('0'+(n/1000)%10)
+            if (n>= 100) PRINTCH('0'+(n/ 100)%10)
+            if (n>=  10) PRINTCH('0'+(n/  10)%10)
+            PRINTCH('0'+n%10)
+          } continue;
+      }
+    }
+    PRINTCH(*fmt)
+  }
+  #undef PRINTCH
+}
+
 /* Render.
  */
  
@@ -251,6 +304,8 @@ void fmn_play_render(struct fmn_image *fb) {
   if (blackout) {
     fmn_image_blackout(fb,blackout);
   }
+  
+  //fmn_blit(fb,0,35,&fmn_emergency_printf_image,0,0,72,5,0);
 }
 
 /* Reset game.
@@ -266,6 +321,7 @@ void fmn_game_reset() {
   memset((void*)fmn_gstate,0,sizeof(fmn_gstate));
   fmn_map_reset();
   fmn_hero_reset();
+  fmn_hero_set_action(fmn_pause_get_verified_action());
 }
 
 void fmn_game_reset_with_state(uint16_t state) {
