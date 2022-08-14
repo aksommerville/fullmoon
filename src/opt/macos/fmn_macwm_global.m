@@ -95,19 +95,6 @@ int fmn_macwm_toggle_fullscreen() {
   return fmn_macwm.window->fullscreen^1;
 }
 
-/* OpenGL frame control.
- */
-
-int fmn_macwm_begin_video() {
-  if (!fmn_macwm.window) return -1;
-  return [fmn_macwm.window beginFrame];
-}
-
-int fmn_macwm_end_video() {
-  if (!fmn_macwm.window) return -1;
-  return [fmn_macwm.window endFrame];
-}
-
 /* Ridiculous hack to ensure key-up events.
  * Unfortunately, during a fullscreen transition we do not receive keyUp events.
  * If the main input is a keyboard, and the user strikes a key to toggle fullscreen,

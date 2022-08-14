@@ -46,7 +46,7 @@ Try `make run`
 - - [ ] linux: PulseAudio
 - - [ ] machid
 - - [ ] macaudio
-- - [ ] macos: Can we drop OpenGL?
+- - [x] macos: Can we drop OpenGL?
 - - [x] macos: review deprecated WM functions
 - - [ ] mswin
 - - [ ] web: Clean up wrapper

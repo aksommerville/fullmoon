@@ -1,5 +1,88 @@
 #include "fmn_macwm_internal.h"
 
+@interface FmnView : NSView {
+@public
+  CGDataProviderRef provider;
+  CGColorSpaceRef colorspace;
+  const void *fb; // from caller
+  int layerInit;
+}
+@end
+
+static const void *fmnview_cb_getBytePointer(void *userdata) {
+  FmnView *view=userdata;
+  return view->fb;
+}
+
+static size_t fmnview_cb_getBytesAtPosition(void *userdata,void *v,off_t p,size_t c) {
+  FmnView *view=userdata;
+  size_t limit=FMN_FBW*FMN_FBH*4;
+  if (p>limit-c) c=limit-p;
+  memcpy((uint8_t*)v+p,(uint8_t*)(view->fb)+p,c);
+  return c;
+}
+
+static void fmnview_cb_releaseBytePointer(void *userdata,const void *fb) {
+}
+
+@implementation FmnView
+
+-(void)dealloc {
+  if (provider) CGDataProviderRelease(provider);
+  if (colorspace) CGColorSpaceRelease(colorspace);
+  [super dealloc];
+}
+
+-(id)init {
+  [super init];
+  int storage_size=FMN_FBW*FMN_FBH*4;
+  
+  CGDataProviderDirectCallbacks providercb={
+    .getBytePointer=fmnview_cb_getBytePointer,
+    .getBytesAtPosition=fmnview_cb_getBytesAtPosition,
+    .releaseBytePointer=fmnview_cb_releaseBytePointer,
+  };
+  provider=CGDataProviderCreateDirect(self,storage_size,&providercb);
+  
+  colorspace=CGColorSpaceCreateDeviceRGB();
+
+  return self;
+}
+
+-(BOOL)wantsLayer { return 1; }
+-(BOOL)wantsUpdateLayer { return 1; }
+-(BOOL)canDrawSubviewsIntoLayer { return 0; }
+
+-(void)updateLayer {
+  if (!fb) return;
+
+  if (!layerInit) {
+    self.layer.contentsGravity=kCAGravityResizeAspect;
+    // Set the background color to black. Seriously? We have to do all this?
+    CGFloat blackv[4]={0.0f,0.0f,0.0f,1.0f};
+    CGColorRef black=CGColorCreate(colorspace,blackv);
+    self.layer.backgroundColor=black;
+    CGColorRelease(black);
+    layerInit=1;
+  }
+
+  CGImageRef img=CGImageCreate(
+    FMN_FBW,FMN_FBH,
+    8,32,FMN_FBW*4,
+    colorspace,
+    kCGBitmapByteOrderDefault, // CGBitmapInfo
+    provider,
+    0, // decode
+    0, // interpolate
+    kCGRenderingIntentDefault
+  );
+  if (!img) return;
+  
+  self.layer.contents=(id)img;
+  CGImageRelease(img);
+}
+@end
+
 @implementation FmnWindow
 
 /* Lifecycle.
@@ -53,6 +136,7 @@
   int scaley=(screenh-margin)/height;
   int scale=(scalex<scaley)?scalex:scaley;
   if (scale<1) scale=1;
+  else if (scale>FMN_MACOS_MAX_INITIAL_SCALE) scale=FMN_MACOS_MAX_INITIAL_SCALE;
   width*=scale;
   height*=scale;
 
@@ -98,7 +182,7 @@
     window.title=[NSString stringWithUTF8String:title];
   }
 
-  if ([window setupOpenGL]<0) {
+  if (!(window.contentView=[FmnView new])) {
     [window release];
     return 0;
   }
@@ -108,48 +192,6 @@
   }
   
   return window;
-}
-
-/* Create OpenGL context.
- */
-
--(int)setupOpenGL {//TODO can we do this without OpenGL?
-
-  NSOpenGLPixelFormatAttribute attrs[]={
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAColorSize,8,
-    NSOpenGLPFAAlphaSize,0,
-    NSOpenGLPFADepthSize,0,
-    0
-  };
-  NSOpenGLPixelFormat *pixelFormat=[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
-  NSRect viewRect=NSMakeRect(0.0,0.0,self.frame.size.width,self.frame.size.height);
-  NSOpenGLView *fullScreenView=[[NSOpenGLView alloc] initWithFrame:viewRect pixelFormat:pixelFormat];
-  [self setContentView:fullScreenView];
-  [pixelFormat release];
-  [fullScreenView release];
-
-  context=((NSOpenGLView*)self.contentView).openGLContext;
-  if (!context) return -1;
-  [context retain];
-  [context setView:self.contentView];
-  
-  [context makeCurrentContext];
-
-  return 0;
-}
-
-/* Frame control.
- */
- 
--(int)beginFrame {
-  [context makeCurrentContext];
-  return 0;
-}
-
--(int)endFrame {
-  [context flushBuffer];
-  return 0;
 }
 
 /* Receive keyboard events.
@@ -362,3 +404,10 @@ static void fmn_macwm_event_mouse_button(int btnid,int value) {
 }
 
 @end
+
+void fmn_macwm_replace_fb(const void *src) {
+  if (!fmn_macwm.window) return;
+  FmnView *view=fmn_macwm.window.contentView;
+  view->fb=src;
+  view.needsDisplay=1;
+}

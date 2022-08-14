@@ -11,7 +11,7 @@ macos_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(macos_OPT_ENABLE)) -DFMN_IMAGE_SET_$(m
 macos_CC:=gcc -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_OBJC:=gcc -xobjective-c -c -MMD -O3 -Isrc -I$(macos_MIDDIR) $(macos_CCWARN) $(macos_CCINC) $(macos_CCDEF)
 macos_LD:=gcc
-macos_LDPOST:=-framework Cocoa -framework OpenGL -framework IOKit
+macos_LDPOST:=-framework Cocoa -framework IOKit -framework Quartz
 
 macos_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(macos_OPT_ENABLE),$(SRCFILES),$(macos_MIDDIR)))
 
@@ -47,7 +47,5 @@ $(macos_ICON):$(macos_INPUT_ICONS);$(PRECMD) iconutil -c icns -o $@ src/opt/maco
 $(macos_EXE):$(macos_PLIST) $(macos_NIB) $(macos_ICON)
 all:$(macos_EXE)
 $(macos_EXE):$(macos_OFILES);$(PRECMD) $(macos_LD) -o$@ $(macos_OFILES) $(macos_LDPOST)
-
-#TODO Mac app bundle
 
 macos-run:$(macos_EXE);open -W $(macos_BUNDLE) --args --reopen-tty=$$(tty) --chdir=$$(pwd)

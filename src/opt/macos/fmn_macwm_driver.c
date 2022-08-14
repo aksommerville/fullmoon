@@ -11,12 +11,7 @@
 
 struct video_driver_macwm {
   struct video_driver hdr;
-  GLuint texid;
-  GLfloat dstl,dstt,dstr,dstb; // in -1..1, ie "device coordinates"
-  int winw,winh; // macwm may change our (w,h) behind our back; use these to detect it
-  uint8_t *y8;//XXX
-  uint8_t *fbcvt;
-  int fbglifmt,fbgltype,fbglfmt;
+  uint8_t *fbcvt; // RGBA if not null (if null, assume provided framebuffer is RGBA)
 };
 
 #define DRIVER ((struct video_driver_macwm*)driver)
@@ -25,8 +20,6 @@ struct video_driver_macwm {
  */
 
 static void _macwm_del(struct video_driver *driver) {
-  if (DRIVER->texid) glDeleteTextures(1,&DRIVER->texid);
-  if (DRIVER->y8) free(DRIVER->y8);
   if (DRIVER->fbcvt) free(DRIVER->fbcvt);
   fmn_macwm_quit();
 }
@@ -39,33 +32,15 @@ static int macwm_init_framebuffer(struct video_driver *driver) {
   if (driver->delegate.fbh<1) return -1;
   switch (driver->delegate.fbfmt) {
     case FMN_IMGFMT_thumby: {
-        if (!(DRIVER->fbcvt=malloc(driver->delegate.fbw*driver->delegate.fbh))) return -1;
-        DRIVER->fbglifmt=GL_RGB;
-        DRIVER->fbglfmt=GL_LUMINANCE;
-        DRIVER->fbgltype=GL_UNSIGNED_BYTE;
+        if (!(DRIVER->fbcvt=malloc(driver->delegate.fbw*driver->delegate.fbh*4))) return -1;
       } return 0;
     case FMN_IMGFMT_bgr565be: {
         if (!(DRIVER->fbcvt=malloc(driver->delegate.fbw*driver->delegate.fbh*4))) return -1;
-        DRIVER->fbglifmt=GL_RGB;
-        DRIVER->fbglfmt=GL_RGBA;
-        DRIVER->fbgltype=GL_UNSIGNED_BYTE;
-      } return 0;
-    case FMN_IMGFMT_rgba8888: {
-        DRIVER->fbglifmt=GL_RGB;
-        DRIVER->fbglfmt=GL_RGBA;
-        DRIVER->fbgltype=GL_UNSIGNED_BYTE;
-      } return 0;
-    case FMN_IMGFMT_y8: {
-        DRIVER->fbglifmt=GL_RGB;
-        DRIVER->fbglfmt=GL_LUMINANCE;
-        DRIVER->fbgltype=GL_UNSIGNED_BYTE;
       } return 0;
     case FMN_IMGFMT_bgr332: {
         if (!(DRIVER->fbcvt=malloc(driver->delegate.fbw*driver->delegate.fbh*4))) return -1;
-        DRIVER->fbglifmt=GL_RGB;
-        DRIVER->fbglfmt=GL_RGBA;
-        DRIVER->fbgltype=GL_UNSIGNED_BYTE;
-      } break;
+      } return 0;
+    case FMN_IMGFMT_rgba8888: return 0;
     // Not supported: ya11, y1, argb4444be, and anything else we add after that.
   }
   return -1;
@@ -83,18 +58,6 @@ static int _macwm_init(struct video_driver *driver) {
     &driver->delegate,driver
   )<0) return -1;
 
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(1,&DRIVER->texid);
-  if (!DRIVER->texid) {
-    glGenTextures(1,&DRIVER->texid);
-    if (!DRIVER->texid) return -1;
-  }
-  glBindTexture(GL_TEXTURE_2D,DRIVER->texid);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-
   if (macwm_init_framebuffer(driver)<0) {
     fprintf(stderr,
       "%s: Failed to initialize framebuffer for format %d, size %d,%d.\n",
@@ -102,61 +65,27 @@ static int _macwm_init(struct video_driver *driver) {
     );
     return -1;
   }
-  /**
-  if (!(DRIVER->y8=malloc(driver->delegate.fbw*driver->delegate.fbh))) return -1;
-  if (driver->delegate.fbfmt!=FMN_IMGFMT_thumby) {
-    fprintf(stderr,"%s: Expected 'thumby' framebuffer format (%d), found %d.\n",__FILE__,FMN_IMGFMT_thumby,driver->delegate.fbfmt);
-    return -1;
-  }
-  /**/
-
-  // Leave (winw,winh) unset; we'll notice at the first swap.
 
   return 0;
 }
 
-/* Recalculate output position if needed.
+/* rgba from thumby's weird format.
  */
 
-static int fmn_macwm_require_bounds(struct video_driver *driver) {
-  if ((DRIVER->winw==driver->w)&&(DRIVER->winh==driver->h)) return 0;
-  DRIVER->winw=driver->w;
-  DRIVER->winh=driver->h;
-  if (!driver->w||!driver->h) return 0;
-
-  // If we're this close to the window size, use the whole window and let it stretch a little.
-  const GLfloat fudge=0.90f;
-
-  GLfloat fbaspect=(GLfloat)driver->delegate.fbw/(GLfloat)driver->delegate.fbh;
-  GLfloat winaspect=(GLfloat)driver->w/(GLfloat)driver->h;
-  if (winaspect>fbaspect) {
-    DRIVER->dstt=1.0f;
-    DRIVER->dstr=fbaspect/winaspect;
-    if (DRIVER->dstr>=fudge) DRIVER->dstr=1.0f;
-  } else {
-    DRIVER->dstr=1.0f;
-    DRIVER->dstt=winaspect/fbaspect;
-    if (DRIVER->dstb>=fudge) DRIVER->dstb=1.0f;
-  }
-  
-  // Always centered:
-  DRIVER->dstl=-DRIVER->dstr;
-  DRIVER->dstb=-DRIVER->dstt;
-  return 0;
-}
-
-/* y8 from thumby's weird format.
- */
-
-static const void *fmn_macwm_cvt_y8_thumby(struct video_driver *driver,const uint8_t *srcrow) {
+static const void *fmn_macwm_cvt_rgba_thumby(struct video_driver *driver,const uint8_t *srcrow) {
   uint8_t srcmask=0x01;
   uint8_t *dstp=DRIVER->fbcvt;
   int yi=driver->delegate.fbh;
   for (;yi-->0;) {
     const uint8_t *srcp=srcrow;
     int xi=driver->delegate.fbw;
-    for (;xi-->0;srcp++,dstp++) {
-      *dstp=((*srcp)&srcmask)?0xff:0x00;
+    for (;xi-->0;srcp++,dstp+=4) {
+      if ((*srcp)&srcmask) {
+        dstp[0]=dstp[1]=dstp[2]=0xff;
+      } else {
+        dstp[0]=dstp[1]=dstp[2]=0x00;
+      }
+      dstp[3]=0xff;
     }
     if (srcmask==0x80) {
       srcmask=0x01;
@@ -224,14 +153,14 @@ static const void *fmn_macwm_cvt_rgba_bgr332(struct video_driver *driver,const u
 static int fmn_macwm_upload_texture(struct video_driver *driver,const void *fb) {
   const void *glpixels=0;
   if (DRIVER->fbcvt) switch (driver->delegate.fbfmt) {
-    case FMN_IMGFMT_thumby: glpixels=fmn_macwm_cvt_y8_thumby(driver,fb); break;
+    case FMN_IMGFMT_thumby: glpixels=fmn_macwm_cvt_rgba_thumby(driver,fb); break;
     case FMN_IMGFMT_bgr565be: glpixels=fmn_macwm_cvt_rgba_bgr565be(driver,fb); break;
     case FMN_IMGFMT_bgr332: glpixels=fmn_macwm_cvt_rgba_bgr332(driver,fb); break;
   } else {
     glpixels=fb;
   }
   if (!glpixels) return -1;
-  glTexImage2D(GL_TEXTURE_2D,0,DRIVER->fbglifmt,driver->delegate.fbw,driver->delegate.fbh,0,DRIVER->fbglfmt,DRIVER->fbgltype,glpixels);
+  fmn_macwm_replace_fb(glpixels);
   return 0;
 }
 
@@ -239,32 +168,7 @@ static int fmn_macwm_upload_texture(struct video_driver *driver,const void *fb) 
  */
 
 static int _macwm_swap(struct video_driver *driver,const void *fb) {
-  if (fmn_macwm_require_bounds(driver)<0) return -1;
-  
-  if (fmn_macwm_begin_video()<0) return -1;
-
-  glViewport(0,0,driver->w,driver->h);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  if (
-    (DRIVER->dstl>-1.0f)||(DRIVER->dstr<1.0f)||
-    (DRIVER->dstt>-1.0f)||(DRIVER->dstb<1.0f)
-  ) {
-    glClearColor(0.0f,0.0f,0.0f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-  }
-
   if (fmn_macwm_upload_texture(driver,fb)<0) return -1;
-
-  glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2i(0,0); glVertex2f(DRIVER->dstl,DRIVER->dstt);
-    glTexCoord2i(0,1); glVertex2f(DRIVER->dstl,DRIVER->dstb);
-    glTexCoord2i(1,0); glVertex2f(DRIVER->dstr,DRIVER->dstt);
-    glTexCoord2i(1,1); glVertex2f(DRIVER->dstr,DRIVER->dstb);
-  glEnd();
-  
-  if (fmn_macwm_end_video()<0) return -1;
   return 0;
 }
 

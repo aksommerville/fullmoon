@@ -1,11 +1,10 @@
 #ifndef FMN_MACWM_INTERNAL_H
 #define FMN_MACWM_INTERNAL_H
 
-// Link: -framework Cocoa -framework OpenGL
+// Link: -framework Cocoa -framework Quartz
 
 #include "game/fullmoon.h"
 #include "opt/intf/intf.h"
-#include <OpenGL/gl.h>
 
 #ifdef __OBJC__
 #include <Cocoa/Cocoa.h>
@@ -15,7 +14,6 @@
 
 @interface FmnWindow : NSWindow <NSWindowDelegate> {
 @public
-  NSOpenGLContext *context;
   int cursor_visible;
   int w,h;
   int mousex,mousey;
@@ -36,9 +34,6 @@
   driver:(void*)driver
 ;
 
--(int)beginFrame;
--(int)endFrame;
-
 @end
 #else
 typedef void FmnWindow;
@@ -48,6 +43,9 @@ typedef void FmnWindow;
  */
 
 #define FMN_MACWM_KEYS_DOWN_LIMIT 8
+
+// No performance penalty or anything for a huge scale, but i want it small so i can read the console
+#define FMN_MACOS_MAX_INITIAL_SCALE 8
 
 extern struct fmn_macwm {
   FmnWindow *window;
@@ -71,6 +69,8 @@ int fmn_macwm_drop_all_keys();
 
 int fmn_macwm_cursor_within_window();
 
+void fmn_macwm_replace_fb(const void *src);
+
 /* Old public API, no longer exposed publicly.
  * We could get all these init params off the delegate ourselves, I'm just trying to keep the 'intf' connection as loose as possible.
  */
@@ -84,7 +84,5 @@ int fmn_macwm_init(
 void fmn_macwm_quit();
 int fmn_macwm_show_cursor(int show);
 int fmn_macwm_toggle_fullscreen();
-int fmn_macwm_begin_video();
-int fmn_macwm_end_video();
 
 #endif
