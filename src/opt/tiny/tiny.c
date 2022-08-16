@@ -132,7 +132,7 @@ static void tiny_audio_init() {
 
   #if FMN_AUDIO_ENABLE
     #if FMN_USE_minisyni
-      minisyni_init(AUDIO_RATE,1);
+      minisyni_init(AUDIO_RATE);
     #endif
   #endif
   // Proceed with the rest even if disabled, it seems to be necessary.

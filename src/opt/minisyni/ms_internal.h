@@ -9,8 +9,15 @@
 
 extern struct minisyni {
   uint16_t rate;
-  uint8_t chanc;
   uint16_t default_ttl;
+  
+  // We hold on to the raw serial song, headers and all.
+  const uint8_t *song;
+  uint16_t songc;
+  uint16_t songp;
+  int32_t songdelay; // frames until the next song command
+  uint8_t songrepeat; // 0,1
+  uint16_t songtempo; // frames/tick, minimum 1 if a song is present
   
   struct ms_voice {
     const int16_t *src;

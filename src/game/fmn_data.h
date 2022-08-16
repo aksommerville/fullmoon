@@ -18,4 +18,15 @@ extern const struct fmn_map swamp_1;
 
 extern const struct fmn_map *map_region_heads[8];
 
+extern const uint8_t song_cobweb[];
+extern const uint16_t song_cobweb_length;
+extern const uint8_t song_baltic[];
+extern const uint16_t song_baltic_length;
+extern const uint8_t song_fullmoon[];
+extern const uint16_t song_fullmoon_length;
+extern const uint8_t song_infinite[];
+extern const uint16_t song_infinite_length; // no, no, it only *feels* that long
+extern const uint8_t song_sevencircles[];
+extern const uint16_t song_sevencircles_length;
+
 #endif

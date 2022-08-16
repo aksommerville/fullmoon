@@ -1,0 +1,31 @@
+Song format for 'minisyni' synthesizer.
+
+Songs are stored in memory as `const uint8_t[]`.
+Multi-byte fields are big-endian regardless of the host we built for.
+
+Starts with an extensible 6-byte header:
+  0000   2 Tempo, us/tick. (ie slowest tick rate is about 15 Hz)
+  0002   2 Start point in bytes. Always 6 under this spec. You must not create a hole; we might define that space in the future.
+  0004   2 Loop point in bytes. >=Start.
+  0006 ... We can add header fields in the future.
+
+In the body, each leading byte tells us the opcode and payload length:
+  0000 0000                    : End of song. (optional if you also provide a valid length)
+  0ttt tttt                    : Delay (t) ticks. Must be nonzero.
+  1000 cccc 0nnn nnnn 0vvv vvvv: MIDI Note Off
+  1001 cccc 0nnn nnnn 0vvv vvvv: MIDI Note On
+  1010 cccc 0nnn nnnn 0vvv vvvv: MIDI Note Adjust
+  1011 cccc 0kkk kkkk 0vvv vvvv: MIDI Control Change
+  1100 cccc 0ppp pppp          : MIDI Program Change
+  1101 cccc 0vvv vvvv          : MIDI Channel Pressure
+  1110 cccc 0lll llll 0mmm mmmm: MIDI Pitch Wheel
+  1111 wwwt tttt tttt tnnn nnnn: Fire-forget note (n), wave (w), duration (t) ticks.
+
+Notice that we can process MIDI Channel events, but not Meta, Sysex, or System events.
+Mostly MIDI stuff is ignored, we only care about Channel (low 3 bits = wave) and Note.
+Use Note On/Off if you need a note to sustain longer than 1023 ticks.
+
+A song with no body is illegal: Add a dummy EOF event if you really want an empty song.
+
+Minisyni songs should be about half the size of MIDI, assuming you use Fire-forget instead of On/Off.
+If you can arrange to start notes at exactly the same tick, you'll also shave off some from delay events.

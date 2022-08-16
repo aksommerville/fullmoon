@@ -31,11 +31,11 @@ Try `make run`
 - - [ ] Consider a limited set of sound effects for Thumby and Pico.
 - - [ ] write music
 - - - [ ] splash: Full Moon Theme (TODO catchier name)
-- - - [ ] home: tbd
-- - - [ ] forest: tbd
+- - - [ ] home: The Forever Mule
+- - - [ ] forest: Lela Marien
 - - - [ ] caves: Infinite Stories Deep
-- - - [ ] desert: tbd
-- - - [ ] swamp: tbd
+- - - [ ] desert: Only on Full Moons
+- - - [ ] swamp: The People Under the Garden
 - - - [ ] castle: The Seven Circles of a Witch's Soul
 - - - [ ] denouement
 - - - [ ] game over (same as splash?)
