@@ -12,7 +12,7 @@ linux_CC:=gcc -c -MMD -O3 -Isrc -I$(linux_MIDDIR) $(linux_CCWARN) $(linux_CCINC)
 linux_LD:=gcc
 linux_LDPOST:=-ldrm -lX11 -lXinerama -lasound -lm -lpthread
 
-linux_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(linux_OPT_ENABLE),$(SRCFILES),$(linux_MIDDIR)))
+linux_SRCFILES:=$(filter-out src/test/% src/www/% src/editor/%,$(call OPTFILTER,$(linux_OPT_ENABLE),$(SRCFILES),$(linux_MIDDIR)))
 
 linux_DATA_SRC:=$(filter src/data/%,$(linux_SRCFILES))
 linux_DATA_SRC:=$(filter-out %.png,$(linux_DATA_SRC)) $(filter %-$(linux_IMAGE_SET).png,$(linux_DATA_SRC))

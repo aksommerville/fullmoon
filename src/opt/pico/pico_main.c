@@ -6,13 +6,6 @@
 #define FRAME_DELAY (1000000/FRAME_RATE) /* us */
 #define SLEEP_LIMIT 100000 /* us */
 
-//XXX TEMP while i figure out cc flags for tiny (must force FMN_USE_minisyni true for everyone)
-const uint8_t song_sevencircles[]={0};
-const uint8_t song_fullmoon[]={0};
-const uint16_t song_sevencircles_length=sizeof(song_sevencircles);
-const uint16_t song_fullmoon_length=sizeof(song_fullmoon);
-int8_t minisyni_play_song() { return 0; }
-
 /* Main.
  */
 

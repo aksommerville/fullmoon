@@ -104,7 +104,7 @@ void fmn_gameover_render(struct fmn_image *fb) {
     fmn_blit(fb,FMN_NSCOORD(1,23),&uibits,FMN_NSCOORD(0,102),FMN_NSCOORD(34,7),0);
     uint8_t i;
     for (i=0;i<FMN_PASSWORD_LENGTH;i++) {
-      uint8_t chp;
+      uint8_t chp=0;
       if ((password[i]>='A')&&(password[i]<='Z')) chp=password[i]-'A';
       else switch (password[i]) {
         case '1': chp=26; break;
