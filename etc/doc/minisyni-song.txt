@@ -29,3 +29,4 @@ A song with no body is illegal: Add a dummy EOF event if you really want an empt
 
 Minisyni songs should be about half the size of MIDI, assuming you use Fire-forget instead of On/Off.
 If you can arrange to start notes at exactly the same tick, you'll also shave off some from delay events.
+...first trial, this does seem true most of the time. Sometimes minisyni is bigger, I guess due to Running Status.

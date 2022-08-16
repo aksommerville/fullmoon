@@ -19,6 +19,10 @@ tiny_OPT_ENABLE:=tiny minisyni
 tiny_SRCFILES:=$(filter-out src/test/% src/www/%,$(call OPTFILTER,$(tiny_OPT_ENABLE),$(SRCFILES),mid/tiny))
 
 tiny_DATA_SRC:=$(filter src/data/%,$(tiny_SRCFILES))
+
+# oh no i finally breached the tiny flash limit. drop a few files
+tiny_DATA_SRC:=$(filter-out %/baltic.mid %/cobweb.mid %/infinite.mid %/appicon-8c.png,$(tiny_DATA_SRC))
+
 tiny_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(tiny_DATA_SRC))
 tiny_DATA_SRC:=$(filter-out %.png,$(tiny_DATA_SRC)) $(filter %-$(tiny_IMAGE_SET).png,$(tiny_DATA_SRC))
 tiny_DATA_C:=$(patsubst src/%,mid/tiny/%.c,$(tiny_DATA_SRC))
@@ -30,13 +34,6 @@ mid/tiny/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -
 mid/tiny/%.mid.c:src/%.mid $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
 
 tiny_SRCFILES+=$(tiny_DATA_C)
-
-#tiny_SRCFILES:= \
-#  $(EMBED_CFILES_TINY) \
-#  $(filter src/main/%,$(CFILES)) \
-#  $(CXXFILES_MAIN) \
-#  $(filter src/main/%.h,$(SRCFILES)) \
-#  $(shell find src/opt/tiny -type f)
 
 # All the C files get copied here to simplify our request to arduino-builder.
 tiny_SCRATCHDIR:=mid/tiny/scratch
@@ -76,6 +73,7 @@ $1:$2 $3 $(tiny_SCRATCHFILES); \
   -build-cache $3 \
   -prefs=build.warn_data_percentage=75 \
   $(tiny_BUILDER_OPTS) \
+  -DFMN_USE_minisyni=1 \
   $(tiny_SCRATCHFILES) \
   2>&1 | etc/tool/reportstatus.py
 endef

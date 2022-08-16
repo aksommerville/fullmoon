@@ -23,8 +23,15 @@ Try `make run`
 - - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
 - - [ ] Cosmetic feedback for animation spell. Grow flowers or something?
 - [ ] Second pass populating the world
+- - [ ] swamp: First half needs some hazards or puzzles
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
+- - [ ] songcvt: loop point
+- - [x] Condense delays
+- - [x] Trim for the Logic bug
+- - [ ] Configurable waves for minisyni
+- - [ ] minisyni foley
+- - [ ] Why are some notes so much louder than others?
 - - [ ] Low quality synth suitable for Tiny
 - - [ ] Higher quality synth for PCs?
 - - [ ] WebAudio

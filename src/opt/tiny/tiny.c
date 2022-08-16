@@ -8,12 +8,20 @@
 #include <stdint.h>
 #include "game/fullmoon.h"
 
+#if 0
 #if 1 /* FMN_USE_minisyni, but the compiler doesn't pass our flags thru */
   #define FMN_USE_minisyni 1
   #define FMN_AUDIO_ENABLE 1
   #include "opt/minisyni/minisyni.h"
 #else
   #define FMN_AUDIO_ENABLE 0
+#endif
+#endif
+
+#if FMN_USE_minisyni
+  ok using minisyni
+#else
+  no minisyni
 #endif
 
 #ifdef __cplusplus

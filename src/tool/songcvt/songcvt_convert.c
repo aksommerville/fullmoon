@@ -197,10 +197,6 @@ static int m2m_find_tempo(const struct m2m_context *ctx) {
 /* Emit delay events.
  */
  
-//TODO condense delays (if the last thing emitted was a delay, grow it instead of adding another).
-// This matters, because not every input event causes an output event, in fact most don't.
-// Maybe punt that to the end, it would be pretty easy when the output is fully composed.
- 
 static int m2m_output_delay(struct m2m_context *ctx,int tickc) {
   ctx->tickc_output+=tickc;
   while (tickc>0x7f) {
@@ -408,12 +404,107 @@ static int m2m_play_and_record(struct m2m_context *ctx) {
   }
 }
 
+/* Condense delay events.
+ * We tend to generate split-up delays because not every input event creates an output event.
+ * We also take this opportunity to drop long trailing delays, eg produced by Logic Pro X.
+ */
+ 
+static int m2m_flush_delay(uint8_t *dst,int delay) {
+  if (!delay) return 0;
+  int dstc=0;
+  while (delay>=0x7f) {
+    dst[dstc++]=0x7f;
+    delay-=0x7f;
+  }
+  if (delay>0) {
+    dst[dstc++]=delay;
+  }
+  return dstc;
+}
+ 
+static int m2m_condense_delays(void *dstpp,const uint8_t *src,int srcc,struct m2m_context *ctx) {
+  if (srcc<6) return -1;
+  uint8_t *dst=malloc(srcc); // (dst) can only be smaller than (src), allocate all we could need.
+  if (!dst) return -1;
+  
+  // Take the 6-byte header verbatim.
+  memcpy(dst,src,6);
+  int dstc=6,srcp=6;
+  int srcloopp=(src[4]<<8)|src[5];
+  
+  int dstlen=0; // output duration in ticks
+  int delay=0;
+  while (srcp<srcc) {
+  
+    // At the input loop point (must be on an event boundary), update the output loop point.
+    if (srcp==srcloopp) {
+      dst[4]=dstc>>8;
+      dst[5]=dstc;
+    }
+    
+    // EOF
+    if (!src[srcp]) break;
+    
+    // Delay.
+    if (!(src[srcp]&0x80)) {
+      delay+=src[srcp];
+      srcp++;
+      continue;
+    }
+    
+    // We have a real event, so flush any delay first.
+    dstlen+=delay;
+    dstc+=m2m_flush_delay(dst+dstc,delay);
+    delay=0;
+    
+    // Copy the real event verbatim, 2 or 3 bytes, knowable from the top 4 bits of the leading byte.
+    switch (src[srcp]&0xf0) {
+      case 0x80:
+      case 0x90:
+      case 0xa0:
+      case 0xb0:
+      case 0xe0:
+      case 0xf0: {
+          if (srcp>srcc-3) return -1;
+          memcpy(dst+dstc,src+srcp,3);
+          dstc+=3;
+          srcp+=3;
+        } break;
+      case 0xc0:
+      case 0xd0: {
+          if (srcp>srcc-2) return -1;
+          memcpy(dst+dstc,src+srcp,2);
+          dstc+=2;
+          srcp+=2;
+        } break;
+      default: return -1;
+    }
+  }
+  
+  // Final delay must not push us beyond the next 4-qnote boundary. (an arbitrary rule that might mess up non-4/4 songs).
+  int measurelen=ctx->division*4;
+  int measurep1=dstlen/measurelen;
+  int measurep2=(dstlen+delay)/measurelen;
+  if (measurep2>measurep1) {
+    delay=measurelen-dstlen%measurelen;
+  }
+  dstc+=m2m_flush_delay(dst+dstc,delay);
+  *(void**)dstpp=dst;
+  return dstc;
+}
+
+/* If the song ends with a long delay, trim it.
+ * This is a silly workaround for a bug in Logic Pro X that pads the end of exported MIDI files.
+ */
+ 
+static int m2m_repair_logic_bug(const uint8_t *src,int srcc) {
+  return srcc;
+}
+
 /* After generating the minisyni song sequentially, any further wrap-up needed.
  */
  
 static int m2m_finish(struct m2m_context *ctx) {
-
-  //TODO Do we need to detect the Logic problem? (it sometimes generates a ridiculous trailing delay)
   
   // Simulate release of any pending notes.
   struct m2m_note *note=ctx->notev;
@@ -430,7 +521,22 @@ static int m2m_finish(struct m2m_context *ctx) {
   
   // Emit an EOF event just to keep it clean.
   if (encode_raw(&ctx->songcvt->bin,"\0",1)<0) return -1;
-
+  
+  void *condensed=0;
+  int condensedc=m2m_condense_delays(&condensed,ctx->songcvt->bin.v,ctx->songcvt->bin.c,ctx);
+  if (condensedc<0) {
+    fprintf(stderr,"%s:!!! Failed to condense delays. Proceeding anyway.\n",ctx->songcvt->srcpath);
+  } else {
+    free(ctx->songcvt->bin.v);
+    ctx->songcvt->bin.v=condensed;
+    ctx->songcvt->bin.c=condensedc;
+    ctx->songcvt->bin.a=condensedc;
+    condensed=0;
+  }
+  if (condensed) free(condensed);
+  
+  ctx->songcvt->bin.c=m2m_repair_logic_bug(ctx->songcvt->bin.v,ctx->songcvt->bin.c);
+  
   return 0;
 }
 

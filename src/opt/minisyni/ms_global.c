@@ -47,8 +47,8 @@ void minisyni_init(uint16_t rate) {
   {
     int16_t *v=TMP_wave;
     int i=512;
-    for (;i-->0;v++) *v=(int16_t)(sinf((i*M_PI*2.0f)/512.0f)*5000.0f);
-    //for (;i-->0;v++) *v=(i*10000)/512-5000;
+    //for (;i-->0;v++) *v=(int16_t)(sinf((i*M_PI*2.0f)/512.0f)*5000.0f);
+    for (;i-->0;v++) *v=(i*10000)/512-5000;
   }
 }
 
