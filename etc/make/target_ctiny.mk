@@ -17,7 +17,7 @@
 ctiny_MIDDIR:=mid/ctiny
 ctiny_OUTDIR:=out/ctiny
 
-ctiny_OPT_ENABLE:=tiny minisyni
+ctiny_OPT_ENABLE:=tiny synth
 
 ctiny_TOOLCHAIN:=$(ctiny_ARDUINO_HOME)/packages/arduino/tools/arm-none-eabi-gcc/$(ctiny_GCC_VERSION)
 

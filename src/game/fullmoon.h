@@ -67,6 +67,16 @@ void fmn_set_uimode(uint8_t mode);
 // Dispatch a text-input event to our UI. This is entirely optional, just to make password entry more convenient under Linux.
 void fmn_text_event(uint32_t codepoint);
 
+#if FMN_USE_minisyni
+  #include "opt/minisyni/minisyni.h"
+  #define fmn_audio_song(name) minisyni_play_song(song_##name,song_##name##_length,0,1)
+#elif FMN_USE_synth
+  #include "opt/synth/synth.h"
+  #define fmn_audio_song(name) synth_play_song(song_##name,song_##name##_length,0,1)
+#else
+  #define fmn_audio_song(name)
+#endif
+
 /* Business.
  ***********************************************************************/
 

@@ -9,10 +9,6 @@
 #include "game/sprite/hero/fmn_hero.h"
 #include <string.h>
 
-#if FMN_USE_minisyni
-  #include "opt/minisyni/minisyni.h"
-#endif
-
 #define FMN_SLOMO_TIME 300
 #define FMN_SLOMO_FACTOR 4
 #define FMN_BLACKOUT_SPEED 4 /* in 1/256ths of the effect per frame */
@@ -48,9 +44,7 @@ uint32_t fmn_play_frame_count=0;
  */
  
 void fmn_play_begin() {
-  #if FMN_USE_minisyni
-    minisyni_play_song(song_sevencircles,song_sevencircles_length,0,1);
-  #endif
+  fmn_audio_song(sevencircles);
 }
 
 /* End.

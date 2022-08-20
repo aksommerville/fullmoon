@@ -1,5 +1,6 @@
 /* minisyni.h
  * Synthesizer optimized for low memory and high performance, should be suitable for Arduino.
+ * XXX Dropping this and replacing with 'synth' -- mostly the same thing.
  */
  
 #ifndef MINISYNI_H

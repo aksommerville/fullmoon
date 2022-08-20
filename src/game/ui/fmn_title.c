@@ -2,10 +2,6 @@
 #include "game/ui/fmn_title.h"
 #include "game/fmn_data.h"
 
-#if FMN_USE_minisyni
-  #include "opt/minisyni/minisyni.h"
-#endif
-
 #define FMN_TITLE_SELECTION_NEW 0
 #define FMN_TITLE_SELECTION_PASSWORD 1
 #define FMN_TITLE_SELECTION_COUNT 2
@@ -23,11 +19,7 @@ static uint8_t arrowanimtime=0;
  
 void fmn_title_begin() {
   fbdirty=1;
-  #if FMN_USE_minisyni //XXX TEMP
-    minisyni_play_song(song_fullmoon,song_fullmoon_length,0,1);//why are some notes so much louder than others?
-    //minisyni_play_song(song_infinite,song_infinite_length,0,1);//some notes seem to get stuck?
-    //minisyni_play_song(song_baltic,song_baltic_length,0,1);//awful! clipping and stuck notes
-  #endif
+  fmn_audio_song(fullmoon);
 }
 
 /* End.

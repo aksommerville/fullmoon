@@ -35,7 +35,7 @@ static int16_t TMP_wave[512];
 void minisyni_init(uint16_t rate) {
 
   minisyni.rate=rate;
-  minisyni.default_ttl=rate/4;
+  minisyni.default_ttl=rate/10;
   
   if (rate!=minisyni_ratev_base) {
     uint32_t *v=minisyni_ratev;
@@ -132,7 +132,11 @@ static void ms_voice_update(int16_t *v,int32_t c,struct ms_voice *voice) {
         voice->src=0;
         return;
       }
-      (*v)+=(voice->src[voice->p>>MS_P_SHIFT]*voice->ttl)/minisyni.default_ttl;
+      if (voice->ttl<minisyni.default_ttl) {
+        (*v)+=(voice->src[voice->p>>MS_P_SHIFT]*voice->ttl)/minisyni.default_ttl;
+      } else {
+        (*v)+=voice->src[voice->p>>MS_P_SHIFT];
+      }
     } else {
       (*v)+=voice->src[voice->p>>MS_P_SHIFT];
     }

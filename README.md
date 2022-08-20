@@ -22,8 +22,11 @@ Try `make run`
 - - [ ] fmn_password_check_business_rules(): reenable once ready
 - - [ ] We are likely to breach the size limit for Pico and Tiny. What can we do to reduce size?
 - - [ ] Cosmetic feedback for animation spell. Grow flowers or something?
+- - [ ] Retain password on Quit
+- - [ ] Retain action on Continue
 - [ ] Second pass populating the world
 - - [ ] swamp: First half needs some hazards or puzzles
+- - [ ] treadle to reset alpha blocks
 - [ ] Before releasing for Thumby, validate FMN_PASSWORD_SEQUENCE hard. Is it possible to violate sequence?
 - [ ] Audio
 - - [ ] songcvt: loop point
@@ -31,7 +34,7 @@ Try `make run`
 - - [x] Trim for the Logic bug
 - - [ ] Configurable waves for minisyni
 - - [ ] minisyni foley
-- - [ ] Why are some notes so much louder than others?
+- - [x] Why are some notes so much louder than others?
 - - [ ] Low quality synth suitable for Tiny
 - - [ ] Higher quality synth for PCs?
 - - [ ] WebAudio

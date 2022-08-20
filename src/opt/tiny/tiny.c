@@ -11,6 +11,9 @@
 #if FMN_USE_minisyni
   #define FMN_AUDIO_ENABLE 1
   #include "opt/minisyni/minisyni.h"
+#elif FMN_USE_synth
+  #define FMN_AUDIO_ENABLE 1
+  #include "opt/synth/synth.h"
 #else
   #define FMN_AUDIO_ENABLE 0
 #endif
@@ -132,6 +135,8 @@ static void tiny_audio_init() {
   #if FMN_AUDIO_ENABLE
     #if FMN_USE_minisyni
       minisyni_init(AUDIO_RATE);
+    #elif FMN_USE_synth
+      synth_init(AUDIO_RATE);
     #endif
   #endif
   // Proceed with the rest even if disabled, it seems to be necessary.
@@ -166,64 +171,58 @@ static void tiny_audio_init() {
  
 #if FMN_AUDIO_ENABLE
 
-#define FMN_AUDIO_BUFFER_SIZE 128
+// Buffer must be comfortably longer than a video frame (~367)
+#define FMN_AUDIO_BUFFER_SIZE 1024
 
-static int16_t fmn_audio_buffer[FMN_AUDIO_BUFFER_SIZE]={0};
-static int16_t fmn_audio_bufferp=0;
-static uint8_t fmn_audio_buffer_front=0,fmn_audio_buffer_back=0;
+uint32_t tinysynth_underflow=0;
+static int16_t fmn_abuf[FMN_AUDIO_BUFFER_SIZE]={0};
 
-static int16_t audio_next() {
-  int16_t v=0;
-  #if FMN_USE_minisyni
-    minisyni_update(&v,1);
-  #endif
-  return v;
-  /*
-  if (fmn_audio_bufferp<FMN_AUDIO_BUFFER_SIZE>>1) {
-    if (!fmn_audio_buffer_back) {
-      #if FMN_USE_minisyni
-        minisyni_update(fmn_audio_buffer+(FMN_AUDIO_BUFFER_SIZE>>1),FMN_AUDIO_BUFFER_SIZE>>1);
-      #else
-        memset(fmn_audio_buffer+(FMN_AUDIO_BUFFER_SIZE>>1),0,FMN_AUDIO_BUFFER_SIZE>>1);
-      #endif
-      fmn_audio_buffer_back=1;
-    }
-  } else {
-    if (!fmn_audio_buffer_front) {
-      #if FMN_USE_minisyni
-        minisyni_update(fmn_audio_buffer,FMN_AUDIO_BUFFER_SIZE>>1);
-      #else
-        memset(fmn_audio_buffer,0,FMN_AUDIO_BUFFER_SIZE>>1);
-      #endif
-      fmn_audio_buffer_front=1;
-    }
-  }
-  int16_t sample=fmn_audio_buffer[fmn_audio_bufferp];
-  fmn_audio_bufferp++;
-  if (fmn_audio_bufferp>=FMN_AUDIO_BUFFER_SIZE) {
-    fmn_audio_bufferp=0;
-    fmn_audio_buffer_back=0;
-  } else if (fmn_audio_bufferp==FMN_AUDIO_BUFFER_SIZE>>1) {
-    fmn_audio_buffer_front=0;
-  }
-  return sample;
-  */
+// (rp==wp) means empty.
+static uint16_t fmn_abuf_rp=0,fmn_abuf_wp=0;
+
+uint16_t fmn_platform_get_audio_buffer(int16_t **dstpp) {
+  uint16_t p=fmn_abuf_wp;
+  if (p>=FMN_AUDIO_BUFFER_SIZE) p=0;
+  *dstpp=fmn_abuf+p;
+  if (fmn_abuf_rp>p) return fmn_abuf_rp-p;
+  return FMN_AUDIO_BUFFER_SIZE-p;
 }
 
-#else
-static int16_t audio_next() { return 0; }
-#endif
+void fmn_platform_filled_audio_buffer(int16_t *v,uint16_t c) {
+  if (fmn_abuf_wp>=FMN_AUDIO_BUFFER_SIZE) fmn_abuf_wp=0;
+  if (v!=fmn_abuf+fmn_abuf_wp) return; // ...the hell you did
+  fmn_abuf_wp+=c;
+}
 
 /* Update audio -- DAC callback.
  */
 
 void TC5_Handler() {
   while(DAC->STATUS.bit.SYNCBUSY == 1);
-  int16_t sample=audio_next();
+  
+  int16_t sample=0;
+  if (fmn_abuf_rp!=fmn_abuf_wp) {
+    sample=fmn_abuf[fmn_abuf_rp++];
+    if (fmn_abuf_rp>=FMN_AUDIO_BUFFER_SIZE) fmn_abuf_rp=0;
+  } else {
+    tinysynth_underflow++;
+  }
+  
   DAC->DATA.reg=((sample>>6)+0x200)&0x3ff;
   while(DAC->STATUS.bit.SYNCBUSY == 1);
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;
 }
+
+#else
+
+void TC5_Handler() {
+  while(DAC->STATUS.bit.SYNCBUSY == 1);
+  DAC->DATA.reg=0;
+  while(DAC->STATUS.bit.SYNCBUSY == 1);
+  TC5->COUNT16.INTFLAG.bit.MC0 = 1;
+}
+
+#endif
 
 /* SPI.
  */
@@ -478,11 +477,25 @@ void fmn_platform_init() {
 static uint8_t throttlecounter=0;
  
 void fmn_platform_update() {
+
   throttlecounter++;
   if (throttlecounter>=3) {
     throttlecounter=0;
     delay(15);
   }
+  
+  #if FMN_AUDIO_ENABLE
+    int16_t *buf=0;
+    uint16_t bufc=fmn_platform_get_audio_buffer(&buf);
+    #if FMN_USE_minisyni
+      minisyni_update(buf,bufc);
+    #elif FMN_USE_synth
+      synth_update(buf,bufc);
+    #else
+      memset(buf,0,bufc<<1);
+    #endif
+    fmn_platform_filled_audio_buffer(buf,bufc);
+  #endif
 }
 
 uint16_t fmn_platform_read_input() {
@@ -503,17 +516,6 @@ static uint8_t outfb[96*64]={0};
 
 void fmn_platform_send_framebuffer(const void *fb) {
   startData();
-  
-  /* We are receiving a framebuffer in the correct format, but smaller than the Tiny's screen.
-   * Rowwise memcpy into one of the correct size.
-   *
-  uint8_t *dstrow=outfb+((64>>1)-(FMN_FBH>>1))*96+((96>>1)-(FMN_FBW>>1));
-  const uint8_t *srcrow=fb;
-  uint8_t cpc=FMN_FBW;
-  uint8_t yi=FMN_FBH;
-  for (;yi-->0;dstrow+=96,srcrow+=FMN_FBW) memcpy(dstrow,srcrow,cpc);
-  /**/
-  
   const uint8_t *FB=(const uint8_t*)outfb;
   for (int j=96*64;j-->0;FB++) {
     TS_SPI_SET_DATA_REG(*FB);
