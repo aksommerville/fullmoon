@@ -4,7 +4,12 @@
 
 #define FMN_TITLE_SELECTION_NEW 0
 #define FMN_TITLE_SELECTION_PASSWORD 1
-#define FMN_TITLE_SELECTION_COUNT 2
+#if FMN_QUITTABLE
+  #define FMN_TITLE_SELECTION_QUIT 2
+  #define FMN_TITLE_SELECTION_COUNT 3
+#else
+  #define FMN_TITLE_SELECTION_COUNT 2
+#endif
 
 /* Globals.
  */
@@ -55,6 +60,11 @@ void fmn_title_input(uint16_t input,uint16_t prev) {
     case FMN_TITLE_SELECTION_PASSWORD: {
         fmn_set_uimode(FMN_UIMODE_PASSWORD);
       } break;
+    #if FMN_QUITTABLE
+      case FMN_TITLE_SELECTION_QUIT: {
+          fmn_platform_quit();
+        } break;
+    #endif
   }
 }
 
@@ -78,6 +88,11 @@ void fmn_title_update() {
 void fmn_title_render(struct fmn_image *fb) {
   if (!fbdirty) return;
   fmn_blit(fb,FMN_NSCOORD( 0, 0),&titlesplash,FMN_NSCOORD(0,0),fb->w,fb->h,0);
+  #if FMN_QUITTABLE
+    if (selection==FMN_TITLE_SELECTION_QUIT) {
+      fmn_blit(fb,FMN_NSCOORD(23,18),&uibits,FMN_NSCOORD(48,12),FMN_NSCOORD(48,12),0);
+    } else
+  #endif
   fmn_blit(fb,FMN_NSCOORD(23,18),&uibits,FMN_NSCOORD(0,selection*12),FMN_NSCOORD(48,12),0);
   fmn_blit(fb,FMN_NSCOORD(44,13),&uibits,FMN_NSCOORD(48+arrowframe*7,0),FMN_NSCOORD(7,5),0);
   fmn_blit(fb,FMN_NSCOORD(44,30),&uibits,FMN_NSCOORD(48+arrowframe*7,5),FMN_NSCOORD(7,5),0);

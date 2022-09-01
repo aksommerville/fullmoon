@@ -7,7 +7,7 @@ linux_OPT_ENABLE:=genioc intf x11 drmfb evdev alsa synth
 
 linux_CCWARN:=-Werror -Wimplicit
 linux_CCINC:=-I/usr/include/libdrm
-linux_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(linux_OPT_ENABLE)) -DFMN_IMAGE_SET_$(linux_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(linux_FBFMT)=1
+linux_CCDEF:=$(patsubst %,-DFMN_USE_%=1,$(linux_OPT_ENABLE)) -DFMN_IMAGE_SET_$(linux_IMAGE_SET)=1 -DFMN_FRAMEBUFFER_$(linux_FBFMT)=1 -DFMN_QUITTABLE=1
 linux_CC:=gcc -c -MMD -O3 -Isrc -I$(linux_MIDDIR) $(linux_CCWARN) $(linux_CCINC) $(linux_CCDEF)
 linux_LD:=gcc
 linux_LDPOST:=-ldrm -lX11 -lXinerama -lasound -lm -lpthread

@@ -21,7 +21,13 @@
  */
  
 void synth_fm_update(int16_t *v,int c,struct synth_voice *voice) {
+
+  //XXX just fooling around
+  //chan->mod++;//obviously not ok; (chan) is shared across voices
+  //uint32_t range=(chan->mod<0x80)?(chan->mod<<10):((0xff-chan->mod)<<10);
+  //...ha ha ha it sounds so cool
   uint32_t range=chan->mod<<10;
+  
   uint32_t moddp=voice->rate;
   if (modrate<0x10) moddp>>=(0x10-modrate);
   else moddp<<=(modrate-0x10);

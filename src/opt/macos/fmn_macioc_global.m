@@ -189,6 +189,10 @@ uint16_t fmn_platform_read_input() {
   ;
 }
 
+void fmn_platform_quit() {
+  fmn_macioc.terminate=1;
+}
+
 /* Final performance report.
  */
  

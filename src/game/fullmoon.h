@@ -39,6 +39,10 @@ uint16_t fmn_platform_read_input();
  */
 void fmn_platform_init_framebuffer(struct fmn_image *fb);
 
+#if FMN_QUITTABLE
+  void fmn_platform_quit();
+#endif
+
 /***************************************************************
  * Shared symbols and services.
  */

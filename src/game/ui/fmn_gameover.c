@@ -50,7 +50,11 @@ void fmn_gameover_input(uint16_t input,uint16_t pvinput) {
             else fmn_game_reset_with_state(fmn_game_get_state());
             fmn_set_uimode(FMN_UIMODE_PLAY);
           } break;
-        case 2: fmn_set_uimode(FMN_UIMODE_TITLE); break;
+        #if FMN_QUITTABLE
+          case 2: fmn_platform_quit(); break;
+        #else
+          case 2: fmn_set_uimode(FMN_UIMODE_TITLE); break;
+        #endif
       }
     }
     #undef _

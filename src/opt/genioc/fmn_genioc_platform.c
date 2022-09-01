@@ -30,3 +30,10 @@ void fmn_platform_send_framebuffer(const void *fb) {
 uint16_t fmn_platform_read_input() {
   return fmn_genioc.input;
 }
+
+/* Quit.
+ */
+ 
+void fmn_platform_quit() {
+  fmn_genioc.terminate=1;
+}
