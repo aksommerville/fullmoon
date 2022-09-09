@@ -19,11 +19,11 @@
 
 //TODO I don't want the wave data living in synth, it's an app concern.
 // Also, this data is highly temporary, just copied out of Pocket Orchestra.
-extern const int16_t synth_wave_0[];
-extern const int16_t synth_wave_1[];
-extern const int16_t synth_wave_2[];
-extern const int16_t synth_wave_3[];
-extern const int16_t synth_wave_4[];
+extern const int16_t synth_wave_0[]; // reed organ
+extern const int16_t synth_wave_1[]; // smooth brass
+extern const int16_t synth_wave_2[]; // bell
+extern const int16_t synth_wave_3[]; // sharp strings
+extern const int16_t synth_wave_4[]; // loud siney bell
 
 extern struct synth {
   uint32_t rate;

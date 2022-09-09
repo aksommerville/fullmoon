@@ -71,6 +71,12 @@ void synth_wave_setup(struct synth_voice *voice,uint8_t noteid,uint8_t velocity,
   voice->release=synth_wave_release;
   voice->adjust=0;
   wavelv=(void*)synth_wave_0;
+  switch ((channel->pid>>2)&3) {
+    case 0: wavelv=(void*)synth_wave_0; break;
+    case 1: wavelv=(void*)synth_wave_1; break;
+    case 2: wavelv=(void*)synth_wave_2; break;
+    case 3: wavelv=(void*)synth_wave_3; break;
+  }
   envstage=0;
   level=0;
   releasing=0;

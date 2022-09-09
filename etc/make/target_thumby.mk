@@ -145,7 +145,7 @@ thumby_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(thumby_OPT_ENABLE),$
 
 thumby_DATA_SRC:=$(filter src/data/%,$(thumby_SRCFILES))
 thumby_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(thumby_DATA_SRC))
-thumby_DATA_SRC:=$(filter-out %.mid,$(thumby_DATA_SRC))
+thumby_DATA_SRC:=$(filter-out %.mid %.adjust,$(thumby_DATA_SRC))
 thumby_DATA_SRC:=$(filter-out %.png,$(thumby_DATA_SRC)) $(filter %-$(thumby_IMAGE_SET).png,$(thumby_DATA_SRC))
 thumby_DATA_C:=$(patsubst src/%,$(thumby_MIDDIR)/%.c,$(thumby_DATA_SRC))
 $(thumby_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@

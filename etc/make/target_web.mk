@@ -17,13 +17,14 @@ web_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(web_OPT_ENABLE),$(SRCFI
 web_DATA_SRC:=$(filter src/data/%,$(web_SRCFILES))
 web_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(web_DATA_SRC))
 web_DATA_SRC:=$(filter-out %.png,$(web_DATA_SRC)) $(filter %-$(web_IMAGE_SET).png,$(web_DATA_SRC))
+web_DATA_SRC:=$(filter-out %.adjust,$(web_DATA_SRC))
 web_DATA_C:=$(patsubst src/%,$(web_MIDDIR)/%.c,$(web_DATA_SRC))
 $(web_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(web_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=$(web_FBFMT)
 $(web_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(web_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(web_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
-$(web_MIDDIR)/%.mid.c:src/%.mid $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
+$(web_MIDDIR)/%.mid.c:src/%.mid src/%.adjust $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
 
 web_CFILES:=$(filter %.c,$(web_SRCFILES)) $(web_DATA_C)
 web_OFILES:=$(patsubst src/%,$(web_MIDDIR)/%,$(addsuffix .o,$(basename $(web_CFILES))))

@@ -17,12 +17,13 @@ macos_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(macos_OPT_ENABLE),$(S
 
 macos_DATA_SRC:=$(filter src/data/%,$(macos_SRCFILES))
 macos_DATA_SRC:=$(filter-out %.png,$(macos_DATA_SRC)) $(filter %-$(macos_IMAGE_SET).png,$(macos_DATA_SRC))
+macos_DATA_SRC:=$(filter-out %.adjust,$(macos_DATA_SRC))
 macos_DATA_C:=$(patsubst src/%,$(macos_MIDDIR)/%.c,$(macos_DATA_SRC))
 $(macos_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=$(macos_FBFMT)
 $(macos_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(macos_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(macos_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
-$(macos_MIDDIR)/%.mid.c:src/%.mid $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
+$(macos_MIDDIR)/%.mid.c:src/%.mid src/%.adjust $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
 $(macos_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 
 macos_CFILES:=$(filter %.c %.m,$(macos_SRCFILES) $(macos_DATA_C))

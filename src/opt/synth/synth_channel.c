@@ -23,13 +23,10 @@ void synth_channel_default(struct synth_channel *channel,uint8_t chid) {
  
 void synth_voice_setup(struct synth_voice *voice,uint8_t noteid,uint8_t velocity,struct synth_channel *channel) {
   voice->update=0;
-  switch (channel->pid) {
-  
-    case 0: synth_wave_setup(voice,noteid,velocity,channel); return;
-    case 1: synth_basicsquare_setup(voice,noteid,velocity,channel); return;
-    case 2: synth_wave_setup(voice,noteid,velocity,channel); return;
-    case 3: synth_mix_setup(voice,noteid,velocity,channel); return;
-    case 4: synth_fm_setup(voice,noteid,velocity,channel); return;
-  
+  switch (channel->pid&3) {
+    case 0: synth_basicsquare_setup(voice,noteid,velocity,channel); return;
+    case 1: synth_wave_setup(voice,noteid,velocity,channel); return;
+    case 2: synth_mix_setup(voice,noteid,velocity,channel); return;
+    case 3: synth_fm_setup(voice,noteid,velocity,channel); return;
   }
 }

@@ -32,6 +32,7 @@ static int songcvt_fail(struct songcvt *songcvt,const char *fmt,...) {
  */
  
 static int songcvt_main(struct songcvt *songcvt) {
+  int err;
 
   if (!songcvt->dstpath) return songcvt_fail(songcvt,"Output path required.");
   if (!songcvt->srcpath) return songcvt_fail(songcvt,"Input path required.");
@@ -41,8 +42,12 @@ static int songcvt_main(struct songcvt *songcvt) {
     return -2;
   }
   
-  int err=songcvt_minisyni_from_midi(songcvt);
-  if (err<0) {
+  if ((err=songcvt_read_adjust(songcvt))<0) {
+    if (err!=-2) fprintf(stderr,"%s: Error processing adjustments file.\n",songcvt->srcpath);
+    return -2;
+  }
+  
+  if ((err=songcvt_minisyni_from_midi(songcvt))<0) {
     if (err!=-2) fprintf(stderr,"%s: Failed to decode MIDI file.\n",songcvt->srcpath);
     return -2;
   }
@@ -105,6 +110,10 @@ static void songcvt_help_extra(struct cli *cli) {
     "  -oPATH             Output path (minisyni).\n"
     "  -iPATH             Input path (MIDI).\n"
     "  --progmem          Insert PROGMEM declaration, for Arduino.\n"
+    "\n"
+    "If a file 'foo.adjust' exists for an input 'foo.mid', we read preferences from it:\n"
+    "  debug # Dump input file metadata.\n"
+    "  MTrk=0 : chid=0 pid=0 # 'CRITERIA : ACTIONS', eg change all notes on track 0 to channel 0.\n"
     "\n"
   );
 }

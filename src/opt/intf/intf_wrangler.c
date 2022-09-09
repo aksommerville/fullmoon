@@ -6,6 +6,8 @@
 
 #if FMN_USE_minisyni
   #include "opt/minisyni/minisyni.h"
+#elif FMN_USE_synth
+  #include "opt/synth/synth.h"
 #endif
  
 /* Delete.
@@ -71,21 +73,29 @@ static int intf_init_video(struct intf *intf,const char *name) {
  */
  
 static int intf_cb_pcm(struct audio_driver *driver,int16_t *v,int c) {
+  int framec=c/driver->chanc;
   #if FMN_USE_minisyni
-    if (driver->chanc==1) {
-      minisyni_update(v,c);
-    } else {
-      int framec=c/driver->chanc;
-      minisyni_update(v,framec);
-      int16_t *dst=v+framec*driver->chanc;
-      int16_t *src=v+framec;
-      if (driver->chanc==2) { // common enough to warrant a special case
+    minisyni_update(v,framec);
+  #elif FMN_USE_synth
+    synth_update(v,framec);
+  #else
+    memset(v,0,c<<1);
+    return 0;
+  #endif
+  switch (driver->chanc) {
+    case 1: break;
+    case 2: {
+        int16_t *dst=v+framec*driver->chanc;
+        int16_t *src=v+framec;
         while (framec-->0) {
           src--;
           dst-=2;
           dst[0]=dst[1]=*src;
         }
-      } else {
+      } break;
+    default: {
+        int16_t *dst=v+framec*driver->chanc;
+        int16_t *src=v+framec;
         while (framec-->0) {
           src--;
           int i=driver->chanc; while (i-->0) {
@@ -93,11 +103,8 @@ static int intf_cb_pcm(struct audio_driver *driver,int16_t *v,int c) {
             *dst=*src;
           }
         }
-      }
-    }
-  #else
-    memset(v,0,c<<1);
-  #endif
+      } break;
+  }
   return 0;
 }
 
@@ -108,6 +115,9 @@ static int intf_init_synth(struct intf *intf) {
   #if FMN_USE_minisyni
     minisyni_init(intf->audio->rate);
     fprintf(stderr,"%s: Using synthesizer 'minisyni', rate=%d, chanc=%d\n",intf->exename,intf->audio->rate,intf->audio->chanc);
+  #elif FMN_USE_synth
+    synth_init(intf->audio->rate);
+    fprintf(stderr,"%s: Using synthesizer 'synth', rate=%d, chanc=%d\n",intf->exename,intf->audio->rate,intf->audio->chanc);
   #else
     fprintf(stderr,"%s: Audio running but no synthesizer available.\n",intf->exename);
   #endif

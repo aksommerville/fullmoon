@@ -26,13 +26,14 @@ tiny_SRCFILES:=$(filter-out src/data/%,$(tiny_SRCFILES))
 
 tiny_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(tiny_DATA_SRC))
 tiny_DATA_SRC:=$(filter-out %.png,$(tiny_DATA_SRC)) $(filter %-$(tiny_IMAGE_SET).png,$(tiny_DATA_SRC))
+tiny_DATA_SRC:=$(filter-out %.adjust,$(tiny_DATA_SRC))
 tiny_DATA_C:=$(patsubst src/%,mid/tiny/%.c,$(tiny_DATA_SRC))
 mid/tiny/%.c:src/%;$(PRECMD) cp $< $@
 mid/tiny/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --progmem --format=bgr332
 mid/tiny/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$< --progmem
 mid/tiny/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 mid/tiny/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
-mid/tiny/%.mid.c:src/%.mid $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
+mid/tiny/%.mid.c:src/%.mid src/%.adjust $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
 
 tiny_SRCFILES+=$(tiny_DATA_C)
 

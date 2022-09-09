@@ -81,7 +81,7 @@ void synth_mix_setup(struct synth_voice *voice,uint8_t noteid,uint8_t velocity,s
   voice->update=synth_mix_update;
   voice->release=synth_mix_release;
   voice->adjust=0;
-  wave0lv=(void*)synth_wave_3;
+  wave0lv=(void*)synth_wave_0;
   wave1lv=(void*)synth_wave_0;
   envstage=0;
   level=0;

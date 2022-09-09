@@ -376,6 +376,7 @@ void synth_event_control(uint8_t chid,uint8_t k,uint8_t v) {
  */
  
 void synth_event_program(uint8_t chid,uint8_t pid) {
+  fprintf(stderr,"%s chid=%d pid=%d\n",__func__,chid,pid);
   if (chid>=SYNTH_CHANNEL_COUNT) return;
   struct synth_channel *channel=synth.channelv+chid;
   channel->pid=pid;

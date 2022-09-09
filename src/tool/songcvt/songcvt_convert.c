@@ -299,6 +299,32 @@ static int m2m_process_note_on(struct m2m_context *ctx,struct m2m_track *track,s
   return 0;
 }
 
+/* Modify an event in place according to the rules from our adjustment file.
+ * For now, adjustments are all one-to-one or one-to-zero. Will need to restructure this if there's ever one-to-many.
+ */
+ 
+static void m2m_apply_rules_to_event(struct m2m_context *ctx,struct m2m_event *event,int trackid) {
+  struct songcvt_rule *rule=ctx->songcvt->rulev;
+  int i=ctx->songcvt->rulec;
+  for (;i-->0;rule++) {
+  
+    // Check criteria.
+    if ((rule->match_MTrk>=0)&&(rule->match_MTrk!=trackid)) continue;
+    if ((rule->match_chid>=0)&&(rule->match_chid!=event->chid)) continue;
+    if (rule->match_pid>=0) {
+      if (event->opcode!=0x0c) continue;
+      if (rule->match_pid!=event->a) continue;
+    }
+    
+    // Apply actions.
+    if (rule->set_chid>=0) event->chid=rule->set_chid;
+    if (rule->set_pid>=0) {
+      if (event->opcode==0x0c) event->a=rule->set_pid;
+    }
+  
+  }
+}
+
 /* Read the next event off this track, then emit output and update state accordingly.
  */
  
@@ -308,9 +334,11 @@ static int m2m_process_event(struct m2m_context *ctx,struct m2m_track *track) {
   if ((err=m2m_read_event(&event,track->v+track->p,track->c-track->p,&track->rstat))<0) return err;
   track->p+=err;
   track->delay=-1;
+  m2m_apply_rules_to_event(ctx,&event,track-ctx->trackv);
   switch (event.opcode) {
     case 0x80: return m2m_process_note_off(ctx,track,&event);
     case 0x90: return m2m_process_note_on(ctx,track,&event);
+    //TODO all of these events are now supported and we ought to encode them:
     case 0xa0: break; // Note Adjust; not interesting to us.
     case 0xb0: break; // Control Change, believe it or not, not interesting.
     case 0xc0: break; // Program Change, ''.
@@ -390,12 +418,13 @@ static int m2m_play_and_record(struct m2m_context *ctx) {
   else uspertick=(uint16_t)uspertickf;
   
   // Emit minisyni header. Loop point is initially the start, but we might learn better later, no worries.
+  // Use encoder_replace(), not encode_raw(), as there might be some content already.
   uint8_t hdr[6]={
     uspertick>>8,uspertick,
     0,6, // start point, always 6
     0,6, // loop point. may overwrite later
   };
-  if (encode_raw(&ctx->songcvt->bin,hdr,sizeof(hdr))<0) return -1;
+  if (encoder_replace(&ctx->songcvt->bin,0,0,hdr,sizeof(hdr))<0) return -1;
 
   // Exhaust all tracks.
   while (1) {
@@ -493,14 +522,6 @@ static int m2m_condense_delays(void *dstpp,const uint8_t *src,int srcc,struct m2
   return dstc;
 }
 
-/* If the song ends with a long delay, trim it.
- * This is a silly workaround for a bug in Logic Pro X that pads the end of exported MIDI files.
- */
- 
-static int m2m_repair_logic_bug(const uint8_t *src,int srcc) {
-  return srcc;
-}
-
 /* After generating the minisyni song sequentially, any further wrap-up needed.
  */
  
@@ -535,8 +556,28 @@ static int m2m_finish(struct m2m_context *ctx) {
   }
   if (condensed) free(condensed);
   
-  ctx->songcvt->bin.c=m2m_repair_logic_bug(ctx->songcvt->bin.v,ctx->songcvt->bin.c);
-  
+  return 0;
+}
+
+/* Produce any initial output. After dechunking but before recording.
+ */
+ 
+static int m2m_produce_lead(struct m2m_context *ctx) {
+
+  // Any rule that matches on only MTrk and emits both chid and pid, emit an initial program change.
+  struct songcvt_rule *rule=ctx->songcvt->rulev;
+  int i=ctx->songcvt->rulec;
+  for (;i-->0;rule++) {
+    if (rule->match_MTrk<0) continue;
+    if (rule->match_MTrk>=ctx->trackc) continue;
+    if (rule->match_chid>=0) continue;
+    if (rule->match_pid>=0) continue;
+    if (rule->set_chid<0) continue;
+    if (rule->set_pid<0) continue;
+    uint8_t serial[]={0xc0|rule->set_chid,rule->set_pid};
+    if (encode_raw(&ctx->songcvt->bin,serial,sizeof(serial))<0) return -1;
+  }
+
   return 0;
 }
 
@@ -568,7 +609,65 @@ static int m2m_read_MThd(struct m2m_context *ctx,const uint8_t *src,int srcc) {
   if (ctx->format!=1) {
     fprintf(stderr,"%s: Unsupported MIDI file format %d (expected 1), but we'll try anyway.\n",ctx->songcvt->srcpath,ctx->format);
   }
+  
+  if (ctx->songcvt->debug) {
+    fprintf(stderr,"MThd format=%d trackc=%d division=%d\n",ctx->format,ctx->track_count,ctx->division);
+  }
+  
   return 0;
+}
+
+/* In debug mode, pre-read each track and dump some stats.
+ */
+ 
+static void m2m_debug_track(const uint8_t *src,int srcc) {
+  #define MALFORMED { \
+    fprintf(stderr,"  !!! MTrk malformed !!!\n"); \
+    return; \
+  }
+  int chidv[16]={0};
+  int notev[256]={0};
+  int pidv[256]={0};
+  int srcp=0,err,duration=0,i;
+  uint8_t rstat=0;
+  while (srcp<srcc) {
+  
+    int delay;
+    if ((err=m2m_read_vlq(&delay,src+srcp,srcc-srcp))<1) MALFORMED
+    duration+=delay;
+    srcp+=err;
+    struct m2m_event event;
+    if ((err=m2m_read_event(&event,src+srcp,srcc-srcp,&rstat))<0) MALFORMED
+    srcp+=err;
+    
+    if (event.chid<0x10) chidv[event.chid]++;
+    switch (event.opcode) {
+      case 0x90: notev[event.a]++; break;
+      case 0xc0: pidv[event.a]++; break;
+    }
+  }
+  
+  fprintf(stderr,"  duration: %d ticks\n",duration);
+  
+  fprintf(stderr,"  channels:");
+  for (i=0;i<16;i++) if (chidv[i]) fprintf(stderr," %d",i);
+  fprintf(stderr,"\n");
+  
+  fprintf(stderr,"  programs:");
+  for (i=0;i<256;i++) if (pidv[i]) fprintf(stderr," %d",i);
+  fprintf(stderr,"\n");
+  
+  fprintf(stderr,"  notes:");
+  int lonote=-1,hinote=-1;
+  for (i=0;i<256;i++) if (notev[i]) { lonote=i; break; }
+  if (lonote>=0) {
+    for (i=256;i-->0;) if (notev[i]) { hinote=i; break; }
+    fprintf(stderr," 0x%02x..0x%02x\n",lonote,hinote);
+  } else {
+    fprintf(stderr," none\n");
+  }
+  
+  #undef MALFORMED
 }
 
 /* Receive MTrk.
@@ -591,6 +690,11 @@ static int m2m_read_MTrk(struct m2m_context *ctx,const uint8_t *src,int srcc) {
   track->v=src;
   track->c=srcc;
   track->delay=-1;
+  
+  if (ctx->songcvt->debug) {
+    fprintf(stderr,"MTrk %d c=%d\n",ctx->trackc-1,srcc);
+    m2m_debug_track(src,srcc);
+  }
   
   return 0;
 }
@@ -658,6 +762,7 @@ int songcvt_minisyni_from_midi(struct songcvt *songcvt) {
   int err;
   if (
     ((err=m2m_read_chunks(&ctx))<0)||
+    ((err=m2m_produce_lead(&ctx))<0)||
     ((err=m2m_play_and_record(&ctx))<0)||
     ((err=m2m_finish(&ctx))<0)
   ) {

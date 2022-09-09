@@ -104,13 +104,14 @@ ctiny_SRCFILES:=$(filter-out src/test/% src/www/% src/editor/%,$(call OPTFILTER,
 
 ctiny_DATA_SRC:=$(filter src/data/%,$(ctiny_SRCFILES))
 ctiny_DATA_SRC:=$(filter-out %.png,$(ctiny_DATA_SRC)) $(filter %-$(ctiny_IMAGE_SET).png,$(ctiny_DATA_SRC))
+ctiny_DATA_SRC:=$(filter-out %.adjust,$(ctiny_DATA_SRC))
 ctiny_DATA_C:=$(patsubst src/%,$(ctiny_MIDDIR)/%.c,$(ctiny_DATA_SRC))
 $(ctiny_MIDDIR)/%.c:src/%;$(PRECMD) cp $< $@
 $(ctiny_MIDDIR)/%.png.c:src/%.png $(TOOL_imgcvt);$(PRECMD) $(TOOL_imgcvt) -o$@ -i$< --format=$(ctiny_FBFMT)
 $(ctiny_MIDDIR)/data/map/%.c:src/data/map/% $(TOOL_mapcvt);$(PRECMD) $(TOOL_mapcvt) -o$@ -i$<
 $(ctiny_MIDDIR)/%_props.txt.c:src/%_props.txt $(TOOL_tileprops);$(PRECMD) $(TOOL_tileprops) -o$@ -i$<
 $(ctiny_MIDDIR)/%.sprite.c:src/%.sprite $(TOOL_spritecvt);$(PRECMD) $(TOOL_spritecvt) -o$@ -i$<
-$(ctiny_MIDDIR)/%.mid.c:src/%.mid $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
+$(ctiny_MIDDIR)/%.mid.c:src/%.mid src/%.adjust $(TOOL_songcvt);$(PRECMD) $(TOOL_songcvt) -o$@ -i$<
 
 ctiny_CFILES:=$(filter %.c %.cpp %.S,$(ctiny_SRCFILES) $(ctiny_DATA_C)) $(ctiny_EXTFILES)
 ctiny_OFILES:=$(patsubst src/%,$(ctiny_MIDDIR)/%, \

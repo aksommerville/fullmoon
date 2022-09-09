@@ -147,7 +147,7 @@ pico_LDPOST:=
 pico_SRCFILES:=$(filter-out src/test/%,$(call OPTFILTER,$(pico_OPT_ENABLE),$(SRCFILES),$(pico_MIDDIR)))
 
 pico_DATA_SRC:=$(filter src/data/%,$(pico_SRCFILES))
-pico_DATA_SRC:=$(filter-out %.mid,$(pico_DATA_SRC))
+pico_DATA_SRC:=$(filter-out %.mid %.adjust,$(pico_DATA_SRC))
 pico_DATA_SRC:=$(filter-out src/data/image/appicon.png,$(pico_DATA_SRC))
 pico_DATA_SRC:=$(filter-out %.png,$(pico_DATA_SRC)) $(filter %-$(pico_IMAGE_SET).png,$(pico_DATA_SRC))
 pico_DATA_C:=$(patsubst src/%,$(pico_MIDDIR)/%.c,$(pico_DATA_SRC))
